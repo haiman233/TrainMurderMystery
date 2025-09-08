@@ -233,6 +233,26 @@
 		],
 		"subtitle": "subtitles.block.generic.footsteps"
 	},
+	"block.door.locked": {
+		"sounds": [
+			"trainmurdermystery:block/door_locked"
+		],
+		"subtitle": "subtitles.block.door.locked"
+	},
+
+	"item.room_key.door": {
+		"sounds": [
+			"trainmurdermystery:item/room_key_door"
+		],
+		"subtitle": "subtitles.item.room_key.door"
+	},
+	"item.lockpick.door": {
+		"sounds": [
+			"trainmurdermystery:item/lockpick_door"
+		],
+		"subtitle": "subtitles.item.lockpick.door"
+	},
+
 	"ambient.train.inside": {
 		"sounds": [
 			"trainmurdermystery:ambient/train_inside"

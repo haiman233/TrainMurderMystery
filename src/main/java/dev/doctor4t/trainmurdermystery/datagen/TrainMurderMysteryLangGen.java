@@ -203,24 +203,8 @@ public class TrainMurderMysteryLangGen extends FabricLanguageProvider {
         builder.add("subtitles.block.cargo_box.close", "Cargo Box closes");
         builder.add("subtitles.block.cargo_box.open", "Cargo Box opens");
         builder.add("subtitles.block.door.toggle", "Door operates");
-        builder.add("tooltip.trainmurdermystery.cook_level.raw", "Uncooked");
-        builder.add("tooltip.trainmurdermystery.cook_level.slightly_cooked", "Slightly Roasted");
-        builder.add("tooltip.trainmurdermystery.cook_level.cooked", "Roasted");
-        builder.add("tooltip.trainmurdermystery.cook_level.perfect", "Perfectly Roasted");
-        builder.add("tooltip.trainmurdermystery.cook_level.burnt", "Burnt");
 
-        builder.add("warning.trainmurdermystery.ichor.low", "Warning: Ichor level low");
-        builder.add("warning.trainmurdermystery.ichor.critical", "Warning: Ichor level critical!");
-        builder.add("warning.trainmurdermystery.oxygen.low", "Warning: Oxygen level low");
-        builder.add("warning.trainmurdermystery.oxygen.critical", "Warning: Oxygen level critical!");
-        builder.add("warning.trainmurdermystery.health.low", "Warning: Vital signs low");
-        builder.add("warning.trainmurdermystery.health.critical", "Warning: Vital signs critical!");
-        builder.add("warning.trainmurdermystery.eat_helmet", "Warning: Cannot eat with a helmet on");
-
-        builder.add("commands.trainmurdermystery.set.success.single", "Set value [%s] to %s for %s");
-        builder.add("commands.trainmurdermystery.setworld.success.single", "Set value [%s] to %s");
-        builder.add("commands.trainmurdermystery.set.success.multiple", "Set value [%s] to %s for %s targets");
-        builder.add("commands.trainmurdermystery.get.success", "Value [%s] is %s for %s");
-        builder.add("commands.trainmurdermystery.getworld.success", "Value [%s] is %s");
+        builder.add("tip.door.requires_key", "This door is locked and requires a key to be opened.");
+        builder.add("tip.door.requires_different_key", "This door is locked and requires a different key to be opened.");
     }
 }

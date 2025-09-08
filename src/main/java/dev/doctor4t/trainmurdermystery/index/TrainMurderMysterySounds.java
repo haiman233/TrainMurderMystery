@@ -19,6 +19,11 @@ public interface TrainMurderMysterySounds {
     SoundEvent BLOCK_BUTTON_TOGGLE_NO_POWER = registrar.create("block.button.toggle_no_power");
     SoundEvent BLOCK_DOOR_TOGGLE = registrar.create("block.door.toggle");
     SoundEvent BLOCK_SPRINKLER_RUN = registrar.create("block.sprinkler.run");
+    SoundEvent BLOCK_DOOR_LOCKED = registrar.create("block.door.locked");
+
+    // Items
+    SoundEvent ITEM_ROOM_KEY_DOOR = registrar.create("item.room_key.door");
+    SoundEvent ITEM_LOCKPICK_DOOR = registrar.create("item.lockpick.door");
 
     // Ambience
     SoundEvent AMBIENT_TRAIN_INSIDE = registrar.create("ambient.train.inside");

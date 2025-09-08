@@ -3,6 +3,7 @@ package dev.doctor4t.trainmurdermystery.block;
 import dev.doctor4t.trainmurdermystery.block_entity.DoorBlockEntity;
 import dev.doctor4t.trainmurdermystery.block_entity.SmallDoorBlockEntity;
 import dev.doctor4t.trainmurdermystery.index.TrainMurderMysteryItems;
+import dev.doctor4t.trainmurdermystery.index.TrainMurderMysterySounds;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -15,7 +16,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
@@ -25,7 +26,6 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
@@ -141,11 +141,15 @@ public class SmallDoorBlock extends DoorPartBlock {
                 toggleDoor(state, world, entity, lowerPos);
                 return ActionResult.CONSUME;
             } else {
-                if (!entity.getKeyName().equals("") || !player.getMainHandStack().isOf(TrainMurderMysteryItems.ROOM_KEY)) {
-                    if (world.isClient) player.sendMessage(Text.translatable("tip.door.requires_key"), true);
+                if (!entity.getKeyName().equals("") && !(player.getMainHandStack().isOf(TrainMurderMysteryItems.ROOM_KEY) || player.getMainHandStack().isOf(TrainMurderMysteryItems.LOCKPICK))) {
+                    if (!world.isClient) {
+                        world.playSound(null, lowerPos.getX() + .5f, lowerPos.getY() + 1, lowerPos.getZ() + .5f, TrainMurderMysterySounds.BLOCK_DOOR_LOCKED, SoundCategory.BLOCKS, 1f, 1f);
+                    } else {
+                        player.sendMessage(Text.translatable("tip.door.requires_key"), true);
+                    }
 
                     return ActionResult.FAIL;
-                } else {
+                } else if (entity.getKeyName().equals("")) {
                     if (world.isClient) return ActionResult.SUCCESS;
                     toggleDoor(state, world, entity, lowerPos);
                     return ActionResult.CONSUME;

@@ -2,6 +2,7 @@ package dev.doctor4t.trainmurdermystery.item;
 
 import dev.doctor4t.trainmurdermystery.block.SmallDoorBlock;
 import dev.doctor4t.trainmurdermystery.block_entity.SmallDoorBlockEntity;
+import dev.doctor4t.trainmurdermystery.index.TrainMurderMysterySounds;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.enums.DoubleBlockHalf;
 import net.minecraft.component.DataComponentTypes;
@@ -10,7 +11,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
-import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
@@ -40,13 +41,17 @@ public class RoomKeyItem extends Item {
                         entity.setKeyName(roomName);
                         return ActionResult.SUCCESS;
                     } else {
-                        System.out.println(roomName);
-                        System.out.println(entity.getKeyName());
                         if (roomName.equals(entity.getKeyName()) || entity.getKeyName().equals("")) {
                             SmallDoorBlock.toggleDoor(state, world, entity, lowerPos);
+                            if (!world.isClient)
+                                world.playSound(null, lowerPos.getX() + .5f, lowerPos.getY() + 1, lowerPos.getZ() + .5f, TrainMurderMysterySounds.ITEM_ROOM_KEY_DOOR, SoundCategory.BLOCKS, 1f, 1f);
                             return ActionResult.SUCCESS;
-                        } else if (world.isClient) {
-                            player.sendMessage(Text.translatable("tip.door.requires_different_key"), true);
+                        } else {
+                            if (!world.isClient) {
+                                world.playSound(null, lowerPos.getX() + .5f, lowerPos.getY() + 1, lowerPos.getZ() + .5f, TrainMurderMysterySounds.BLOCK_DOOR_LOCKED, SoundCategory.BLOCKS, 1f, 1f);
+                            } else {
+                                player.sendMessage(Text.translatable("tip.door.requires_different_key"), true);
+                            }
                             return ActionResult.FAIL;
                         }
                     }
