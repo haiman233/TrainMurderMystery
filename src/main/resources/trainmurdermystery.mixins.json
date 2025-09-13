@@ -3,7 +3,8 @@
   "package": "dev.doctor4t.trainmurdermystery.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "DedicatedPlayerManagerMixin"
+    "DedicatedPlayerManagerMixin",
+    "client.DebugHudMixin"
   ],
   "injectors": {
     "defaultRequire": 1
