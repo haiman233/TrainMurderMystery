@@ -59,6 +59,7 @@ public class KnifeItem extends Item {
             if (collision instanceof EntityHitResult entityHitResult && entityHitResult.getEntity() instanceof PlayerEntity player) {
                 player.damage(attacker.getWorld().getDamageSources().playerAttack(attacker), 20f);
                 user.swingHand(Hand.MAIN_HAND);
+                player.playSound(TrainMurderMysterySounds.ITEM_KNIFE_STAB, 1.0f, 1.0f);
                 if (!attacker.isCreative()) attacker.getItemCooldownManager().set(this, 3600); // 3 minutes
             }
 
@@ -74,6 +75,7 @@ public class KnifeItem extends Item {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         user.setCurrentHand(hand);
+        user.playSound(TrainMurderMysterySounds.ITEM_KNIFE_PREPARE, 1.0f, 1.0f);
         return TypedActionResult.consume(itemStack);
     }
 }

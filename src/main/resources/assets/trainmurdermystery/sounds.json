@@ -252,6 +252,18 @@
 		],
 		"subtitle": "subtitles.item.lockpick.door"
 	},
+	"item.knife.prepare": {
+		"sounds": [
+			"trainmurdermystery:item/knife_prepare"
+		],
+		"subtitle": "subtitles.item.knife.prepare"
+	},
+	"item.knife.stab": {
+		"sounds": [
+			"trainmurdermystery:item/knife_stab"
+		],
+		"subtitle": "subtitles.item.knife.stab"
+	},
 
 	"ambient.train.inside": {
 		"sounds": [
