@@ -107,7 +107,7 @@ public class GameFunctions {
         }
 
         // teleport non playing players
-        for (ServerPlayerEntity player : world.getPlayers(serverPlayerEntity -> !isPlayerAliveAndSurvival(serverPlayerEntity))) {
+        for (ServerPlayerEntity player : world.getPlayers(serverPlayerEntity -> !playerPool.contains(serverPlayerEntity))) {
             player.changeGameMode(GameMode.SPECTATOR);
             TMMGameConstants.SPECTATOR_TP.accept(player);
         }
@@ -214,6 +214,7 @@ public class GameFunctions {
 
         gameComponent.setGameStatus(WorldGameComponent.GameStatus.ACTIVE);
         gameComponent.setGameTime(0);
+        gameComponent.sync();
     }
 
     public static void finalizeGame(ServerWorld world) {
@@ -242,6 +243,7 @@ public class GameFunctions {
         gameComponent.resetRoleLists();
         gameComponent.setGameStatus(WorldGameComponent.GameStatus.INACTIVE);
         gameComponent.setGameTime(0);
+        gameComponent.sync();
     }
 
     public static boolean isPlayerEliminated(PlayerEntity player) {

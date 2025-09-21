@@ -50,8 +50,6 @@ public class TMM implements ModInitializer {
 
 // TODO: System that remembers previous roles and allows cycling of roles
 // TODO: Train chimney smoke + ringable horn, triggers game start in lobby
-// TODO: Sync scenery
-// TODO: Fix vents
 // TODO: Sleep chat fix
 // TODO: Fix spectators being shot by guns
 // TODO: Better tasks: mood goes down gradually, completing tasks is a single action to bring it back up

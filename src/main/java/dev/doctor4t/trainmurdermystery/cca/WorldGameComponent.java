@@ -50,7 +50,6 @@ public class WorldGameComponent implements AutoSyncedComponent, ClientTickingCom
 
     public void setFade(int fade) {
         this.fade = MathHelper.clamp(fade, 0, TMMGameConstants.FADE_TIME + TMMGameConstants.FADE_PAUSE);
-        this.sync();
     }
 
     public int getGameTime() {
@@ -265,7 +264,7 @@ public class WorldGameComponent implements AutoSyncedComponent, ClientTickingCom
 
         // fade and start / stop game
         if (this.getGameStatus() == GameStatus.STARTING || this.getGameStatus() == GameStatus.STOPPING) {
-            this.fade++;
+            this.setFade(fade+1);
 
             if (this.getFade() >= TMMGameConstants.FADE_TIME + TMMGameConstants.FADE_PAUSE) {
                 if (world instanceof ServerWorld serverWorld) {
@@ -276,7 +275,7 @@ public class WorldGameComponent implements AutoSyncedComponent, ClientTickingCom
                 }
             }
         } else if (this.getGameStatus() == GameStatus.ACTIVE || this.getGameStatus() == GameStatus.INACTIVE) {
-            this.fade--;
+            this.setFade(fade-1);
         }
     }
 

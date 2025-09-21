@@ -191,7 +191,7 @@ public class TMMClient implements ClientModInitializer {
             // Fade sound with game start / stop fade
             WorldGameComponent component = TMMComponents.GAME.get(clientWorld);
             if (component.getFade() > 0) {
-                MinecraftClient.getInstance().getSoundManager().updateSoundVolume(SoundCategory.MASTER, MathHelper.map(component.getFade(), 0, TMMGameConstants.FADE_TIME, 1, 0));
+                MinecraftClient.getInstance().getSoundManager().updateSoundVolume(SoundCategory.MASTER, MathHelper.map(component.getFade(), 0, TMMGameConstants.FADE_TIME, soundLevel, 0));
             } else {
                 MinecraftClient.getInstance().getSoundManager().updateSoundVolume(SoundCategory.MASTER, soundLevel);
                 soundLevel = MinecraftClient.getInstance().options.getSoundVolume(SoundCategory.MASTER);
