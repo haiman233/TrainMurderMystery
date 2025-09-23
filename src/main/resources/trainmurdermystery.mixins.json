@@ -5,6 +5,7 @@
   "mixins": [
     "DedicatedPlayerManagerMixin",
     "HungerManagerMixin",
+    "EntityMixin",
     "PlayerEntityMixin",
     "ServerPlayerEntityMixin",
     "client.restrictions.DebugHudMixin"

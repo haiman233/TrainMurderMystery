@@ -92,5 +92,5 @@ public class TMM implements ModInitializer {
 
 // TORECORD: Polish
 // TODO: Train chimney smoke + ringable horn, triggers game start in lobby and end of game
-// TODO: Players collide with each other (Amy)
+// TORECORD: Players collide with each other (Amy)
 // TODO: Louder footsteps
