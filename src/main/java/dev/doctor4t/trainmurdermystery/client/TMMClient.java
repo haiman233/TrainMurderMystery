@@ -16,6 +16,7 @@ import dev.doctor4t.trainmurdermystery.client.render.block_entity.DrinkPlateBloc
 import dev.doctor4t.trainmurdermystery.client.render.block_entity.PlateBlockEntityRenderer;
 import dev.doctor4t.trainmurdermystery.client.render.block_entity.SmallDoorBlockEntityRenderer;
 import dev.doctor4t.trainmurdermystery.client.render.block_entity.WheelBlockEntityRenderer;
+import dev.doctor4t.trainmurdermystery.client.render.entity.FirecrackerEntityRenderer;
 import dev.doctor4t.trainmurdermystery.client.util.TMMItemTooltips;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
@@ -82,6 +83,7 @@ public class TMMClient implements ClientModInitializer {
 
         // Entity renderer registration
         EntityRendererRegistry.register(TMMEntities.SEAT, EmptyEntityRenderer::new);
+        EntityRendererRegistry.register(TMMEntities.FIRECRACKER, FirecrackerEntityRenderer::new);
 
         // Register entity model layers
         TMMModelLayers.initialize();
