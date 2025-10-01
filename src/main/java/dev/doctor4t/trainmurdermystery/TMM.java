@@ -150,7 +150,7 @@ public class TMM implements ModInitializer {
 
 // TORECORD: Polish
 // done: Rearrange the train cars to prevent all POIs being separated by all the sleeping cars
-// TODO: Train chimney smoke
+// TORECORD: Train chimney smoke
 // TORECORD: Ringable horn, triggers game start in lobby
 // TORECORD: Players collide with each other (Amy) + let's you step on them
 // TORECORD: System that remembers previous roles and allows cycling of roles (Amy)
