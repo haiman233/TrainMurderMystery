@@ -126,7 +126,7 @@ public class StaminaRenderer {
 
 			// 体力条参数 - 更现代、更扁平的设计
 			int barWidth = 120; // 总宽度增加
-			int barHeight = 1;  // 高度减小变得更扁平
+			int barHeight = 2;  // 高度减小变得更扁平
 			int halfWidth = barWidth / 2;
 
 			// 绘制背景（更现代化的半透明黑色）

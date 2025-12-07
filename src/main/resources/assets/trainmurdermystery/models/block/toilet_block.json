@@ -1,0 +1,6 @@
+{
+    "parent": "trainmurdermystery:block/template/toilet_open",
+    "textures": {
+        "2": "trainmurdermystery:block/toilet/light_toilet"
+    }
+}

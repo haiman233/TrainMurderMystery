@@ -127,6 +127,7 @@ public class TMMBlockLootTableGen extends FabricBlockLootTableProvider {
         this.addSelfDrop(TMMBlocks.WHITE_TRIMMED_BED, block -> this.dropsWithProperty(block, BedBlock.PART, BedPart.HEAD));
         this.addSelfDrop(TMMBlocks.RED_TRIMMED_BED, block -> this.dropsWithProperty(block, BedBlock.PART, BedPart.HEAD));
         this.addSelfDrop(TMMBlocks.BLUE_LOUNGE_COUCH);
+        this.addSelfDrop(TMMBlocks.TOILET_BLOCK);
         this.addSelfDrop(TMMBlocks.GREEN_LOUNGE_COUCH);
         this.addSelfDrop(TMMBlocks.RED_LEATHER_COUCH);
         this.addSelfDrop(TMMBlocks.BROWN_LEATHER_COUCH);

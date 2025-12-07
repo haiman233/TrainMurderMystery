@@ -8,6 +8,8 @@ import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.tag.TMMItemTags;
 import dev.doctor4t.trainmurdermystery.util.TaskCompletePayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.client.gui.screen.ingame.BookScreen;
+import net.minecraft.client.gui.screen.ingame.LecternScreen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -18,6 +20,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.screen.LecternScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
@@ -155,8 +158,10 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
                 return switch (entry.getKey()) {
                     case SLEEP -> new SleepTask(GameConstants.SLEEP_TASK_DURATION);
                     case OUTSIDE -> new OutsideTask(GameConstants.OUTSIDE_TASK_DURATION);
+                    case RAED_BOOK -> new ReadBookTask(GameConstants.READ_BOOK_TASK_DURATION);
                     case EAT -> new EatTask();
                     case DRINK -> new DrinkTask();
+
                 };
             }
         }
@@ -186,6 +191,7 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
     public void eatFood() {
         if (this.tasks.get(Task.EAT) instanceof EatTask eatTask) eatTask.fulfilled = true;
     }
+
 
     public void drinkCocktail() {
         if (this.tasks.get(Task.DRINK) instanceof DrinkTask drinkTask) drinkTask.fulfilled = true;
@@ -230,6 +236,7 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
     public enum Task {
         SLEEP(nbt -> new SleepTask(nbt.getInt("timer"))),
         OUTSIDE(nbt -> new OutsideTask(nbt.getInt("timer"))),
+        RAED_BOOK(nbt -> new OutsideTask(nbt.getInt("timer"))),
         EAT(nbt -> new EatTask()),
         DRINK(nbt -> new DrinkTask());
 
@@ -296,6 +303,47 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
         @Override
         public String getName() {
             return "outside";
+        }
+
+        @Override
+        public Task getType() {
+            return Task.OUTSIDE;
+        }
+
+        @Override
+        public NbtCompound toNbt() {
+            NbtCompound nbt = new NbtCompound();
+            nbt.putInt("type", Task.OUTSIDE.ordinal());
+            nbt.putInt("timer", this.timer);
+            return nbt;
+        }
+    }
+
+    public static class ReadBookTask implements TrainTask {
+        private int timer;
+
+        public ReadBookTask(int time) {
+            this.timer = time;
+        }
+
+        @Override
+        public void tick(@NotNull PlayerEntity player) {
+
+
+            if (player.currentScreenHandler instanceof LecternScreenHandler && this.timer > 0) {
+                this.timer--;
+
+            }
+        }
+
+        @Override
+        public boolean isFulfilled(@NotNull PlayerEntity player) {
+            return this.timer <= 0;
+        }
+
+        @Override
+        public String getName() {
+            return "read_book";
         }
 
         @Override

@@ -240,6 +240,7 @@ public interface TMMBlocks {
     Block PANEL_STRIPES = registrar.createWithItem("panel_stripes", new PanelStripesBlock(AbstractBlock.Settings.create().sounds(BlockSoundGroup.CHISELED_BOOKSHELF).strength(0.5f).nonOpaque()), TMMItems.DECORATION_GROUP);
     Block CARGO_BOX = registrar.createWithItem("cargo_box", new CargoBoxBlock(AbstractBlock.Settings.create().strength(1).sounds(BlockSoundGroup.COPPER).mapColor(MapColor.GRAY).nonOpaque()), TMMItems.DECORATION_GROUP);
     Block WHITE_LOUNGE_COUCH = registrar.createWithItem("white_lounge_couch", new LoungeCouch(AbstractBlock.Settings.create().nonOpaque().strength(0.5f).sounds(BlockSoundGroup.CHISELED_BOOKSHELF)), TMMItems.DECORATION_GROUP);
+    Block TOILET_BLOCK = registrar.createWithItem("toilet_block", new ToiletBlock(AbstractBlock.Settings.create().nonOpaque().strength(0.5f).sounds(BlockSoundGroup.METAL)), TMMItems.DECORATION_GROUP);
     Block WHITE_OTTOMAN = registrar.createWithItem("white_ottoman", new OttomanBlock(AbstractBlock.Settings.copy(WHITE_LOUNGE_COUCH)), TMMItems.DECORATION_GROUP);
     Block BLUE_LOUNGE_COUCH = registrar.createWithItem("blue_lounge_couch", new LoungeCouch(AbstractBlock.Settings.copy(WHITE_LOUNGE_COUCH)), TMMItems.DECORATION_GROUP);
     Block GREEN_LOUNGE_COUCH = registrar.createWithItem("green_lounge_couch", new LoungeCouch(AbstractBlock.Settings.copy(WHITE_LOUNGE_COUCH)), TMMItems.DECORATION_GROUP);

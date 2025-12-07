@@ -39,7 +39,7 @@ public class RoleAnnouncementTexts {
             this.titleText = Text.translatable("announcement.title." + this.name.toLowerCase()).withColor(this.colour);
             this.welcomeText = Text.translatable("announcement.welcome", this.roleText).withColor(0xF0F0F0);
             this.premiseText = (count) -> Text.translatable(count == 1 ? "announcement.premise" : "announcement.premises", count);
-            this.goalText = (count) -> Text.translatable((count == 1 ? "announcement.goal." : "announcement.goals.") + this.nawe.toLowerCase(), count).withColor(this.colour);
+            this.goalText = (count) -> Text.translatable((count == 1 ? "announcement.goal." : "announcement.goals.") + this.name.toLowerCase(), count).withColor(this.colour);
             this.winText = Text.translatable("announcement.win." + this.name.toLowerCase()).withColor(this.colour);
         }
 

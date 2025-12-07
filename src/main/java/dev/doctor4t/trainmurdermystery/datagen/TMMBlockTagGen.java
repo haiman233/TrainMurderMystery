@@ -224,6 +224,7 @@ public class TMMBlockTagGen extends FabricTagProvider.BlockTagProvider {
                 .add(TMMBlocks.WHITE_TRIMMED_BED)
                 .add(TMMBlocks.RED_TRIMMED_BED)
                 .add(TMMBlocks.BLUE_LOUNGE_COUCH)
+                .add(TMMBlocks.TOILET_BLOCK)
                 .add(TMMBlocks.GREEN_LOUNGE_COUCH)
                 .add(TMMBlocks.RED_LEATHER_COUCH)
                 .add(TMMBlocks.BROWN_LEATHER_COUCH)
