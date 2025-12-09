@@ -83,6 +83,7 @@ dependencies {
 	modIncludeImplementation "maven.modrinth:midnightlib:${project.midnightlib_version}"
 
 	modApi files("libs/moonlight-1.27.1.jar")
+	modApi files("libs/vista-1.21-1.0.9-fabric.jar")
 
 	// Runtime mods
 	modLocalImplementation "com.terraformersmc:modmenu:${mod_menu_version}"

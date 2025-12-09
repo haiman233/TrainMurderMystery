@@ -73,17 +73,17 @@ public class TMMConfig extends MidnightConfig {
     public static Comment shopPricesComment;
 
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
-    public static int knifePrice = 100;
+    public static int knifePrice = 125;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
     public static int revolverPrice = 300;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
-    public static int grenadePrice = 350;
+    public static int grenadePrice = 325;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
-    public static int psychoModePrice = 300;
+    public static int psychoModePrice = 250;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
-    public static int poisonVialPrice = 100;
+    public static int poisonVialPrice = 80;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
-    public static int scorpionPrice = 50;
+    public static int scorpionPrice = 40;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
     public static int firecrackerPrice = 10;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
@@ -91,9 +91,9 @@ public class TMMConfig extends MidnightConfig {
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
     public static int crowbarPrice = 25;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
-    public static int bodyBagPrice = 200;
+    public static int bodyBagPrice = 140;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
-    public static int blackoutPrice = 200;
+    public static int blackoutPrice = 105;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
     public static int notePrice = 10;
 

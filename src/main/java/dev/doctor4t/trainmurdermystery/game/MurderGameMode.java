@@ -68,17 +68,17 @@ public class MurderGameMode extends GameMode {
 
         // check killer win condition (killed all civilians)
         if (!civilianAlive) {
-//            winStatus = GameFunctions.WinStatus.KILLERS;
+            winStatus = GameFunctions.WinStatus.KILLERS;
         }
 
         // check passenger win condition (all killers are dead)
         if (winStatus == GameFunctions.WinStatus.NONE) {
-//            winStatus = GameFunctions.WinStatus.PASSENGERS;
-//            for (UUID player : gameWorldComponent.getAllKillerTeamPlayers()) {
-//                if (!GameFunctions.isPlayerEliminated(serverWorld.getPlayerByUuid(player))) {
-//                    winStatus = GameFunctions.WinStatus.NONE;
-//                }
-//            }
+            winStatus = GameFunctions.WinStatus.PASSENGERS;
+            for (UUID player : gameWorldComponent.getAllKillerTeamPlayers()) {
+                if (!GameFunctions.isPlayerEliminated(serverWorld.getPlayerByUuid(player))) {
+                    winStatus = GameFunctions.WinStatus.NONE;
+                }
+            }
         }
 
         // game end on win and display

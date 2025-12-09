@@ -8,8 +8,11 @@ import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.tag.TMMItemTags;
 import dev.doctor4t.trainmurdermystery.util.TaskCompletePayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.LecternScreen;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -139,6 +142,9 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
         }
         for (Task task : removals) this.tasks.remove(task);
         if (shouldSync) this.sync();
+		
+		// 根据情绪值调整玩家速度
+		updatePlayerMovementSpeed();
     }
 
     private @Nullable TrainTask generateTask() {
@@ -161,6 +167,8 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
                     case RAED_BOOK -> new ReadBookTask(GameConstants.READ_BOOK_TASK_DURATION);
                     case EAT -> new EatTask();
                     case DRINK -> new DrinkTask();
+                    case EXERCISE -> new ExerciseTask(GameConstants.EXERCISE_TASK_DURATION);
+                    case MEDITATE -> new MeditateTask(GameConstants.MEDITATE_TASK_DURATION); // 添加冥想任务生成
 
                 };
             }
@@ -205,6 +213,10 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
         return this.getMood() < GameConstants.DEPRESSIVE_MOOD_THRESHOLD;
     }
 
+    public boolean isHigherThanAngry() {
+        return this.getMood() > GameConstants.ANGRY_MOOD_THRESHOLD;
+    }
+
     public HashMap<UUID, ItemStack> getPsychosisItems() {
         return this.psychosisItems;
     }
@@ -234,17 +246,19 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
     }
 
     public enum Task {
-        SLEEP(nbt -> new SleepTask(nbt.getInt("timer"))),
-        OUTSIDE(nbt -> new OutsideTask(nbt.getInt("timer"))),
-        RAED_BOOK(nbt -> new ReadBookTask(nbt.getInt("timer"))),
-        EAT(nbt -> new EatTask()),
-        DRINK(nbt -> new DrinkTask());
+	SLEEP(nbt -> new SleepTask(nbt.getInt("timer"))),
+	OUTSIDE(nbt -> new OutsideTask(nbt.getInt("timer"))),
+	RAED_BOOK(nbt -> new ReadBookTask(nbt.getInt("timer"))),
+	EAT(nbt -> new EatTask()),
+	DRINK(nbt -> new DrinkTask()),
+	EXERCISE(nbt -> new ExerciseTask(nbt.getInt("timer"))),
+	MEDITATE(nbt -> new MeditateTask(nbt.getInt("timer"))); // 添加冥想任务
 
-        public final @NotNull Function<NbtCompound, TrainTask> setFunction;
+	public final @NotNull Function<NbtCompound, TrainTask> setFunction;
 
-        Task(@NotNull Function<NbtCompound, TrainTask> function) {
-            this.setFunction = function;
-        }
+	Task(@NotNull Function<NbtCompound, TrainTask> function) {
+		this.setFunction = function;
+	}
     }
 
     public static class SleepTask implements TrainTask {
@@ -412,6 +426,88 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
         }
     }
 
+    public static class ExerciseTask implements TrainTask {
+        private int timer;
+
+        public ExerciseTask(int time) {
+            this.timer = time;
+        }
+
+        @Override
+        public void tick(@NotNull PlayerEntity player) {
+            // 玩家必须在跑步状态下才能完成锻炼任务
+            if (player.isSprinting() && player.getWorld().getBlockState(player.getBlockPos().add(0, -1, 0)).getBlock() == Blocks.WHITE_CONCRETE&& this.timer > 0) this.timer--;
+        }
+
+        @Override
+        public boolean isFulfilled(@NotNull PlayerEntity player) {
+            return this.timer <= 0;
+        }
+
+        @Override
+        public String getName() {
+            return "exercise";
+        }
+
+        @Override
+        public Task getType() {
+            return Task.EXERCISE;
+        }
+
+        @Override
+        public NbtCompound toNbt() {
+            NbtCompound nbt = new NbtCompound();
+            nbt.putInt("type", Task.EXERCISE.ordinal());
+            nbt.putInt("timer", this.timer);
+            return nbt;
+        }
+    }
+
+    /**
+     * 冥想任务类
+     * 玩家需要保持静止并蹲下来完成冥想
+     */
+    public static class MeditateTask implements TrainTask {
+        private int timer;
+
+        public MeditateTask(int time) {
+            this.timer = time;
+        }
+
+        @Override
+        public void tick(@NotNull PlayerEntity player) {
+            // 玩家必须蹲下且保持静止才能完成冥想任务
+            if (player.isInSneakingPose() && player.getVelocity().lengthSquared() < 0.01 && this.timer > 0) {
+                this.timer--;
+            }
+        }
+
+        @Override
+        public boolean isFulfilled(@NotNull PlayerEntity player) {
+            return this.timer <= 0;
+        }
+
+        @Override
+        public String getName() {
+            return "meditate";
+        }
+
+        @Override
+        public Task getType() {
+            return Task.MEDITATE;
+        }
+
+        @Override
+        public NbtCompound toNbt() {
+            NbtCompound nbt = new NbtCompound();
+            nbt.putInt("type", Task.MEDITATE.ordinal());
+            nbt.putInt("timer", this.timer);
+            return nbt;
+        }
+    }
+
+
+
     public interface TrainTask {
         default void tick(@NotNull PlayerEntity player) {
         }
@@ -423,5 +519,40 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
         Task getType();
 
         NbtCompound toNbt();
+    }
+
+    /**
+     * 根据玩家的情绪值更新其移动速度
+     */
+    private void updatePlayerMovementSpeed() {
+        if (this.player instanceof ServerPlayerEntity) {
+            // 获取当前玩家的移动速度属性
+            var speedAttribute = this.player.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+            
+            if (speedAttribute != null) {
+                // 移除之前可能添加的修饰符
+                speedAttribute.removeModifier(TMM.id("mood_speed_modifier"));
+                
+                // 根据情绪值添加新的修饰符
+                if (this.isLowerThanDepressed()) {
+                    // 抑郁状态 - 降低20%速度
+                    EntityAttributeModifier modifier = new EntityAttributeModifier(
+                            TMM.id("mood_speed_modifier"),
+                            -0.2,
+                            EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
+                    );
+                    speedAttribute.addTemporaryModifier(modifier);
+                } else if (this.isHigherThanAngry()) {
+                    // 愤怒状态 - 提高15%速度
+                    EntityAttributeModifier modifier = new EntityAttributeModifier(
+                            TMM.id("mood_speed_modifier"),
+                            0.15,
+                            EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
+                    );
+                    speedAttribute.addTemporaryModifier(modifier);
+                }
+                // 正常情绪范围内保持默认速度
+            }
+        }
     }
 }

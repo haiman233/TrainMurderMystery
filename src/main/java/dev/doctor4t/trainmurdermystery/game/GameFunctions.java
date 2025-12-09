@@ -121,6 +121,29 @@ public class GameFunctions {
         gameComponent.sync();
     }
 
+    public static Vec3d getSpawnPos(int room){
+        if (room == 1) {
+            return new Vec3d(116 ,122 ,-539);
+        } else if (room == 2) {
+            return new Vec3d(124 ,122, -534);
+        } else if (room == 3) {
+            return new Vec3d(131,122,-534);
+        }
+         else if (room == 4) {
+            return new Vec3d(144,122,-540);
+        }
+         else if (room == 5) {
+            return new Vec3d(119,128,-537);
+        }
+         else if (room == 6) {
+            return new Vec3d(132,128,-536);
+        }
+         if (room == 7) {
+            return new Vec3d(146,128,-537);
+        }
+        return null;
+    }
+    static Map<UUID, Integer> roomToPlayer = new HashMap<>();
     private static void baseInitialize(ServerWorld serverWorld, GameWorldComponent gameComponent, List<ServerPlayerEntity> players) {
         AreasWorldComponent areas = AreasWorldComponent.KEY.get(serverWorld);
 
@@ -145,8 +168,15 @@ public class GameFunctions {
         // teleport players to play area
         for (ServerPlayerEntity player : players) {
             player.changeGameMode(net.minecraft.world.GameMode.ADVENTURE);
-            Vec3d pos = player.getPos().add(areas.getPlayAreaOffset());
-            player.requestTeleport(pos.getX(), pos.getY() + 1, pos.getZ());
+            //
+            Vec3d pos = getSpawnPos(roomToPlayer.getOrDefault(player.getUuid(), 1));
+            if (pos != null) {
+                player.requestTeleport(pos.getX(), pos.getY() + 1, pos.getZ());
+            }
+            else {
+                Vec3d pos1 = player.getPos().add(areas.getPlayAreaOffset());
+                player.requestTeleport(pos1.getX(), pos1.getY() + 1, pos1.getZ());
+            }
         }
 
         // teleport non playing players
@@ -183,10 +213,11 @@ public class GameFunctions {
         int roomNumber = 0;
         for (ServerPlayerEntity serverPlayerEntity : players) {
             ItemStack itemStack = new ItemStack(TMMItems.KEY);
-            roomNumber = roomNumber % 7 + 1;
+            roomNumber = roomNumber % 6 + 1;
             int finalRoomNumber = roomNumber;
             itemStack.apply(DataComponentTypes.LORE, LoreComponent.DEFAULT, component -> new LoreComponent(Text.literal("Room " + finalRoomNumber).getWithStyle(Style.EMPTY.withItalic(false).withColor(0xFF8C00))));
             serverPlayerEntity.giveItemStack(itemStack);
+            roomToPlayer.put(serverPlayerEntity.getUuid(), finalRoomNumber);
 
             // give letter
             ItemStack letter = new ItemStack(TMMItems.LETTER);
