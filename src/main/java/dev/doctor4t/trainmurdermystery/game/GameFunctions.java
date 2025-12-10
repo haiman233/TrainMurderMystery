@@ -2,6 +2,7 @@ package dev.doctor4t.trainmurdermystery.game;
 
 import com.google.common.collect.Lists;
 import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.TMMConfig;
 import dev.doctor4t.trainmurdermystery.api.GameMode;
 import dev.doctor4t.trainmurdermystery.cca.*;
 import dev.doctor4t.trainmurdermystery.compat.TrainVoicePlugin;
@@ -332,6 +333,13 @@ public class GameFunctions {
             TMM.REPLAY_MANAGER.recordPlayerKill(killer != null ? killer.getUuid() : null, serverVictim.getUuid(), deathReason);
         }
 
+        // Check if victim has a role assigned - if not, skip role-dependent logic
+        GameWorldComponent gameWorldComponent = GameWorldComponent.KEY.get(victim.getWorld());
+        if (gameWorldComponent.getRole(victim) == null) {
+            // Player doesn't have a role (game not started or joined mid-game), don't kill them
+            return;
+        }
+
         if (!AllowPlayerDeath.EVENT.invoker().allowDeath(victim, deathReason)) return;
         if (component.getPsychoTicks() > 0) {
             if (component.getArmour() > 0) {
@@ -389,7 +397,6 @@ public class GameFunctions {
             }
         }
 
-        GameWorldComponent gameWorldComponent = GameWorldComponent.KEY.get(victim.getWorld());
         if (gameWorldComponent.isInnocent(victim)) {
             GameTimeComponent.KEY.get(victim.getWorld()).addTime(GameConstants.TIME_ON_CIVILIAN_KILL);
         }
@@ -433,9 +440,16 @@ public class GameFunctions {
 
     // returns whether another reset should be attempted
     public static boolean tryResetTrain(ServerWorld serverWorld) {
+
+        if (!TMMConfig.enableAutoTrainReset) {
+            return false;
+        }
+        
         if (serverWorld.getServer().getOverworld().equals(serverWorld)) {
             AreasWorldComponent areas = AreasWorldComponent.KEY.get(serverWorld);
-            TMM.LOGGER.info("Resetting train"+areas.toString());
+            if (TMMConfig.verboseTrainResetLogs) {
+                TMM.LOGGER.info("Resetting train" + areas.toString());
+            }
             BlockPos backupMinPos = BlockPos.ofFloored(areas.getResetTemplateArea().getMinPos());
             BlockPos backupMaxPos = BlockPos.ofFloored(areas.getResetTemplateArea().getMaxPos());
             BlockBox backupTrainBox = BlockBox.create(backupMinPos, backupMaxPos);
@@ -457,14 +471,28 @@ public class GameFunctions {
                 int trainChunkMaxX = trainMaxPos.getX() >> 4;
                 int trainChunkMaxZ = trainMaxPos.getZ() >> 4;
                 
-
-                TMM.LOGGER.info("Train reset: Loading chunks - Template: ({}, {}) to ({}, {}), Paste: ({}, {}) to ({}, {})",
-                    backupChunkMinX, backupChunkMinZ, backupChunkMaxX, backupChunkMaxZ,
-                    trainChunkMinX, trainChunkMinZ, trainChunkMaxX, trainChunkMaxZ);
+                if (TMMConfig.verboseTrainResetLogs) {
+                    TMM.LOGGER.info("Train reset: Loading chunks - Template: ({}, {}) to ({}, {}), Paste: ({}, {}) to ({}, {})",
+                        backupChunkMinX, backupChunkMinZ, backupChunkMaxX, backupChunkMaxZ,
+                        trainChunkMinX, trainChunkMinZ, trainChunkMaxX, trainChunkMaxZ);
+                }
                 
+                // Force load the required chunks
+                for (int x = backupChunkMinX; x <= backupChunkMaxX; x++) {
+                    for (int z = backupChunkMinZ; z <= backupChunkMaxZ; z++) {
+                        serverWorld.getChunk(x, z);
+                    }
+                }
+                for (int x = trainChunkMinX; x <= trainChunkMaxX; x++) {
+                    for (int z = trainChunkMinZ; z <= trainChunkMaxZ; z++) {
+                        serverWorld.getChunk(x, z);
+                    }
+                }
 
-                TMM.LOGGER.info("Train reset failed: Clone positions not loaded. Queueing another attempt.");
-                return true;
+                if (TMMConfig.verboseTrainResetLogs) {
+                    TMM.LOGGER.info("Train reset: Chunks loaded, attempting reset.");
+                }
+                // Continue with the reset after loading chunks
             }
             
             if (serverWorld.isRegionLoaded(backupMinPos, backupMaxPos) && serverWorld.isRegionLoaded(trainMinPos, trainMaxPos)) {
@@ -539,11 +567,15 @@ public class GameFunctions {
 
                 serverWorld.getBlockTickScheduler().scheduleTicks(serverWorld.getBlockTickScheduler(), backupTrainBox, blockPos5);
                 if (mx == 0) {
-                    TMM.LOGGER.info("Train reset failed: No blocks copied. Queueing another attempt.");
+                    if (TMMConfig.verboseTrainResetLogs) {
+                        TMM.LOGGER.info("Train reset failed: No blocks copied. Queueing another attempt.");
+                    }
                     return true;
                 }
             } else {
-                TMM.LOGGER.info("Train reset failed: Clone positions not loaded. Queueing another attempt.");
+                if (TMMConfig.verboseTrainResetLogs) {
+                    TMM.LOGGER.info("Train reset failed: Clone positions not loaded. Queueing another attempt.");
+                }
                 return true;
             }
 

@@ -54,6 +54,8 @@ public class TMMConfig extends MidnightConfig {
         DEFAULT_VALUES.put("firecrackerDuration", 15);
         DEFAULT_VALUES.put("blackoutMinDuration", 15);
         DEFAULT_VALUES.put("blackoutMaxDuration", 20);
+        DEFAULT_VALUES.put("enableAutoTrainReset", true);
+        DEFAULT_VALUES.put("verboseTrainResetLogs", false);
     }
 
     // 客户端专用配置 - 仅在客户端环境生效
@@ -142,6 +144,10 @@ public class TMMConfig extends MidnightConfig {
     public static int blackoutMinDuration = 15;
     @Entry(category = "game", min = 0, max = 300, isSlider = true)
     public static int blackoutMaxDuration = 20;
+    @Entry(category = "game")
+    public static boolean enableAutoTrainReset = true;
+    @Entry(category = "game")
+    public static boolean verboseTrainResetLogs = false;
 
     /**
      * 初始化配置系统
@@ -242,6 +248,8 @@ public class TMMConfig extends MidnightConfig {
             if (json.has("firecrackerDuration")) firecrackerDuration = json.get("firecrackerDuration").getAsInt();
             if (json.has("blackoutMinDuration")) blackoutMinDuration = json.get("blackoutMinDuration").getAsInt();
             if (json.has("blackoutMaxDuration")) blackoutMaxDuration = json.get("blackoutMaxDuration").getAsInt();
+            if (json.has("enableAutoTrainReset")) enableAutoTrainReset = json.get("enableAutoTrainReset").getAsBoolean();
+            if (json.has("verboseTrainResetLogs")) verboseTrainResetLogs = json.get("verboseTrainResetLogs").getAsBoolean();
 
             // 读取客户端配置
             if (json.has("ultraPerfMode")) ultraPerfMode = json.get("ultraPerfMode").getAsBoolean();

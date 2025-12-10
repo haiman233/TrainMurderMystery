@@ -51,7 +51,7 @@ public record ReplayPayload(GameReplay replay) implements CustomPayload {
         List<GameReplay.ReplayEvent> timelineEvents = new ArrayList<>();
         for (int i = 0; i < numEvents; i++) {
             GameReplay.EventType eventType = buf.readEnumConstant(GameReplay.EventType.class);
-            long timestamp = buf.readInt(); // OPTIMIZATION
+            long timestamp = buf.readInt();
             GameReplay.EventDetails details = null;
 
             switch (eventType) {
