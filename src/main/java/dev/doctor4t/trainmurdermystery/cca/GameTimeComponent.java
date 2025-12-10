@@ -33,7 +33,8 @@ public class GameTimeComponent implements AutoSyncedComponent, CommonTickingComp
         if (!GameWorldComponent.KEY.get(this.world).isRunning()) return;
         if (this.time <= 0) return;
         this.time--;
-        if (this.time % 400 == 0) this.sync();
+        // 从每400tick增加到每600tick同步（30秒）
+        if (this.time % 600 == 0) this.sync();
     }
 
     public boolean hasTime() {

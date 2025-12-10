@@ -7,12 +7,16 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 public class NetworkHandler {
+    // 优化：减少发送距离从96格到64格，减少网络占用
+    private static final int NETWORK_RANGE = 64;
+    private static final int NETWORK_RANGE_SQUARED = NETWORK_RANGE * NETWORK_RANGE;
+    
     public static void sendToNearBy(World world, BlockPos pos, CustomPayload toSend) {
         if (world instanceof ServerWorld) {
             ServerWorld serverWorld = (ServerWorld) world;
 
             serverWorld.getServer().getPlayerManager().getPlayerList().stream()
-                    .filter(p -> p.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ()) < 96 * 96)
+                    .filter(p -> p.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ()) < NETWORK_RANGE_SQUARED)
                     .forEach(p -> ServerPlayNetworking.send(p, toSend));
         }
     }

@@ -30,7 +30,8 @@ public class BeveragePlateBlockEntity extends BlockEntity {
     private void sync() {
         if (this.world != null && !this.world.isClient) {
             this.markDirty();
-            this.world.updateListeners(this.pos, this.getCachedState(), this.getCachedState(), 3);
+            // 仅对关键更新同步，使用NOTIFY_LISTENERS减少网络占用
+            this.world.updateListeners(this.pos, this.getCachedState(), this.getCachedState(), Block.NOTIFY_LISTENERS);
         }
     }
 

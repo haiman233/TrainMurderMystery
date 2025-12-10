@@ -189,11 +189,20 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
         Role role = GameWorldComponent.KEY.get(this.player.getWorld()).getRole(player);
 
         if (role != null && role.getMoodType() == Role.MoodType.REAL) {
-            this.mood = Math.clamp(mood, 0, 1);
+            float clampedMood = Math.clamp(mood, 0, 1);
+            // 只有当情绪变化超过0.05时才同步（减少网络占用）
+            if (Math.abs(this.mood - clampedMood) > 0.05f) {
+                this.mood = clampedMood;
+                this.sync();
+            } else {
+                this.mood = clampedMood;
+            }
         } else {
-            this.mood = 1;
+            if (this.mood != 1f) {
+                this.mood = 1f;
+                this.sync();
+            }
         }
-        this.sync();
     }
 
     public void eatFood() {

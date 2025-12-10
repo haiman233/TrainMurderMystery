@@ -27,13 +27,22 @@ public class TrainWorldComponent implements AutoSyncedComponent, ServerTickingCo
         this.world = world;
     }
 
+    private boolean needsSync = false;
+
     private void sync() {
         TrainWorldComponent.KEY.sync(this.world);
+        this.needsSync = false;
+    }
+
+    private void markDirty() {
+        this.needsSync = true;
     }
 
     public void setSpeed(int speed) {
-        this.speed = speed;
-        this.sync();
+        if (this.speed != speed) {
+            this.speed = speed;
+            this.markDirty();
+        }
     }
 
     public int getSpeed() {
@@ -45,8 +54,10 @@ public class TrainWorldComponent implements AutoSyncedComponent, ServerTickingCo
     }
 
     public void setTime(int time) {
-        this.time = time;
-        this.sync();
+        if (this.time != time) {
+            this.time = time;
+            this.markDirty();
+        }
     }
 
     public boolean isSnowing() {
@@ -54,8 +65,10 @@ public class TrainWorldComponent implements AutoSyncedComponent, ServerTickingCo
     }
 
     public void setSnow(boolean snow) {
-        this.snow = snow;
-        this.sync();
+        if (this.snow != snow) {
+            this.snow = snow;
+            this.markDirty();
+        }
     }
 
     public boolean isFoggy() {
@@ -63,8 +76,10 @@ public class TrainWorldComponent implements AutoSyncedComponent, ServerTickingCo
     }
 
     public void setFog(boolean fog) {
-        this.fog = fog;
-        this.sync();
+        if (this.fog != fog) {
+            this.fog = fog;
+            this.markDirty();
+        }
     }
 
     public boolean hasHud() {
@@ -72,8 +87,10 @@ public class TrainWorldComponent implements AutoSyncedComponent, ServerTickingCo
     }
 
     public void setHud(boolean hud) {
-        this.hud = hud;
-        this.sync();
+        if (this.hud != hud) {
+            this.hud = hud;
+            this.markDirty();
+        }
     }
 
     public TimeOfDay getTimeOfDay() {
@@ -81,8 +98,10 @@ public class TrainWorldComponent implements AutoSyncedComponent, ServerTickingCo
     }
 
     public void setTimeOfDay(TimeOfDay timeOfDay) {
-        this.timeOfDay = timeOfDay;
-        this.sync();
+        if (this.timeOfDay != timeOfDay) {
+            this.timeOfDay = timeOfDay;
+            this.markDirty();
+        }
     }
 
     @Override
@@ -124,6 +143,11 @@ public class TrainWorldComponent implements AutoSyncedComponent, ServerTickingCo
 
         ServerWorld serverWorld = (ServerWorld) world;
         serverWorld.setTimeOfDay(timeOfDay.time);
+        
+        // 每秒同步一次（减少网络占用）
+        if (this.needsSync && this.world.getTime() % 20 == 0) {
+            this.sync();
+        }
     }
 
     public void reset() {

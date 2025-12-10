@@ -31,7 +31,8 @@ public abstract class SyncingBlockEntity extends BlockEntity {
     public void sync() {
         this.markDirty();
         if (this.world != null) {
-            this.world.updateListeners(this.pos, this.getCachedState(), this.getCachedState(), Block.NOTIFY_ALL);
+            // 使用NOTIFY_LISTENERS代替NOTIFY_ALL，减少不必要的网络通知
+            this.world.updateListeners(this.pos, this.getCachedState(), this.getCachedState(), Block.NOTIFY_LISTENERS);
         }
     }
 

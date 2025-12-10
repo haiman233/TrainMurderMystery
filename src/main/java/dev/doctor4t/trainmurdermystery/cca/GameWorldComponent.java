@@ -381,7 +381,7 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
             }
         }
 
-        if (serverWorld.getTime() % 20 == 0) {
+        if (serverWorld.getTime() % 40 == 0) {
             this.sync();
         }
     }
