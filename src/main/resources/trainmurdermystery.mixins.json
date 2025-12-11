@@ -19,7 +19,8 @@
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin",
     "TalkChatMixin",
-    "client.LivingEntityRendererMixin"
+    "client.LivingEntityRendererMixin",
+    "BlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1

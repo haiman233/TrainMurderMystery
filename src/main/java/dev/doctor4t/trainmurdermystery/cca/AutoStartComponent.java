@@ -49,7 +49,7 @@ public class AutoStartComponent implements AutoSyncedComponent, CommonTickingCom
                 }
             }
 
-            // 从每秒同步降低为每2秒同步
+
             if (this.getTime() % 40 == 0) {
                 this.sync();
             }
