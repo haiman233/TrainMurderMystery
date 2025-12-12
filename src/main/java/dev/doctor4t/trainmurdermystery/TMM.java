@@ -6,6 +6,7 @@ import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.command.*;
 import dev.doctor4t.trainmurdermystery.command.argument.GameModeArgumentType;
 import dev.doctor4t.trainmurdermystery.command.argument.TimeOfDayArgumentType;
+import dev.doctor4t.trainmurdermystery.event.PlayerInteractionHandler;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
 import dev.doctor4t.trainmurdermystery.game.GameReplayData;
 import dev.doctor4t.trainmurdermystery.game.GameReplayManager;
@@ -56,6 +57,9 @@ public class TMM implements ModInitializer {
         
         // Init constants
         GameConstants.init();
+
+        // Register event handlers
+        PlayerInteractionHandler.register();
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             SERVER = server;
