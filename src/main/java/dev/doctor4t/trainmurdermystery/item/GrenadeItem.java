@@ -47,7 +47,7 @@ public class GrenadeItem extends Item {
 			grenade.setPos(user.getX(), user.getEyeY() - 0.1, user.getZ());
 			
 			// 根据蓄力时间计算投掷速度（最小速度0.3，最大速度1.2）
-			float velocity = 0.2F + (0.8F * (float) chargeTime / MAX_CHARGE_TIME);
+			float velocity = 0.4F + (0.75F * (float) chargeTime / MAX_CHARGE_TIME);
 			
 			// 设置手榴弹的速度和方向
 			grenade.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, velocity, 1.0F);

@@ -82,7 +82,7 @@ public class WorldBlackoutComponent implements AutoSyncedComponent, ServerTickin
             }
         }
         if (this.world instanceof ServerWorld serverWorld) for (ServerPlayerEntity player : serverWorld.getPlayers()) {
-            if (GameWorldComponent.KEY.get(player).isInnocent(player)){
+            if ((!GameWorldComponent.KEY.get(player).getRole(player).canUseKiller())){
                 player.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 100, 0, false, false, false));
             }
             player.networkHandler.sendPacket(new PlaySoundS2CPacket(Registries.SOUND_EVENT.getEntry(TMMSounds.AMBIENT_BLACKOUT), SoundCategory.PLAYERS, player.getX(), player.getY(), player.getZ(), 100f, 1f, player.getRandom().nextLong()));

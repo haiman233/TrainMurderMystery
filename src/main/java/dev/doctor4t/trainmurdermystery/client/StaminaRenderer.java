@@ -1,8 +1,10 @@
 package dev.doctor4t.trainmurdermystery.client;
 
+import dev.doctor4t.trainmurdermystery.TMMConfig;
 import dev.doctor4t.trainmurdermystery.api.Role;
 import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
+import dev.doctor4t.trainmurdermystery.index.TMMItems;
 import dev.doctor4t.trainmurdermystery.util.PlayerStaminaGetter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -11,6 +13,7 @@ import net.minecraft.client.gui.screen.Overlay;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
 
@@ -68,6 +71,21 @@ public class StaminaRenderer {
 		float maxStamina = staminaProvider.getMaxStamina(player);
 		float staminaPercent = staminaProvider.getStaminaPercentage(player);
 
+		final var mainHandStack = player.getMainHandStack();
+		boolean isChargingWeapon = false;
+		if ( mainHandStack.getItem() == TMMItems.GRENADE){
+			maxStamina = 20;
+			final var itemUseTime = player.getItemUseTime();
+			staminaPercent = Math.min( (float) itemUseTime / 20,1f);
+			isChargingWeapon = true;
+		}
+		if (mainHandStack.getItem() == TMMItems.KNIFE ){
+			maxStamina = 10;
+			final var itemUseTime = player.getItemUseTime();
+			staminaPercent = Math.min( (float) itemUseTime / 10,1f);
+			isChargingWeapon = true;
+		}
+
 		if (maxStamina <= 0) return; // 无体力系统
 
 		// 使用与TimeRenderer类似的颜色逻辑
@@ -87,7 +105,14 @@ public class StaminaRenderer {
 		// 渲染体力条 - 移动到物品栏上方
 		context.getMatrices().push();
 		context.getMatrices().translate(context.getScaledWindowWidth() / 2f, context.getScaledWindowHeight() - 35, 0); // 在物品栏上方显示
-		view.render(context, colour, delta);
+		
+		// 检查是否应该禁用平滑动画（特别是对于武器蓄力）
+		if ((TMMConfig.disableStaminaBarSmoothing && isChargingWeapon) || isChargingWeapon) {
+			view.renderWithoutSmoothing(context, colour, staminaPercent);
+		} else {
+			view.render(context, colour, delta);
+		}
+		
 		context.getMatrices().pop();
 
 		// 可选：显示体力数值
@@ -124,6 +149,30 @@ public class StaminaRenderer {
 		public void render(@NotNull DrawContext context, int colour, float delta) {
 			float value = MathHelper.lerp(delta, this.lastValue, this.currentValue);
 
+			// 体力条参数 - 更现代、更扁平的设计
+			int barWidth = 120; // 总宽度增加
+			int barHeight = 2;  // 高度减小变得更扁平
+			int halfWidth = barWidth / 2;
+
+			// 绘制背景（更现代化的半透明黑色）
+			int backgroundColor = 0x66000000; // 更透明的背景
+			context.fill(-halfWidth, -barHeight/2, halfWidth, barHeight/2, backgroundColor);
+
+			// 计算当前体力条宽度
+			int currentWidth = Math.round(barWidth * value);
+			int currentHalfWidth = currentWidth / 2;
+
+			if (currentWidth > 0) {
+				// 绘制体力条（从中间向两边延伸）
+				context.fill(-currentHalfWidth, -barHeight/2, currentHalfWidth, barHeight/2, colour);
+			}
+
+			// 绘制中心分隔线（更窄）
+			int centerLineColor = 0x80FFFFFF;
+			context.fill(-1, -barHeight/2 + 1, 1, barHeight/2 - 1, centerLineColor); // 更窄的线条
+		}
+
+		public void renderWithoutSmoothing(@NotNull DrawContext context, int colour, float value) {
 			// 体力条参数 - 更现代、更扁平的设计
 			int barWidth = 120; // 总宽度增加
 			int barHeight = 2;  // 高度减小变得更扁平

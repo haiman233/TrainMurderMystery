@@ -7,6 +7,7 @@
     "AbstractBlockInvoker",
     "AbstractBlockSettingsMixin",
     "CemaraMixin",
+    "ChatMixin2",
     "DedicatedPlayerManagerMixin",
     "EntityMixin",
     "HungerManagerMixin",

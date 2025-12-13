@@ -18,6 +18,7 @@ public class TMMConfig extends MidnightConfig {
         // 客户端配置默认值
         DEFAULT_VALUES.put("ultraPerfMode", false);
         DEFAULT_VALUES.put("disableScreenShake", false);
+        DEFAULT_VALUES.put("disableStaminaBarSmoothing", false);
 
         // 商店物品价格默认值
         DEFAULT_VALUES.put("knifePrice", 100);
@@ -70,18 +71,22 @@ public class TMMConfig extends MidnightConfig {
     @Entry(category = "client")
     public static boolean disableScreenShake = false;
 
+    @Environment(EnvType.CLIENT)
+    @Entry(category = "client")
+    public static boolean disableStaminaBarSmoothing = false;
+
     // 商店物品价格配置 - 服务端只读
     @Comment(category = "shop", centered = true)
     public static Comment shopPricesComment;
 
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
-    public static int knifePrice = 125;
+    public static int knifePrice = 120;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
-    public static int revolverPrice = 300;
+    public static int revolverPrice = 285;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
-    public static int grenadePrice = 325;
+    public static int grenadePrice = 330;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
-    public static int psychoModePrice = 250;
+    public static int psychoModePrice = 300;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
     public static int poisonVialPrice = 80;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
@@ -93,9 +98,9 @@ public class TMMConfig extends MidnightConfig {
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
     public static int crowbarPrice = 25;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
-    public static int bodyBagPrice = 140;
+    public static int bodyBagPrice = 130;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
-    public static int blackoutPrice = 105;
+    public static int blackoutPrice = 100;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
     public static int notePrice = 10;
 
@@ -259,6 +264,7 @@ public class TMMConfig extends MidnightConfig {
             // 读取客户端配置
             if (json.has("ultraPerfMode")) ultraPerfMode = json.get("ultraPerfMode").getAsBoolean();
             if (json.has("disableScreenShake")) disableScreenShake = json.get("disableScreenShake").getAsBoolean();
+            if (json.has("disableStaminaBarSmoothing")) disableStaminaBarSmoothing = json.get("disableStaminaBarSmoothing").getAsBoolean();
 
             TMM.LOGGER.debug("配置解析成功");
         } catch (Exception e) {

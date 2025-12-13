@@ -146,7 +146,7 @@ public class GameFunctions {
         }
         return null;
     }
-    static Map<UUID, Integer> roomToPlayer = new HashMap<>();
+    public static Map<UUID, Integer> roomToPlayer = new HashMap<>();
     private static void baseInitialize(ServerWorld serverWorld, GameWorldComponent gameComponent, List<ServerPlayerEntity> players) {
         AreasWorldComponent areas = AreasWorldComponent.KEY.get(serverWorld);
 
@@ -205,7 +205,7 @@ public class GameFunctions {
         int roomNumber = 0;
         for (ServerPlayerEntity serverPlayerEntity : players) {
             ItemStack itemStack = new ItemStack(TMMItems.KEY);
-            roomNumber = roomNumber % 6 + 1;
+            roomNumber = roomNumber % 7 + 1;
             int finalRoomNumber = roomNumber;
             itemStack.apply(DataComponentTypes.LORE, LoreComponent.DEFAULT, component -> new LoreComponent(Text.literal("Room " + finalRoomNumber).getWithStyle(Style.EMPTY.withItalic(false).withColor(0xFF8C00))));
             serverPlayerEntity.giveItemStack(itemStack);
