@@ -34,12 +34,15 @@ public class LimitedInventoryScreen extends LimitedHandledScreen<PlayerScreenHan
     protected void init() {
         super.init();
         if (!GameWorldComponent.KEY.get(this.player.getWorld()).canUseKillerFeatures(player)) return;
-        List<ShopEntry> entries = GameConstants.getShopEntries();
+        List<ShopEntry> entries = getShopEntries();
         int apart = 38;
         int x = this.width / 2 - entries.size() * apart / 2 + 9;
         int y = this.y - 46;
         for (int i = 0; i < entries.size(); i++)
             this.addDrawableChild(new StoreItemWidget(this, x + apart * i, y, entries.get(i), i));
+    }
+    public   List<ShopEntry> getShopEntries() {
+        return GameConstants.getShopEntries();
     }
 
     @Override

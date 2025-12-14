@@ -22,6 +22,8 @@ import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 import org.ladysnake.cca.api.v3.component.tick.ClientTickingComponent;
 import org.ladysnake.cca.api.v3.component.tick.ServerTickingComponent;
 
+import java.util.List;
+
 public class PlayerShopComponent implements AutoSyncedComponent, ServerTickingComponent, ClientTickingComponent {
     public static final ComponentKey<PlayerShopComponent> KEY = ComponentRegistry.getOrCreate(TMM.id("shop"), PlayerShopComponent.class);
     private final PlayerEntity player;
@@ -52,8 +54,8 @@ public class PlayerShopComponent implements AutoSyncedComponent, ServerTickingCo
     }
 
     public void tryBuy(int index) {
-        if (index < 0 || index >= GameConstants.getShopEntries().size()) return;
-        ShopEntry entry = GameConstants.getShopEntries().get(index);
+        if (index < 0 || index >= getShopEntries().size()) return;
+        ShopEntry entry = getShopEntries().get(index);
         if (FabricLoader.getInstance().isDevelopmentEnvironment() && this.balance < entry.price())
             this.balance = entry.price() * 10;
         if (this.balance >= entry.price() && !this.player.getItemCooldownManager().isCoolingDown(entry.stack().getItem()) && entry.onBuy(this.player)) {
@@ -68,6 +70,10 @@ public class PlayerShopComponent implements AutoSyncedComponent, ServerTickingCo
             }
         }
         this.sync();
+    }
+
+    private @NotNull List<ShopEntry> getShopEntries() {
+        return GameConstants.getShopEntries();
     }
 
     @Override
