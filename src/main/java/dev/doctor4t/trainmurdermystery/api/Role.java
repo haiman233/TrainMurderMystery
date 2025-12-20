@@ -1,6 +1,9 @@
 package dev.doctor4t.trainmurdermystery.api;
 
+import dev.doctor4t.trainmurdermystery.client.gui.screen.ingame.LimitedInventoryScreen;
 import net.minecraft.util.Identifier;
+
+import java.util.function.Consumer;
 
 public final class Role {
     private final Identifier identifier;
@@ -8,12 +11,41 @@ public final class Role {
     private final boolean isInnocent;
     private final boolean canUseKiller;
     private final MoodType moodType;
+
+    public Identifier getIdentifier() {
+        return identifier;
+    }
+
+    public int getColor() {
+        return color;
+    }
+
+    public boolean isCanUseKiller() {
+        return canUseKiller;
+    }
+
+    public boolean isCanSeeTime() {
+        return canSeeTime;
+    }
+
+    public Role setAddChild(Consumer<LimitedInventoryScreen> addChild) {
+        this.addChild = addChild;
+        return this;
+    }
+
     private final int maxSprintTime;
     private final boolean canSeeTime;
+
+    public Consumer<LimitedInventoryScreen> getAddChild() {
+        return addChild;
+    }
+
+    private  Consumer<LimitedInventoryScreen> addChild;
 
     public enum MoodType {
         NONE, REAL, FAKE
     }
+
 
     /**
      * @param identifier    the mod id and name of the role
@@ -34,6 +66,10 @@ public final class Role {
         this.canSeeTime = canSeeTime;
     }
 
+    public Role addChild(Consumer<LimitedInventoryScreen> addChild) {
+        this.addChild = addChild;
+        return this;
+    }
     public Identifier identifier() {
         return identifier;
     }

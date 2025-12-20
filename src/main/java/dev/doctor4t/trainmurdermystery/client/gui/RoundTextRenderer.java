@@ -2,12 +2,15 @@ package dev.doctor4t.trainmurdermystery.client.gui;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.api.Role;
 import dev.doctor4t.trainmurdermystery.api.TMMGameModes;
 import dev.doctor4t.trainmurdermystery.cca.GameRoundEndComponent;
 import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.client.TMMClient;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
+import dev.doctor4t.trainmurdermystery.game.GameReplay;
 import dev.doctor4t.trainmurdermystery.index.TMMSounds;
 import net.minecraft.block.entity.SkullBlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -99,6 +102,8 @@ public class RoundTextRenderer {
                     PlayerListEntry playerEntry = TMMClient.PLAYER_ENTRIES_CACHE.get(entry.player().getId());
                     if (playerEntry != null && playerEntry.getSkinTextures().texture() != null) {
                         Identifier texture = playerEntry.getSkinTextures().texture();
+
+
                         RenderSystem.enableBlend();
                         context.getMatrices().push();
                         context.getMatrices().translate(8, 0, 0);
@@ -132,6 +137,8 @@ public class RoundTextRenderer {
                     context.getMatrices().push();
                     context.getMatrices().scale(2f, 2f, 1f);
 
+
+
                     if (entry.role() == RoleAnnouncementTexts.CIVILIAN) {
                         context.getMatrices().translate(-60 + (civilians % 4) * 12, 14 + (civilians / 4) * 12, 0);
                         civilians++;
@@ -143,9 +150,16 @@ public class RoundTextRenderer {
                         context.getMatrices().translate(7 + (killers % 2) * 12, 14 + (killers / 2) * 12, 0);
                         killers++;
                     }
-
+                    final var role1 = TMMClient.gameComponent.getRole(entry.player().getId());
+                    //final var first = TMM.REPLAY_MANAGER.getCurrentReplay().players().stream().filter(replayPlayerInfo -> replayPlayerInfo.uuid().equals(entry.player().getId())).findFirst();
+                    if (role1 !=null) {
+                        context.drawText(renderer, Text.translatable("announcement.role."+role1.getIdentifier().getPath()), 0, 4, role1.getColor(), false);
+                    }else {
+                   //     context.drawText(renderer, player.getName(), 0, 4, 0xFFFFFF, false);
+                    }
                     PlayerListEntry playerListEntry = TMMClient.PLAYER_ENTRIES_CACHE.get(entry.player().getId());
                     if (playerListEntry != null) {
+
                         Identifier texture = playerListEntry.getSkinTextures().texture();
                         if (texture != null) {
                             RenderSystem.enableBlend();

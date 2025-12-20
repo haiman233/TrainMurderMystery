@@ -1,7 +1,9 @@
 package dev.doctor4t.trainmurdermystery.client.gui.screen.ingame;
 
 import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.api.Role;
 import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
+import dev.doctor4t.trainmurdermystery.client.TMMClient;
 import dev.doctor4t.trainmurdermystery.client.gui.StoreRenderer;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
 import dev.doctor4t.trainmurdermystery.util.ShopEntry;
@@ -9,6 +11,9 @@ import dev.doctor4t.trainmurdermystery.util.StoreBuyPayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.RenderLayer;
@@ -20,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class LimitedInventoryScreen extends LimitedHandledScreen<PlayerScreenHandler> {
+public class LimitedInventoryScreen extends LimitedHandledScreen<PlayerScreenHandler>  {
     public static final Identifier BACKGROUND_TEXTURE = TMM.id("textures/gui/container/limited_inventory.png");
     public static final @NotNull Identifier ID = TMM.id("textures/gui/game.png");
     public final ClientPlayerEntity player;
@@ -38,8 +43,20 @@ public class LimitedInventoryScreen extends LimitedHandledScreen<PlayerScreenHan
         int apart = 38;
         int x = this.width / 2 - entries.size() * apart / 2 + 9;
         int y = this.y - 46;
-        for (int i = 0; i < entries.size(); i++)
+        final var gameComponent = TMMClient.gameComponent;
+        if (gameComponent !=null) {
+            final var role = gameComponent.getRole(player);
+            if (role.getAddChild() != null) {
+                role.getAddChild().accept(this);
+            }
+        }
+        for (int i = 0; i < entries.size(); i++) {
             this.addDrawableChild(new StoreItemWidget(this, x + apart * i, y, entries.get(i), i));
+        }
+    }
+    public  <T extends Element & Drawable & Selectable> T addDrawableChild(T drawableElement) {
+        ((DrawableGet) this).getDrawable().add(drawableElement);
+        return (T)this.addSelectableChild(drawableElement);
     }
     public   List<ShopEntry> getShopEntries() {
         return GameConstants.getShopEntries();
@@ -68,6 +85,8 @@ public class LimitedInventoryScreen extends LimitedHandledScreen<PlayerScreenHan
         this.drawMouseoverTooltip(context, mouseX, mouseY);
         StoreRenderer.renderHud(this.textRenderer, this.player, context, delta);
     }
+
+
 
     public static class StoreItemWidget extends ButtonWidget {
         public final LimitedInventoryScreen screen;
