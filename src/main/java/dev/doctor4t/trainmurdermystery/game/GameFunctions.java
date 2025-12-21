@@ -33,6 +33,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.command.WeatherCommand;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -44,6 +46,7 @@ import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.intprovider.IntProvider;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.TeleportTarget;
@@ -114,6 +117,7 @@ public class GameFunctions {
         GameWorldComponent gameComponent = GameWorldComponent.KEY.get(serverWorld);
         List<ServerPlayerEntity> readyPlayerList = getReadyPlayerList(serverWorld);
 
+        serverWorld.setWeather(0,-1, true, true);
         baseInitialize(serverWorld, gameComponent, readyPlayerList);
         TMM.REPLAY_MANAGER.initializeReplay(readyPlayerList, gameComponent.getRoles());
         gameComponent.getGameMode().initializeGame(serverWorld, gameComponent, readyPlayerList);
@@ -294,6 +298,7 @@ public class GameFunctions {
         GameWorldComponent gameComponent = GameWorldComponent.KEY.get(world);
        var areasWorldComponent = AreasWorldComponent.KEY.get(world);
         areasWorldComponent.loadFromFile();
+        world.setTimeOfDay(18000);
         gameComponent.getGameMode().finalizeGame(world, gameComponent);
         TMM.REPLAY_MANAGER.finalizeReplay(gameComponent.getLastWinStatus());
 

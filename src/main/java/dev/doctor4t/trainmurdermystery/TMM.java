@@ -7,10 +7,7 @@ import dev.doctor4t.trainmurdermystery.command.*;
 import dev.doctor4t.trainmurdermystery.command.argument.GameModeArgumentType;
 import dev.doctor4t.trainmurdermystery.command.argument.TimeOfDayArgumentType;
 import dev.doctor4t.trainmurdermystery.event.PlayerInteractionHandler;
-import dev.doctor4t.trainmurdermystery.game.GameConstants;
-import dev.doctor4t.trainmurdermystery.game.GameReplayData;
-import dev.doctor4t.trainmurdermystery.game.GameReplayManager;
-import dev.doctor4t.trainmurdermystery.game.MurderGameMode;
+import dev.doctor4t.trainmurdermystery.game.*;
 import dev.doctor4t.trainmurdermystery.index.*;
 import dev.doctor4t.trainmurdermystery.util.*;
 import dev.upcraft.datasync.api.DataSyncAPI;
@@ -78,6 +75,7 @@ public class TMM implements ModInitializer {
         TMMBlocks.initialize();
         TMMItems.initialize();
         TMMBlockEntities.initialize();
+        ShopContent.register();
 
         TMMParticles.initialize();
 

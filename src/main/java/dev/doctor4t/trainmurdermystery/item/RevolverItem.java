@@ -21,11 +21,19 @@ import org.jetbrains.annotations.NotNull;
 
 public class RevolverItem extends Item {
     public RevolverItem(Settings settings) {
-        super(settings);
+        super(settings.maxDamage(4)); // 设置最大耐久度为4
     }
+
 
     @Override
     public TypedActionResult<ItemStack> use(@NotNull World world, @NotNull PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        
+        // 检查物品是否已经损坏（耐久度为0）
+        if (stack.getDamage() >= stack.getMaxDamage()-1) {
+            return TypedActionResult.fail(stack);
+        }
+        
         if (world.isClient) {
             HitResult collision = getGunTarget(user);
             if (collision instanceof EntityHitResult entityHitResult) {
@@ -36,8 +44,11 @@ public class RevolverItem extends Item {
             }
             user.setPitch(user.getPitch() - 4);
             spawnHandParticle();
+        } else {
+            // 在服务端消耗耐久度
+            stack.setDamage(stack.getDamage() + 1);
         }
-        return TypedActionResult.consume(user.getStackInHand(hand));
+        return TypedActionResult.consume(stack);
     }
 
     public static void spawnHandParticle() {

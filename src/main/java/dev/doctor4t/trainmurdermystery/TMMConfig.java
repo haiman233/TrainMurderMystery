@@ -119,7 +119,7 @@ public class TMMConfig extends MidnightConfig {
     @Entry(category = "cooldowns", min = 0, max = 300, isSlider = true)
     public static int lockpickCooldown = 180;
     @Entry(category = "cooldowns", min = 0, max = 300, isSlider = true)
-    public static int crowbarCooldown = 10;
+    public static int crowbarCooldown = 45;
     @Entry(category = "cooldowns", min = 0, max = 300, isSlider = true)
     public static int bodyBagCooldown = 300;
     @Entry(category = "cooldowns", min = 0, max = 300, isSlider = true)

@@ -1,6 +1,7 @@
 package dev.doctor4t.trainmurdermystery.cca;
 
 import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.api.Role;
 import dev.doctor4t.trainmurdermystery.client.TMMClient;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
 import dev.doctor4t.trainmurdermystery.game.ShopContent;
@@ -67,22 +68,32 @@ public class PlayerShopComponent implements AutoSyncedComponent, ServerTickingCo
                 player.networkHandler.sendPacket(new PlaySoundS2CPacket(Registries.SOUND_EVENT.getEntry(TMMSounds.UI_SHOP_BUY), SoundCategory.PLAYERS, player.getX(), player.getY(), player.getZ(), 1.0f, 0.9f + this.player.getRandom().nextFloat() * 0.2f, player.getRandom().nextLong()));
             }
         } else {
-            this.player.sendMessage(Text.literal("Purchase Failed").formatted(Formatting.DARK_RED), true);
+            this.player.sendMessage(Text.literal("购买失败").formatted(Formatting.DARK_RED), true);
             if (this.player instanceof ServerPlayerEntity player) {
                 player.networkHandler.sendPacket(new PlaySoundS2CPacket(Registries.SOUND_EVENT.getEntry(TMMSounds.UI_SHOP_BUY_FAIL), SoundCategory.PLAYERS, player.getX(), player.getY(), player.getZ(), 1.0f, 0.9f + this.player.getRandom().nextFloat() * 0.2f, player.getRandom().nextLong()));
             }
         }
         this.sync();
     }
-
+    public static boolean isPlayerAliveAndSurvival(PlayerEntity player) {
+        return player != null && !player.isSpectator() && !player.isCreative();
+    }
     private @NotNull List<ShopEntry> getShopEntries() {
 
-        if (TMMClient.gameComponent!=null && TMMClient.isPlayerAliveAndInSurvival()) {
-            return ShopContent.getShopEntries(
-                TMMClient.gameComponent.getRole( player).getIdentifier()
+        final var gameWorldComponent = GameWorldComponent.KEY.get(player.getWorld());
+        final var role = gameWorldComponent.getRole(player);
+        if (gameWorldComponent!=null && role!=null && isPlayerAliveAndSurvival( player)) {
+            final var shopEntries = ShopContent.getShopEntries(
+                    role.getIdentifier()
             );
+            if (!shopEntries.isEmpty()) {
+                return shopEntries;
+            }
+            if (gameWorldComponent.canUseKillerFeatures(player)) {
+                return ShopContent.defaultEntries;
+            }
         }
-        return ShopContent.defaultEntries;
+        return List.of();
     }
 
     @Override

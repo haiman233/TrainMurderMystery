@@ -5,9 +5,11 @@ import dev.doctor4t.trainmurdermystery.api.Role;
 import dev.doctor4t.trainmurdermystery.client.TMMClient;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
+import dev.doctor4t.trainmurdermystery.index.TMMBlocks;
 import dev.doctor4t.trainmurdermystery.index.tag.TMMItemTags;
 import dev.doctor4t.trainmurdermystery.util.TaskCompletePayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.LecternScreen;
@@ -310,7 +312,7 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
         private int timer;
 
         public OutsideTask(int time) {
-            this.timer = time;
+            this.timer = time+6;
         }
 
         @Override
@@ -445,7 +447,9 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
         @Override
         public void tick(@NotNull PlayerEntity player) {
             // 玩家必须在跑步状态下才能完成锻炼任务
-            if (player.isSprinting() && player.getWorld().getBlockState(player.getBlockPos().add(0, -1, 0)).getBlock() == Blocks.WHITE_CONCRETE&& this.timer > 0) this.timer--;
+            if ( player.getWorld().getBlockState(player.getBlockPos().add(0, -1, 0)).getBlock() == Blocks.BLACK_CONCRETE && this.timer > 0) {
+                this.timer--;
+            }
         }
 
         @Override

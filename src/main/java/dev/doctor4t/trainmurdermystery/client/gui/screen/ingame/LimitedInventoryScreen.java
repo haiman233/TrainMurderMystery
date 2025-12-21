@@ -39,8 +39,9 @@ public class LimitedInventoryScreen extends LimitedHandledScreen<PlayerScreenHan
     @Override
     protected void init() {
         super.init();
-        if (!GameWorldComponent.KEY.get(this.player.getWorld()).canUseKillerFeatures(player)) return;
+        //if (!GameWorldComponent.KEY.get(this.player.getWorld()).canUseKillerFeatures(player)) return;
         List<ShopEntry> entries = getShopEntries();
+        if (entries.isEmpty())return;
         int apart = 38;
         int x = this.width / 2 - entries.size() * apart / 2 + 9;
         int y = this.y - 46;
@@ -60,12 +61,23 @@ public class LimitedInventoryScreen extends LimitedHandledScreen<PlayerScreenHan
         return (T)this.addSelectableChild(drawableElement);
     }
     public   List<ShopEntry> getShopEntries() {
-        if (TMMClient.gameComponent!=null && TMMClient.isPlayerAliveAndInSurvival()) {
-            return ShopContent.getShopEntries(
-                    TMMClient.gameComponent.getRole( player).getIdentifier()
+
+         var gameWorldComponent = GameWorldComponent.KEY.get(this.player.getWorld());
+        if (gameWorldComponent == null)return List.of();
+        if (TMMClient.gameComponent!=null&& TMMClient.isPlayerAliveAndInSurvival()) {
+            final var role = gameWorldComponent.getRole(player);
+            if (role==null)return List.of();
+            final var shopEntries = ShopContent.getShopEntries(
+                    role.getIdentifier()
             );
+            if (!shopEntries.isEmpty()) {
+                return shopEntries;
+            }
         }
-        return ShopContent.defaultEntries;
+        if (gameWorldComponent.canUseKillerFeatures(player)) {
+            return ShopContent.defaultEntries;
+        }
+        return List.of();
     }
 
     @Override
