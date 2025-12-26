@@ -1,0 +1,6 @@
+{
+    "parent": "furnies:block/template/toilet_closed",
+    "textures": {
+        "2": "furnies:block/toilet/light_toilet"
+    }
+}

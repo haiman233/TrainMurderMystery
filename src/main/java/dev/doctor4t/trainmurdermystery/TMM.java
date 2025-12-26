@@ -1,0 +1,235 @@
+package dev.doctor4t.trainmurdermystery;
+
+import com.google.common.reflect.Reflection;
+import com.mojang.logging.LogUtils;
+import dev.doctor4t.trainmurdermystery.block.DoorPartBlock;
+import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
+import dev.doctor4t.trainmurdermystery.command.*;
+import dev.doctor4t.trainmurdermystery.command.argument.GameModeArgumentType;
+import dev.doctor4t.trainmurdermystery.command.argument.TimeOfDayArgumentType;
+import dev.doctor4t.trainmurdermystery.event.PlayerInteractionHandler;
+import dev.doctor4t.trainmurdermystery.game.*;
+import dev.doctor4t.trainmurdermystery.index.*;
+import dev.doctor4t.trainmurdermystery.util.*;
+import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.registries.DeferredBlock;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredItem;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
+
+// The value here should match an entry in the META-INF/neoforge.mods.toml file
+@Mod(TMM.MOD_ID)
+public class TMM {
+    public static final String MOD_ID = "trainmurdermystery";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    public static MinecraftServer SERVER;
+    public static MurderGameMode GAME;
+    public static TMMConfig CONFIG = new TMMConfig();
+    public static GameReplayManager REPLAY_MANAGER;
+
+    public static @NotNull ResourceLocation id(String name) {
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
+    }
+
+    public TMM(IEventBus modEventBus, ModContainer modContainer){
+        // Init config - must be called first to generate config file
+        TMMConfig.init();
+
+        // Init constants
+        GameConstants.init();
+
+        // Register event handlers
+        PlayerInteractionHandler.register();
+
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            SERVER = server;
+            GAME = new MurderGameMode(TMM.id("murder"));
+            REPLAY_MANAGER = new GameReplayManager(server);
+        });
+
+        // Registry initializers
+        Reflection.initialize(TMMDataComponentTypes.class);
+        TMMSounds.initialize();
+        TMMEntities.initialize();
+        TMMBlocks.initialize();
+        TMMItems.initialize();
+        TMMBlockEntities.initialize();
+        ShopContent.register();
+
+        TMMParticles.initialize();
+
+        // Register command argument types
+        ArgumentTypeRegistry.registerArgumentType(id("timeofday"), TimeOfDayArgumentType.class, SingletonArgumentInfo.contextFree(TimeOfDayArgumentType::timeofday));
+        ArgumentTypeRegistry.registerArgumentType(id("gamemode"), GameModeArgumentType.class, SingletonArgumentInfo.contextFree(GameModeArgumentType::gameMode));
+
+        // Register commands
+        CommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess, environment) -> {
+            GiveRoomKeyCommand.register(dispatcher);
+            StartCommand.register(dispatcher);
+            StopCommand.register(dispatcher);
+            EnableWeightsCommand.register(dispatcher);
+            CheckWeightsCommand.register(dispatcher);
+            ResetWeightsCommand.register(dispatcher);
+            SetVisualCommand.register(dispatcher);
+            ForceRoleCommand.register(dispatcher);
+//            UpdateDoorsCommand.register(dispatcher);
+            SetTimerCommand.register(dispatcher);
+            SetMoneyCommand.register(dispatcher);
+            SetBoundCommand.register(dispatcher);
+            AutoStartCommand.register(dispatcher);
+            LockToSupportersCommand.register(dispatcher);
+            SetRoleCountCommand.register(dispatcher);
+            ConfigCommand.register(dispatcher);
+        }));
+
+        // server lock to supporters
+        ServerPlayerEvents.JOIN.register(player -> {
+            GameWorldComponent gameWorldComponent = GameWorldComponent.KEY.get(player.level());
+
+            // 优化：提前检查是否启用锁定，避免不必要的API调用
+            if (!gameWorldComponent.isLockedToSupporters()) {
+                // 服务器未锁定，直接允许加入
+                if (gameWorldComponent.getGameStatus() == GameWorldComponent.GameStatus.ACTIVE) {
+                    // gameWorldComponent.addPlayer(player); // Removed as method does not exist
+                }
+                if (REPLAY_MANAGER != null) {
+                    REPLAY_MANAGER.recordPlayerName(player);
+                    REPLAY_MANAGER.addEvent(GameReplayData.EventType.PLAYER_JOIN, null, player.getUUID(), null, null);
+                }
+                return;
+            }
+
+            // 服务器已锁定，需要验证支持者身份
+            DataSyncAPI.refreshAllPlayerData(player.getUUID()).thenRunAsync(() -> {
+                try {
+                    // 再次检查锁定状态（可能在异步期间已更改）
+                    if (GameWorldComponent.KEY.get(player.level()).isLockedToSupporters()) {
+                        // 检查玩家是否为支持者
+                        if (!isSupporter(player)) {
+                            LOGGER.info("Player {} attempted to join locked server (supporters only)", player.getName().getString());
+                            player.connection.disconnect(Component.translatable("Server is reserved to doctor4t supporters."));
+                            return;
+                        }
+                    }
+
+                    // 支持者或锁定已解除，允许加入
+                    if (REPLAY_MANAGER != null) {
+                        REPLAY_MANAGER.recordPlayerName(player);
+                        REPLAY_MANAGER.addEvent(GameReplayData.EventType.PLAYER_JOIN, null, player.getUUID(), null, null);
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("Error checking supporter status for player {}", player.getName().getString(), e);
+                }
+            }, player.level().getServer());
+
+            if (gameWorldComponent.getGameStatus() == GameWorldComponent.GameStatus.ACTIVE) {
+                // gameWorldComponent.addPlayer(player); // Removed as method does not exist
+            }
+        });
+
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            GameWorldComponent gameWorldComponent = GameWorldComponent.KEY.get(handler.player.level());
+            if (gameWorldComponent.getGameStatus() == GameWorldComponent.GameStatus.ACTIVE) {
+                // gameWorldComponent.removePlayer(handler.player); // Removed as method does not exist
+            }
+            if (REPLAY_MANAGER != null) {
+                REPLAY_MANAGER.addEvent(GameReplayData.EventType.PLAYER_LEAVE, null, handler.player.getUUID(), null, null);
+            }
+        });
+
+        PayloadTypeRegistry.playS2C().register(ShootMuzzleS2CPayload.ID, ShootMuzzleS2CPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(PoisonUtils.PoisonOverlayPayload.ID, PoisonUtils.PoisonOverlayPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(GunDropPayload.ID, GunDropPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(TaskCompletePayload.ID, TaskCompletePayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(AnnounceWelcomePayload.ID, AnnounceWelcomePayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(AnnounceEndingPayload.ID, AnnounceEndingPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(ReplayPayload.ID, ReplayPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(KnifeStabPayload.ID, KnifeStabPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(GunShootPayload.ID, GunShootPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(StoreBuyPayload.ID, StoreBuyPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(NoteEditPayload.ID, NoteEditPayload.CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(KnifeStabPayload.ID, new KnifeStabPayload.Receiver());
+        ServerPlayNetworking.registerGlobalReceiver(GunShootPayload.ID, new GunShootPayload.Receiver());
+        ServerPlayNetworking.registerGlobalReceiver(StoreBuyPayload.ID, new StoreBuyPayload.Receiver());
+        ServerPlayNetworking.registerGlobalReceiver(NoteEditPayload.ID, new NoteEditPayload.Receiver());
+
+        Scheduler.init();
+    }
+
+
+
+    public static boolean isSkyVisibleAdjacent(@NotNull Entity player) {
+        BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
+        BlockPos playerPos = BlockPos.containing(player.getEyePosition());
+        for (int x = -1; x <= 1; x += 2) {
+            for (int z = -1; z <= 1; z += 2) {
+
+                mutable.set(playerPos.getX() + x, playerPos.getY(), playerPos.getZ() + z);
+                final var chunkPos = player.chunkPosition();
+                final var chunk = player.level().getChunk(chunkPos.x, chunkPos.z);
+                final var i = chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.MOTION_BLOCKING).getFirstAvailable(mutable.getX()&15, mutable.getZ()&15)-1;
+                if (i< player.getY()+3) {
+                    return !(player.level().getBlockState(playerPos).getBlock() instanceof DoorPartBlock);
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean isExposedToWind(@NotNull Entity player) {
+        BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
+        BlockPos playerPos = BlockPos.containing(player.getEyePosition());
+        for (int x = 0; x <= 10; x++) {
+            mutable.set(playerPos.getX() - x, player.getEyePosition().y(), playerPos.getZ());
+            if (!player.level().canSeeSky(mutable)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static final ResourceLocation COMMAND_ACCESS = id("commandaccess");
+
+    public static int executeSupporterCommand(CommandSourceStack source, Runnable runnable) {
+        ServerPlayer player = source.getPlayer();
+        if (player == null || !player.getClass().equals(ServerPlayer.class)) return 0;
+        runnable.run();
+        return 1;
+
+    }
+
+    public static @NotNull Boolean isSupporter(Player player) {
+        Optional<Entitlements> entitlements = Entitlements.token().get(player.getUUID());
+        return entitlements.map(value -> value.keys().stream().anyMatch(identifier -> identifier.equals(COMMAND_ACCESS))).orElse(false);
+    }
+}

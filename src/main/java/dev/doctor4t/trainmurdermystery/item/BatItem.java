@@ -1,0 +1,38 @@
+package dev.doctor4t.trainmurdermystery.item;
+
+import dev.doctor4t.trainmurdermystery.cca.PlayerPsychoComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
+
+import java.util.List;
+
+public class BatItem extends Item {
+    public BatItem(Properties settings) {
+        super(settings);
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag type) {
+    }
+
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+        if (user.isCreative()) {
+            PlayerPsychoComponent playerPsychoComponent = PlayerPsychoComponent.KEY.get(user);
+            if (playerPsychoComponent.getPsychoTicks() > 0) {
+                playerPsychoComponent.stopPsycho();
+            } else {
+                playerPsychoComponent.startPsycho();
+            }
+            return InteractionResultHolder.success(user.getItemInHand(hand));
+        }
+
+        return super.use(world, user, hand);
+    }
+}
