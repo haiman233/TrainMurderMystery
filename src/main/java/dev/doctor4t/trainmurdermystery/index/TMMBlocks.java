@@ -1,13 +1,10 @@
 package dev.doctor4t.trainmurdermystery.index;
 
-import dev.doctor4t.ratatouille.util.registrar.BlockRegistrar;
+
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.block.*;
 import dev.doctor4t.trainmurdermystery.util.BlockSettingsAdditions;
-import net.fabricmc.fabric.api.object.builder.v1.block.type.BlockSetTypeBuilder;
-import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
-import net.minecraft.block.*;
-import net.minecraft.core.registries.BuiltInRegistries;
+
 import net.minecraft.data.BlockFamily;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.DyeColor;

@@ -2,6 +2,7 @@ package dev.doctor4t.trainmurdermystery;
 
 import com.google.common.reflect.Reflection;
 import com.mojang.logging.LogUtils;
+import com.tterrag.registrate.Registrate;
 import dev.doctor4t.trainmurdermystery.block.DoorPartBlock;
 import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.command.*;
@@ -56,6 +57,7 @@ public class TMM {
     public static MurderGameMode GAME;
     public static TMMConfig CONFIG = new TMMConfig();
     public static GameReplayManager REPLAY_MANAGER;
+    public static final Registrate REGISTRATE = Registrate.create(MOD_ID);
 
     public static @NotNull ResourceLocation id(String name) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
