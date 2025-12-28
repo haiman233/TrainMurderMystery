@@ -19,12 +19,14 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import dev.doctor4t.trainmurdermystery.cca.GameScoreboardComponent;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.LecternMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
@@ -139,7 +141,14 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
                 shouldSync = true;
             }
         }
-        for (Task task : removals) this.tasks.remove(task);
+        for (Task task : removals) {
+            this.tasks.remove(task);
+            // 更新计分板上的任务计数
+            if (this.player instanceof ServerPlayer serverPlayer) {
+                GameScoreboardComponent scoreboardComponent = GameScoreboardComponent.KEY.get(serverPlayer.getServer().getScoreboard());
+                scoreboardComponent.incrementPlayerTaskCount(this.player);
+            }
+        }
         if (shouldSync) this.sync();
 		
 		// 根据情绪值调整玩家速度

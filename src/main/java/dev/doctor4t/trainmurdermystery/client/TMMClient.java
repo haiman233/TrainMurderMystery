@@ -26,6 +26,8 @@ import dev.doctor4t.trainmurdermystery.entity.NoteEntity;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.*;
+import dev.doctor4t.trainmurdermystery.item.GrenadeItem;
+import dev.doctor4t.trainmurdermystery.item.KnifeItem;
 import dev.doctor4t.trainmurdermystery.ui.TMMCommandUI;
 import dev.doctor4t.trainmurdermystery.ui.event.KeyPressHandler;
 import dev.doctor4t.trainmurdermystery.util.*;
@@ -62,6 +64,7 @@ import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public class TMMClient implements ClientModInitializer {
     private static float soundLevel = 0f;
@@ -409,8 +412,14 @@ public class TMMClient implements ClientModInitializer {
         return -1;
     }
 
+    static Predicate<Player> isHoldSpecialItem = (player) -> {
+        if (player.getMainHandItem().getItem() instanceof KnifeItem) return true;
+        if (player.getMainHandItem().getItem() instanceof GrenadeItem) return true;
+        return false;
+    };
     public static boolean isInstinctEnabled() {
-        return instinctKeybind.isDown() && ((isKiller() && isPlayerAliveAndInSurvival()) || isPlayerSpectatingOrCreative());
+        final var player = Minecraft.getInstance().player;
+        return (instinctKeybind.isDown() && ((isKiller() && isPlayerAliveAndInSurvival()) || isPlayerSpectatingOrCreative()) || isHoldSpecialItem.test(player));
     }
 
     public static Object getLockedRenderDistance(boolean ultraPerfMode) {

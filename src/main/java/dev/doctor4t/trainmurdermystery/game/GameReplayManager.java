@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.api.Role;
+import dev.doctor4t.trainmurdermystery.api.TMMRoles;
 import dev.doctor4t.trainmurdermystery.util.ReplayDisplayUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static dev.doctor4t.trainmurdermystery.util.ReplayDisplayUtils.buildTeamPlayerRoles;
+
 
 public class GameReplayManager {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -204,23 +205,93 @@ public GameReplayData loadReplay() {
 
         Map<UUID, String> playerRoles = replayData.getPlayerRoles();
         if (playerRoles != null && !playerRoles.isEmpty()) {
-
             List<UUID> deadPlayers = getDeadPlayers(replayData);
-            List<UUID> alivePlayers = new java.util.ArrayList<>();
-            for (UUID uuid : playerRoles.keySet()) {
-                if (!deadPlayers.contains(uuid)) {
-                    alivePlayers.add(uuid);
+            
+            // 分别获取不同阵营的存活和死亡玩家
+            List<UUID> aliveCivilians = new java.util.ArrayList<>();
+            List<UUID> deadCivilians = new java.util.ArrayList<>();
+            List<UUID> aliveNeutrals = new java.util.ArrayList<>();
+            List<UUID> deadNeutrals = new java.util.ArrayList<>();
+            List<UUID> aliveKillers = new java.util.ArrayList<>();
+            List<UUID> deadKillers = new java.util.ArrayList<>();
+            
+            for (Map.Entry<UUID, String> entry : playerRoles.entrySet()) {
+                UUID uuid = entry.getKey();
+                String roleId = entry.getValue();
+                boolean isDead = deadPlayers.contains(uuid);
+                
+                // 根据角色ID分类
+                if (roleId.equals(TMMRoles.CIVILIAN.identifier().toString())) {
+                    if (isDead) {
+                        deadCivilians.add(uuid);
+                    } else {
+                        aliveCivilians.add(uuid);
+                    }
+                } else if (roleId.equals(TMMRoles.KILLER.identifier().toString())) {
+                    if (isDead) {
+                        deadKillers.add(uuid);
+                    } else {
+                        aliveKillers.add(uuid);
+                    }
+                } else {
+                    // 其他角色归类为中立
+                    if (isDead) {
+                        deadNeutrals.add(uuid);
+                    } else {
+                        aliveNeutrals.add(uuid);
+                    }
                 }
             }
-
-            MutableComponent aliveText = buildTeamPlayerRoles(this, alivePlayers, playerRoles, "存活玩家：");
-            MutableComponent deadText = buildTeamPlayerRoles(this, deadPlayers, playerRoles, "死亡玩家：");
-
-            if (aliveText != null) {
-                player.sendSystemMessage(aliveText.withStyle(ChatFormatting.GREEN));
+            
+            // 显示平民
+            if (!aliveCivilians.isEmpty() || !deadCivilians.isEmpty()) {
+                player.sendSystemMessage(Component.translatable("tmm.replay.civilians").withStyle(ChatFormatting.BLUE));
+                if (!aliveCivilians.isEmpty()) {
+                    MutableComponent aliveCivText = ReplayDisplayUtils.buildTeamPlayerRolesWithDeathStatus(this, aliveCivilians, playerRoles, "", true);
+                    if (aliveCivText != null) {
+                        player.sendSystemMessage(aliveCivText);
+                    }
+                }
+                if (!deadCivilians.isEmpty()) {
+                    MutableComponent deadCivText = ReplayDisplayUtils.buildTeamPlayerRolesWithDeathStatus(this, deadCivilians, playerRoles, "", false);
+                    if (deadCivText != null) {
+                        player.sendSystemMessage(deadCivText);
+                    }
+                }
             }
-            if (deadText != null) {
-                player.sendSystemMessage(deadText.withStyle(ChatFormatting.RED));
+            
+            // 显示中立
+            if (!aliveNeutrals.isEmpty() || !deadNeutrals.isEmpty()) {
+                player.sendSystemMessage(Component.translatable("tmm.replay.neutrals").withStyle(ChatFormatting.YELLOW));
+                if (!aliveNeutrals.isEmpty()) {
+                    MutableComponent aliveNeutText = ReplayDisplayUtils.buildTeamPlayerRolesWithDeathStatus(this, aliveNeutrals, playerRoles, "", true);
+                    if (aliveNeutText != null) {
+                        player.sendSystemMessage(aliveNeutText);
+                    }
+                }
+                if (!deadNeutrals.isEmpty()) {
+                    MutableComponent deadNeutText = ReplayDisplayUtils.buildTeamPlayerRolesWithDeathStatus(this, deadNeutrals, playerRoles, "", false);
+                    if (deadNeutText != null) {
+                        player.sendSystemMessage(deadNeutText);
+                    }
+                }
+            }
+            
+            // 显示杀手
+            if (!aliveKillers.isEmpty() || !deadKillers.isEmpty()) {
+                player.sendSystemMessage(Component.translatable("tmm.replay.killers").withStyle(ChatFormatting.DARK_RED));
+                if (!aliveKillers.isEmpty()) {
+                    MutableComponent aliveKillText = ReplayDisplayUtils.buildTeamPlayerRolesWithDeathStatus(this, aliveKillers, playerRoles, "", true);
+                    if (aliveKillText != null) {
+                        player.sendSystemMessage(aliveKillText);
+                    }
+                }
+                if (!deadKillers.isEmpty()) {
+                    MutableComponent deadKillText = ReplayDisplayUtils.buildTeamPlayerRolesWithDeathStatus(this, deadKillers, playerRoles, "", false);
+                    if (deadKillText != null) {
+                        player.sendSystemMessage(deadKillText);
+                    }
+                }
             }
         }
         

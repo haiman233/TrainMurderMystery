@@ -18,6 +18,7 @@ public class HeldItemFeatureRendererMixin {
     @WrapOperation(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getMainHandItem()Lnet/minecraft/world/item/ItemStack;"))
     public ItemStack tmm$hideNoteAndRenderPsychosisItems(LivingEntity instance, Operation<ItemStack> original) {
         ItemStack ret = original.call(instance);
+        if (instance.isInvisible())return ret;
 
         if (ret.is(TMMItems.NOTE)) {
             ret = ItemStack.EMPTY;

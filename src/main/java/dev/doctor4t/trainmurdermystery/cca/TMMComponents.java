@@ -1,7 +1,10 @@
 package dev.doctor4t.trainmurdermystery.cca;
 
+import dev.doctor4t.trainmurdermystery.TMM;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.scores.Scoreboard;
 import org.jetbrains.annotations.NotNull;
+import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.ladysnake.cca.api.v3.entity.EntityComponentFactoryRegistry;
 import org.ladysnake.cca.api.v3.entity.EntityComponentInitializer;
 import org.ladysnake.cca.api.v3.entity.RespawnCopyStrategy;
@@ -34,5 +37,9 @@ public class TMMComponents implements WorldComponentInitializer, EntityComponent
     @Override
     public void registerScoreboardComponentFactories(@NotNull ScoreboardComponentFactoryRegistry registry) {
         registry.registerScoreboardComponent(ScoreboardRoleSelectorComponent.KEY, ScoreboardRoleSelectorComponent::new);
+        // 注册新的GameScoreboardComponent
+        registry.registerScoreboardComponent(GameScoreboardComponent.KEY, GameScoreboardComponent::new);
     }
+
+
 }

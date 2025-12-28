@@ -26,6 +26,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -71,7 +72,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerSt
 
 	@ModifyReturnValue(method = "getSpeed", at = @At("RETURN"))
 	public float tmm$overrideMovementSpeed(float original) {
-		if (GameFunctions.isPlayerAliveAndSurvival((Player) (Object) this)) {
+		final var player = (Player) (Object) this;
+		if (GameFunctions.isPlayerAliveAndSurvival(player)) {
+			if (player.hasEffect(MobEffects.MOVEMENT_SPEED)){
+				return this.isSprinting() ? 0.15f : 0.1f;
+			}
 			return this.isSprinting() ? 0.1f : 0.07f;
 		} else {
 			return original;
@@ -81,8 +86,12 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerSt
 	@Inject(method = "aiStep", at = @At("HEAD"))
 	public void tmm$limitSprint(CallbackInfo ci) {
 		GameWorldComponent gameComponent = GameWorldComponent.KEY.get(this.level());
-		if (GameFunctions.isPlayerAliveAndSurvival((Player) (Object) this) && gameComponent != null && gameComponent.isRunning()) {
-			Role role = gameComponent.getRole((Player) (Object) this);
+		final var player = (Player) (Object) this;
+		if (GameFunctions.isPlayerAliveAndSurvival(player) && gameComponent != null && gameComponent.isRunning()) {
+			Role role = gameComponent.getRole(player);
+			if (role != null && role.isCanUseKiller()) {
+                return;
+            }
 			if (role != null && role.getMaxSprintTime() >= 0) {
 				if (this.isSprinting()) {
 					sprintingTicks = Math.max(sprintingTicks - 1, 0);

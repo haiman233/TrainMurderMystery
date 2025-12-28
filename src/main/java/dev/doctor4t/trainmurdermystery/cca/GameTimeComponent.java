@@ -9,6 +9,10 @@ import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.ladysnake.cca.api.v3.component.ComponentRegistry;
 import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 import org.ladysnake.cca.api.v3.component.tick.CommonTickingComponent;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import dev.doctor4t.trainmurdermystery.cca.GameScoreboardComponent;
+import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 
 public class GameTimeComponent implements AutoSyncedComponent, CommonTickingComponent {
     public static final ComponentKey<GameTimeComponent> KEY = ComponentRegistry.getOrCreate(TMM.id("time"), GameTimeComponent.class);
@@ -28,6 +32,9 @@ public class GameTimeComponent implements AutoSyncedComponent, CommonTickingComp
         this.setTime(this.resetTime);
     }
 
+    public int getResetTime() {
+        return this.resetTime;
+    }
     @Override
     public void tick() {
         if (!GameWorldComponent.KEY.get(this.world).isRunning()) return;
@@ -35,6 +42,14 @@ public class GameTimeComponent implements AutoSyncedComponent, CommonTickingComp
         this.time--;
         // 从每400tick增加到每600tick同步（30秒）
         if (this.time % 600 == 0) this.sync();
+        
+        // 更新计分板上的游戏计时器
+        if (this.time % 20 == 0) { // 每秒更新一次计分板
+            final var server = this.world.getServer();
+            if (server==null)return;
+            GameScoreboardComponent scoreboardComponent = GameScoreboardComponent.KEY.get(server.getScoreboard());
+            scoreboardComponent.updateGameTimers(this.world);
+        }
     }
 
     public boolean hasTime() {

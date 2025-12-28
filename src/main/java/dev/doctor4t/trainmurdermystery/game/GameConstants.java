@@ -131,7 +131,7 @@ public interface GameConstants {
     static int getBlackoutMaxDuration() {
         return TMMConfig.blackoutMaxDuration * 20;
     }
-    int TIME_ON_CIVILIAN_KILL = getInTicks(1, 0);
+    int TIME_ON_CIVILIAN_KILL = getInTicks(0, 30);
 
     static int getInTicks(int minutes, int seconds) {
         return (minutes * 60 + seconds) * 20;

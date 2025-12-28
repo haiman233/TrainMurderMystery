@@ -17,7 +17,7 @@ public class StaminaRenderer {
 	public static float offsetDelta = 0f;
 
 
-	// 体力提供者接口 - 留给你实现
+
 	public interface StaminaProvider {
 		float getCurrentStamina(Player clientPlayerEntity);
 		float getMaxStamina(Player clientPlayerEntity);

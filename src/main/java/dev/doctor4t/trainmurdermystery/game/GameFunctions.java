@@ -57,36 +57,36 @@ import java.util.function.UnaryOperator;
 public class GameFunctions {
 
     public static void limitPlayerToBox(ServerPlayer player, AABB box) {
-        Vec3 playerPos = player.position();
-
-        if (!box.contains(playerPos)) {
-            double x = playerPos.x();
-            double y = playerPos.y();
-            double z = playerPos.z();
-
-            if (z < box.minZ) {
-                z = box.minZ;
-            }
-            if (z > box.maxZ) {
-                z = box.maxZ;
-            }
-
-            if (y < box.minY) {
-                y = box.minY;
-            }
-            if (y > box.maxY) {
-                y = box.maxY;
-            }
-
-            if (x < box.minX) {
-                x = box.minX;
-            }
-            if (x > box.maxX) {
-                x = box.maxX;
-            }
-
-            player.teleportTo(x, y, z);
-        }
+//        Vec3 playerPos = player.position();
+//
+//        if (!box.contains(playerPos)) {
+//            double x = playerPos.x();
+//            double y = playerPos.y();
+//            double z = playerPos.z();
+//
+//            if (z < box.minZ) {
+//                z = box.minZ;
+//            }
+//            if (z > box.maxZ) {
+//                z = box.maxZ;
+//            }
+//
+//            if (y < box.minY) {
+//                y = box.minY;
+//            }
+//            if (y > box.maxY) {
+//                y = box.maxY;
+//            }
+//
+//            if (x < box.minX) {
+//                x = box.minX;
+//            }
+//            if (x > box.maxX) {
+//                x = box.maxX;
+//            }
+//
+//            player.teleportTo(x, y, z);
+//        }
     }
 
     public static void startGame(ServerLevel world, GameMode gameMode, int time) {
@@ -98,6 +98,10 @@ public class GameFunctions {
 
         if (playerCount >= gameMode.minPlayerCount) {
             game.setGameStatus(GameWorldComponent.GameStatus.STARTING);
+            
+            // 初始化计分板组件
+            GameScoreboardComponent scoreboardComponent = GameScoreboardComponent.KEY.get(world.getServer().getScoreboard());
+            scoreboardComponent.reset();
         } else {
             for (ServerPlayer player : world.players()) {
                 player.displayClientMessage(Component.translatable("game.start_error.not_enough_players", gameMode.minPlayerCount), true);
@@ -111,7 +115,11 @@ public class GameFunctions {
     }
 
     public static void initializeGame(ServerLevel serverWorld) {
+
         GameWorldComponent gameComponent = GameWorldComponent.KEY.get(serverWorld);
+        AreasWorldComponent areasWorldComponent = AreasWorldComponent.KEY.get(serverWorld);
+        areasWorldComponent.loadFromFile();
+
         List<ServerPlayer> readyPlayerList = getReadyPlayerList(serverWorld);
 
         serverWorld.setWeatherParameters(0,-1, true, true);
@@ -124,6 +132,17 @@ public class GameFunctions {
         // Set game status to ACTIVE after roles are assigned
         gameComponent.setGameStatus(GameWorldComponent.GameStatus.ACTIVE);
         gameComponent.sync();
+        
+        // 初始化计分板组件
+        GameScoreboardComponent scoreboardComponent = GameScoreboardComponent.KEY.get(serverWorld.getServer().getScoreboard());
+        scoreboardComponent.reset();
+        
+        // 设置平民获胜所需的总任务数 (这里可以根据玩家数量动态计算)
+        int totalRequiredTasks = readyPlayerList.size() * 5; // 每个玩家需要完成5个任务
+        scoreboardComponent.setTotalRequiredTasks(totalRequiredTasks);
+        
+        // 更新所有玩家的计分板显示
+        scoreboardComponent.updateAllPlayerScores();
     }
 
     public static Vec3 getSpawnPos(AreasWorldComponent areas, int room){
@@ -294,7 +313,7 @@ public class GameFunctions {
     public static void finalizeGame(ServerLevel world) {
         GameWorldComponent gameComponent = GameWorldComponent.KEY.get(world);
        var areasWorldComponent = AreasWorldComponent.KEY.get(world);
-        areasWorldComponent.loadFromFile();
+
         world.setDayTime(18000);
         gameComponent.getGameMode().finalizeGame(world, gameComponent);
         TMM.REPLAY_MANAGER.finalizeReplay(gameComponent.getLastWinStatus());
@@ -325,6 +344,10 @@ public class GameFunctions {
         gameComponent.setGameStatus(GameWorldComponent.GameStatus.INACTIVE);
         trainComponent.setTime(0);
         gameComponent.sync();
+        
+        // 重置计分板组件
+        GameScoreboardComponent scoreboardComponent = GameScoreboardComponent.KEY.get(world.getServer().getScoreboard());
+        scoreboardComponent.reset();
     }
 
     public static void resetPlayer(ServerPlayer player) {
@@ -430,10 +453,18 @@ public class GameFunctions {
         }
 
         if (gameWorldComponent.isInnocent(victim)) {
-            GameTimeComponent.KEY.get(victim.level()).addTime(GameConstants.TIME_ON_CIVILIAN_KILL);
+            final var gameTimeComponent = GameTimeComponent.KEY.get(victim.level());
+
+            if (gameTimeComponent != null) {
+                {
+                    if (gameTimeComponent.getTime()< 60*10*20) {
+                        gameTimeComponent.addTime(GameConstants.TIME_ON_CIVILIAN_KILL);
+                    }
+                }
+            }
         }
 
-        TrainVoicePlugin.addPlayer(victim.getUUID());
+        //TrainVoicePlugin.addPlayer(victim.getUUID());
     }
 
     public static boolean shouldDropOnDeath(@NotNull ItemStack stack) {

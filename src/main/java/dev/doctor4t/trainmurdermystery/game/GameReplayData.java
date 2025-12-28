@@ -1,5 +1,6 @@
 package dev.doctor4t.trainmurdermystery.game;
 
+import dev.doctor4t.trainmurdermystery.api.TMMRoles;
 import dev.doctor4t.trainmurdermystery.index.TMMItems;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import dev.doctor4t.trainmurdermystery.util.ReplayDisplayUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -189,6 +192,26 @@ public class GameReplayData {
         public Component toText(GameReplayManager manager, GameReplayData replayData) {
             Component sourceName = sourcePlayer != null ? manager.getPlayerName(sourcePlayer) : Component.literal("未知玩家").withStyle(ChatFormatting.GRAY);
             Component targetName = targetPlayer != null ? manager.getPlayerName(targetPlayer) : Component.literal("未知玩家").withStyle(ChatFormatting.GRAY);
+            
+            // 获取角色信息并设置颜色
+            String sourceRoleId = sourcePlayer != null ? replayData.getPlayerRoles().get(sourcePlayer) : null;
+            String targetRoleId = targetPlayer != null ? replayData.getPlayerRoles().get(targetPlayer) : null;
+            
+            if (sourceRoleId != null) {
+                Component sourceRoleName = ReplayDisplayUtils.getRoleDisplayName(sourceRoleId);
+                ChatFormatting sourceColor = getRoleColor(sourceRoleId);
+                sourceName = sourceName.copy().withStyle(sourceColor)
+                    .append(Component.literal(" (").withStyle(ChatFormatting.GRAY))
+                    .append(sourceRoleName).append(Component.literal(")").withStyle(ChatFormatting.GRAY));
+            }
+            
+            if (targetRoleId != null) {
+                Component targetRoleName = ReplayDisplayUtils.getRoleDisplayName(targetRoleId);
+                ChatFormatting targetColor = getRoleColor(targetRoleId);
+                targetName = targetName.copy().withStyle(targetColor)
+                    .append(Component.literal(" (").withStyle(ChatFormatting.GRAY))
+                    .append(targetRoleName).append(Component.literal(")").withStyle(ChatFormatting.GRAY));
+            }
 
             return switch (type) {
                 case KILL -> Component.translatable("tmm.replay.event.kill", sourceName, getItemUsedText(), targetName);
@@ -201,6 +224,26 @@ public class GameReplayData {
                 case PLAYER_JOIN -> Component.translatable("tmm.replay.event.player_join", sourceName).withStyle(ChatFormatting.GRAY);
                 case PLAYER_LEAVE -> Component.translatable("tmm.replay.event.player_leave", sourceName).withStyle(ChatFormatting.GRAY);
             };
+        }
+        
+        private ChatFormatting getRoleColor(String roleId) {
+            if (roleId == null) {
+                return ChatFormatting.WHITE; // 默认颜色
+            }
+            
+            // 根据角色类型返回对应颜色
+            if (roleId.equals(TMMRoles.CIVILIAN.identifier().toString()) || 
+                roleId.equals(TMMRoles.DISCOVERY_CIVILIAN.identifier().toString())) {
+                return ChatFormatting.BLUE; // 民兵蓝色
+            } else if (roleId.equals(TMMRoles.KILLER.identifier().toString())) {
+                return ChatFormatting.DARK_RED; // 杀手深红色
+            } else if (roleId.equals(TMMRoles.VIGILANTE.identifier().toString())) {
+                return ChatFormatting.GOLD; // 侦探金色
+            } else if (roleId.equals(TMMRoles.LOOSE_END.identifier().toString())) {
+                return ChatFormatting.YELLOW; // 中立黄色
+            } else {
+                return ChatFormatting.GRAY; // 其他角色灰色
+            }
         }
     }
 
