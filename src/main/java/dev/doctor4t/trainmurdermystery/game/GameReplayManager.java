@@ -17,11 +17,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
+import java.util.*;
 
 
 public class GameReplayManager {
@@ -219,26 +215,32 @@ public GameReplayData loadReplay() {
                 UUID uuid = entry.getKey();
                 String roleId = entry.getValue();
                 boolean isDead = deadPlayers.contains(uuid);
-                
+                final var first = TMMRoles.ROLES.stream().filter(role -> role.identifier().toString().equals(roleId)).findFirst();
                 // 根据角色ID分类
-                if (roleId.equals(TMMRoles.CIVILIAN.identifier().toString())) {
+                if (first.isPresent()&& first.get().isInnocent()) {
                     if (isDead) {
                         deadCivilians.add(uuid);
                     } else {
                         aliveCivilians.add(uuid);
                     }
-                } else if (roleId.equals(TMMRoles.KILLER.identifier().toString())) {
-                    if (isDead) {
-                        deadKillers.add(uuid);
-                    } else {
-                        aliveKillers.add(uuid);
-                    }
                 } else {
-                    // 其他角色归类为中立
-                    if (isDead) {
-                        deadNeutrals.add(uuid);
+
+                    if (first.isPresent() && first.get().canUseKiller()) {
+                        if (isDead) {
+                            deadKillers.add(uuid);
+                        } else {
+                            aliveKillers.add(uuid);
+                        }
                     } else {
-                        aliveNeutrals.add(uuid);
+                        if (first.isPresent() && !first.get().isInnocent()) {
+                            // 其他角色归类为中立
+                            if (isDead) {
+                                deadNeutrals.add(uuid);
+                            } else {
+                                aliveNeutrals.add(uuid);
+                            }
+                        }
+
                     }
                 }
             }
