@@ -419,7 +419,7 @@ public class TMMClient implements ClientModInitializer {
     };
     public static boolean isInstinctEnabled() {
         final var player = Minecraft.getInstance().player;
-        return (instinctKeybind.isDown() && ((isKiller() && isPlayerAliveAndInSurvival()) || isPlayerSpectatingOrCreative()) || isHoldSpecialItem.test(player));
+        return (instinctKeybind.isDown() && ((isKiller() && isPlayerAliveAndInSurvival()) || isPlayerSpectatingOrCreative())) || (isKiller() && isHoldSpecialItem.test(player));
     }
 
     public static Object getLockedRenderDistance(boolean ultraPerfMode) {
