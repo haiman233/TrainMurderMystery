@@ -1,5 +1,6 @@
 package dev.doctor4t.trainmurdermystery.util;
 
+import dev.doctor4t.trainmurdermystery.api.Role;
 import dev.doctor4t.trainmurdermystery.api.TMMRoles;
 import dev.doctor4t.trainmurdermystery.game.GameReplayData;
 import dev.doctor4t.trainmurdermystery.game.GameReplayManager;
@@ -110,9 +111,21 @@ public class ReplayDisplayUtils {
         if (roleId == null) {
             return ChatFormatting.WHITE; // 默认颜色
         }
-        
+        final var first = TMMRoles.ROLES.stream().filter(role -> role.identifier().toString().equals(roleId)).findFirst();
+        if (first.isPresent()){
+            final var role = first.get();
+            if (role.isInnocent()){
+                return ChatFormatting.GREEN;
+            }
+            if (role.canUseKiller()){
+                return ChatFormatting.RED;
+            }
+            if (!role.isInnocent()){
+                return ChatFormatting.YELLOW;
+            }
+        }
         // 根据角色类型返回对应颜色
-        if (roleId.equals(TMMRoles.CIVILIAN.identifier().toString()) || 
+        if (roleId.equals(TMMRoles.CIVILIAN.identifier().toString()) ||
             roleId.equals(TMMRoles.DISCOVERY_CIVILIAN.identifier().toString())) {
             return ChatFormatting.BLUE; // 民兵蓝色
         } else if (roleId.equals(TMMRoles.KILLER.identifier().toString())) {
