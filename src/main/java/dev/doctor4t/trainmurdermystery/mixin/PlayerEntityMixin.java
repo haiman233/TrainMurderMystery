@@ -26,6 +26,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -75,7 +76,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerSt
 		final var player = (Player) (Object) this;
 		if (GameFunctions.isPlayerAliveAndSurvival(player)) {
 			if (player.hasEffect(MobEffects.MOVEMENT_SPEED)){
-				return this.isSprinting() ? 0.15f : 0.1f;
+				final var effect = player.getEffect(MobEffects.MOVEMENT_SPEED);
+				return this.isSprinting() ? 0.1f * (1 + effect.getAmplifier() * 0.2f) : 0.07f * (1 + effect.getAmplifier() * 0.2f);
 			}
 			return this.isSprinting() ? 0.1f : 0.07f;
 		} else {
