@@ -84,6 +84,17 @@ public void initializeReplay(List<ServerPlayer> players, HashMap<UUID, Role> rol
     Map<UUID, String> roleMap = new HashMap<>();
     for (Map.Entry<UUID, Role> entry : roles.entrySet()) {
         roleMap.put(entry.getKey(), entry.getValue().identifier().toString());
+        // 确保所有玩家的名称都被记录，即使他们尚未在游戏中被显式记录
+        if (!playerNames.containsKey(entry.getKey())) {
+            // 如果找不到玩家名称，尝试从服务器获取
+            ServerPlayer serverPlayer = server.getPlayerList().getPlayer(entry.getKey());
+            if (serverPlayer != null) {
+                recordPlayerName(serverPlayer);
+            } else {
+                // 如果无法获取玩家，使用UUID作为名称
+                recordPlayerName(entry.getKey(), "未知玩家(" + entry.getKey().toString().substring(0, 8) + ")");
+            }
+        }
     }
     currentReplayData.setPlayerRoles(roleMap);
 }
@@ -110,9 +121,39 @@ public void recordPlayerName(Player player) {
     playerNames.put(player.getUUID(), player.getName().getString());
 }
 
+public void recordPlayerName(UUID uuid, String name) {
+    playerNames.put(uuid, name);
+}
+
+public void recordPlayerNames(Map<UUID, String> playerNamesMap) {
+    playerNames.putAll(playerNamesMap);
+}
+
+public boolean isPlayerNameRecorded(UUID uuid) {
+    return playerNames.containsKey(uuid);
+}
+
+public Map<UUID, String> getPlayerNames() {
+    return new HashMap<>(playerNames);
+}
+
 public Component getPlayerName(UUID uuid) {
     String name = playerNames.get(uuid);
-    return name != null ? Component.literal(name) : Component.literal("未知玩家");
+    if (name != null) {
+        return Component.literal(name);
+    } else {
+        // 如果在回放期间遇到未记录的玩家，尝试从服务器获取名称
+        if (server != null) {
+            ServerPlayer serverPlayer = server.getPlayerList().getPlayer(uuid);
+            if (serverPlayer != null) {
+                String playerName = serverPlayer.getName().getString();
+                recordPlayerName(uuid, playerName); // 记录以便将来使用
+                return Component.literal(playerName);
+            }
+        }
+        // 如果无法获取玩家名称，返回带UUID的描述
+        return Component.literal("未知玩家(" + uuid.toString().substring(0, 8) + ")");
+    }
 }
 
 public void addEvent(GameReplayData.EventType type, UUID sourcePlayer, UUID targetPlayer, String itemUsed, String message) {

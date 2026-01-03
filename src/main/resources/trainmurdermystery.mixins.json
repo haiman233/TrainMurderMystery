@@ -7,7 +7,6 @@
     "AbstractBlockInvoker",
     "AbstractBlockSettingsMixin",
     "CanRightClickMixin",
-    "CemaraMixin",
     "ChatMixin2",
     "DedicatedPlayerManagerMixin",
     "EntityMixin",
@@ -23,7 +22,6 @@
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin",
     "TalkChatMixin",
-
     "client.LivingEntityRendererMixin"
   ],
   "injectors": {
@@ -38,6 +36,7 @@
     "client.PlayerEntityRendererMixin",
     "client.ResourceTextureMixin",
     "client.ResourceTextureMixin$TextureDataMixin",
+    "client.RoleInfoShowMixin",
     "client.TrueDarknessLightmapTextureManagerMixin",
     "client.items.BipedEntityModelMixin",
     "client.items.ClientPlayerEntityMixin",

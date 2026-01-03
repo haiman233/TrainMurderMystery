@@ -75,7 +75,7 @@ public class StaminaRenderer {
 			isChargingWeapon = true;
 		}
 		if (mainHandStack.getItem() == TMMItems.KNIFE ){
-			maxStamina = 10;
+			maxStamina = 7;
 			final var itemUseTime = player.getTicksUsingItem();
 			staminaPercent = Math.min( (float) itemUseTime / 10,1f);
 			isChargingWeapon = true;

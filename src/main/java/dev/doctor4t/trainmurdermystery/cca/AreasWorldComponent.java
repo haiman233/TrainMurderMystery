@@ -42,7 +42,7 @@ public class AreasWorldComponent implements AutoSyncedComponent {
             this.pitch = pitch;
         }
 
-        PosWithOrientation(double x, double y, double z, float yaw, float pitch) {
+        public PosWithOrientation(double x, double y, double z, float yaw, float pitch) {
             this(new Vec3(x, y, z), yaw, pitch);
         }
 
@@ -442,8 +442,16 @@ public class AreasWorldComponent implements AutoSyncedComponent {
         this.playAreaOffset = getVec3dFromNbt(tag, "playAreaOffset");
         this.playArea = getBoxFromNbt(tag, "playArea");
 
-        this.resetTemplateArea = new AABB(177 ,60 ,-524, -82 ,84, -546);
-        this.resetPasteArea = new AABB(177 ,115 ,-524, -82 ,139, -546); // Default: resetTemplateArea.offset(0, 55, 0)
+        this.resetTemplateArea = getBoxFromNbt(tag, "resetTemplateArea");
+        this.resetPasteArea = getBoxFromNbt(tag, "resetPasteArea");
+        
+        // 从NBT读取房间数量和房间位置（如果存在）
+        if (tag.contains("roomCount")) {
+            this.roomCount = tag.getInt("roomCount");
+        }
+        
+        // 房间位置需要从NBT中读取（如果实现此功能）
+        // 这里暂时不实现，因为NBT格式可能需要专门处理Map类型
     }
 
     @Override
@@ -457,5 +465,11 @@ public class AreasWorldComponent implements AutoSyncedComponent {
 
         writeBoxToNbt(tag, this.resetTemplateArea, "resetTemplateArea");
         writeBoxToNbt(tag, this.resetPasteArea, "resetPasteArea");
+        
+        // 将房间数量写入NBT
+        tag.putInt("roomCount", this.roomCount);
+        
+        // 房间位置需要写入NBT（如果实现此功能）
+        // 这里暂时不实现，因为NBT格式可能需要专门处理Map类型
     }
 }
