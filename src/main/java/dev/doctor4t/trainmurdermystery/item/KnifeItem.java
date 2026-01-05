@@ -38,7 +38,7 @@ public class KnifeItem extends Item {
             return;
         }
 
-        if (remainingUseTicks >= this.getUseDuration(stack, user) - 10 || !(user instanceof Player attacker) || !world.isClientSide)
+        if (remainingUseTicks >= this.getUseDuration(stack, user) - 7 || !(user instanceof Player attacker) || !world.isClientSide)
             return;
         HitResult collision = getKnifeTarget(attacker);
         if (collision instanceof EntityHitResult entityHitResult) {

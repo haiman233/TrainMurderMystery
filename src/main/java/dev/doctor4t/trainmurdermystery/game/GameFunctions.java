@@ -153,42 +153,42 @@ public class GameFunctions {
         }
         
         // Fallback to default positions based on room count
-        int roomCount = areas.getRoomCount();
-        if (roomCount >= 7) {
-            if (room == 1) {
-                return new Vec3(116, 122, -539);
-            } else if (room == 2) {
-                return new Vec3(124, 122, -534);
-            } else if (room == 3) {
-                return new Vec3(131, 122, -534);
-            } else if (room == 4) {
-                return new Vec3(144, 122, -540);
-            } else if (room == 5) {
-                return new Vec3(119, 128, -537);
-            } else if (room == 6) {
-                return new Vec3(132, 128, -536);
-            } else if (room == 7) {
-                return new Vec3(146, 128, -537);
-            }
-        } else if (roomCount >= 4) {
-            // Handle 4-6 rooms
-            switch (room) {
-                case 1: return new Vec3(116, 122, -539);
-                case 2: return new Vec3(124, 122, -534);
-                case 3: return new Vec3(131, 122, -534);
-                case 4: return new Vec3(144, 122, -540);
-            }
-        } else if (roomCount >= 2) {
-            // Handle 2-3 rooms
-            switch (room) {
-                case 1: return new Vec3(116, 122, -539);
-                case 2: return new Vec3(131, 122, -534);
-                case 3: return new Vec3(144, 122, -540);
-            }
-        } else if (roomCount == 1) {
-            // Handle single room
-            return new Vec3(131, 122, -534);
-        }
+//        int roomCount = areas.getRoomCount();
+//        if (roomCount >= 7) {
+//            if (room == 1) {
+//                return new Vec3(116, 122, -539);
+//            } else if (room == 2) {
+//                return new Vec3(124, 122, -534);
+//            } else if (room == 3) {
+//                return new Vec3(131, 122, -534);
+//            } else if (room == 4) {
+//                return new Vec3(144, 122, -540);
+//            } else if (room == 5) {
+//                return new Vec3(119, 128, -537);
+//            } else if (room == 6) {
+//                return new Vec3(132, 128, -536);
+//            } else if (room == 7) {
+//                return new Vec3(146, 128, -537);
+//            }
+//        } else if (roomCount >= 4) {
+//            // Handle 4-6 rooms
+//            switch (room) {
+//                case 1: return new Vec3(116, 122, -539);
+//                case 2: return new Vec3(124, 122, -534);
+//                case 3: return new Vec3(131, 122, -534);
+//                case 4: return new Vec3(144, 122, -540);
+//            }
+//        } else if (roomCount >= 2) {
+//            // Handle 2-3 rooms
+//            switch (room) {
+//                case 1: return new Vec3(116, 122, -539);
+//                case 2: return new Vec3(131, 122, -534);
+//                case 3: return new Vec3(144, 122, -540);
+//            }
+//        } else if (roomCount == 1) {
+//            // Handle single room
+//            return new Vec3(131, 122, -534);
+//        }
         return null;
     }
     
@@ -284,6 +284,7 @@ public class GameFunctions {
                                 }).getString()
                         ).withStyle(stylizer));
                         text.add(Component.translatable(tipString + "tooltip2").withStyle(stylizer));
+
 
                         return new ItemLore(text);
                     }
@@ -464,7 +465,7 @@ public class GameFunctions {
             }
         }
 
-        //TrainVoicePlugin.addPlayer(victim.getUUID());
+        TrainVoicePlugin.addPlayer(victim.getUUID());
     }
 
     public static boolean shouldDropOnDeath(@NotNull ItemStack stack) {

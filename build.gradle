@@ -73,7 +73,6 @@ dependencies {
 	// Libraries
 	// Ratatouille
 	modIncludeImplementation "dev.upcraft.datasync:datasync-minecraft-${project.minecraft_version}-fabric:${project.datasync_version}"
-	modImplementation "dev.doctor4t:ratatouille:${project.ratatouille_version}"
 	// CCA
 	modImplementation include ("org.ladysnake.cardinal-components-api:cardinal-components-base:${project.cca_version}")
 	modImplementation include ("org.ladysnake.cardinal-components-api:cardinal-components-world:${project.cca_version}")
@@ -83,11 +82,11 @@ dependencies {
 	modIncludeImplementation "maven.modrinth:midnightlib:${project.midnightlib_version}"
 
 	modApi files("libs/moonlight-1.27.1.jar")
-	modApi files("libs/vista-1.21-1.0.9-fabric.jar")
 	modApi files("libs/LocalizedChat-fabric-1.21.1-5.2.1.jar")
 	modApi files("libs/uilib-1.0.1-1.21.1-fabric.jar")
 	modApi files("libs/architectury-13.0.8-fabric.jar")
 	modApi files("libs/cloth-config-15.0.140-fabric.jar")
+	modApi files("libs/ratatouille-1.4.3-1.21.1.jar")
 
 	// Runtime mods
 	modLocalImplementation "com.terraformersmc:modmenu:${mod_menu_version}"

@@ -1,6 +1,7 @@
 package dev.doctor4t.trainmurdermystery;
 
 import com.google.common.reflect.Reflection;
+import dev.doctor4t.trainmurdermystery.TMMConfig;
 import dev.doctor4t.trainmurdermystery.block.DoorPartBlock;
 import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.command.*;
@@ -73,7 +74,7 @@ public class TMM implements ModInitializer {
         TMMBlocks.initialize();
         TMMItems.initialize();
         TMMBlockEntities.initialize();
-        ShopContent.register();
+
 
         TMMParticles.initialize();
 
@@ -99,6 +100,7 @@ public class TMM implements ModInitializer {
             LockToSupportersCommand.register(dispatcher);
             SetRoleCountCommand.register(dispatcher);
             ConfigCommand.register(dispatcher);
+            SwitchMapCommand.register(dispatcher);
         }));
 
         // server lock to supporters

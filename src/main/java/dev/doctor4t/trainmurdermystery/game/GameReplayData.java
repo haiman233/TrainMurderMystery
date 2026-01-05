@@ -230,20 +230,22 @@ public class GameReplayData {
             if (roleId == null) {
                 return ChatFormatting.WHITE; // 默认颜色
             }
-            
-            // 根据角色类型返回对应颜色
-            if (roleId.equals(TMMRoles.CIVILIAN.identifier().toString()) || 
-                roleId.equals(TMMRoles.DISCOVERY_CIVILIAN.identifier().toString())) {
-                return ChatFormatting.BLUE; // 民兵蓝色
-            } else if (roleId.equals(TMMRoles.KILLER.identifier().toString())) {
-                return ChatFormatting.DARK_RED; // 杀手深红色
-            } else if (roleId.equals(TMMRoles.VIGILANTE.identifier().toString())) {
-                return ChatFormatting.GOLD; // 侦探金色
-            } else if (roleId.equals(TMMRoles.LOOSE_END.identifier().toString())) {
-                return ChatFormatting.YELLOW; // 中立黄色
+            final var first = TMMRoles.ROLES.stream().filter(role -> role.identifier().toString().equals(roleId)).findFirst();
+            // 根据角色ID分类
+            if (first.isPresent()&& first.get().isInnocent()) {
+                return ChatFormatting.GREEN;
             } else {
-                return ChatFormatting.GRAY; // 其他角色灰色
+
+                if (first.isPresent() && first.get().canUseKiller()) {
+                    return ChatFormatting.RED;
+                } else {
+                    if (first.isPresent() && !first.get().isInnocent()) {
+                        return ChatFormatting.YELLOW;
+                    }
+
+                }
             }
+            return ChatFormatting.WHITE;
         }
     }
 

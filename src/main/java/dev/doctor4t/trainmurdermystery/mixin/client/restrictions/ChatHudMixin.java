@@ -14,9 +14,9 @@ public class ChatHudMixin {
     @WrapMethod(method = "render")
     public void tmm$disableChatRender(GuiGraphics context, int currentTick, int mouseX, int mouseY, boolean focused, Operation<Void> original) {
         final var instance = Minecraft.getInstance();
-        if (TMMClient.gameComponent!=null && TMMClient.isPlayerAliveAndInSurvival() && instance!=null &&TMMClient.gameComponent.getRole(instance.player)!=null&& TMMClient.gameComponent.getRole(instance.player).identifier().getPath().equals(
-            "the_insane_damned_paranoid_killer"
-        ) ) {
+        if (instance.player != null && TMMClient.gameComponent != null && TMMClient.isPlayerAliveAndInSurvival() && instance != null && TMMClient.gameComponent.getRole(instance.player) != null && "the_insane_damned_paranoid_killer".equals(
+                TMMClient.gameComponent.getRole(instance.player).identifier().getPath()
+        )) {
             return;
         }
         if (TMMClient.gameComponent == null || !TMMClient.gameComponent.isRunning() || !TMMClient.isPlayerAliveAndInSurvival()) {
