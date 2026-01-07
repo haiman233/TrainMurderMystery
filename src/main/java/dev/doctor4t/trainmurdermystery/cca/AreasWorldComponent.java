@@ -250,6 +250,9 @@ public class AreasWorldComponent implements AutoSyncedComponent {
                             readyAreaObj.get("maxY").getAsDouble(),
                             readyAreaObj.get("maxZ").getAsDouble()
                     );
+                } else {
+                    // 尝试从单独的readyArea.json加载
+                    loadReadyAreaFromFile();
                 }
 
                 if (jsonObject.has("playAreaOffset")) {
@@ -326,10 +329,89 @@ public class AreasWorldComponent implements AutoSyncedComponent {
                     }
                 }
 
+            } else {
+                // 如果 areas.json 不存在，尝试加载单独的配置文件
+                loadReadyAreaFromFile();
             }
         } catch (Exception e) {
             TMM.LOGGER.error("Failed to load areas from file", e);
         }
+    }
+
+    // 新增方法：从单独的 readyArea.json 文件加载准备区域
+    public void loadReadyAreaFromFile() {
+        try {
+            Path readyAreaFilePath = Paths.get(world.getServer().getServerDirectory().toString(), "world", "readyArea.json");
+            File readyAreaFile = readyAreaFilePath.toFile();
+
+            if (readyAreaFile.exists()) {
+                FileReader reader = new FileReader(readyAreaFile);
+                JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+                reader.close();
+
+                if (jsonObject.has("readyArea")) {
+                    JsonObject readyAreaObj = jsonObject.getAsJsonObject("readyArea");
+                    this.readyArea = new AABB(
+                            readyAreaObj.get("minX").getAsDouble(),
+                            readyAreaObj.get("minY").getAsDouble(),
+                            readyAreaObj.get("minZ").getAsDouble(),
+                            readyAreaObj.get("maxX").getAsDouble(),
+                            readyAreaObj.get("maxY").getAsDouble(),
+                            readyAreaObj.get("maxZ").getAsDouble()
+                    );
+                    TMM.LOGGER.info("Successfully loaded readyArea from readyArea.json");
+                }
+            }
+        } catch (Exception e) {
+            TMM.LOGGER.error("Failed to load readyArea from readyArea.json", e);
+        }
+    }
+
+    // 新增方法：将准备区域保存到单独的 readyArea.json 文件
+    public void saveReadyAreaToFile() {
+        try {
+            Path areasDirPath = Paths.get(world.getServer().getServerDirectory().toString(), "world");
+            File areasDir = areasDirPath.toFile();
+            if (!areasDir.exists()) {
+                areasDir.mkdirs();
+            }
+
+            Path readyAreaFilePath = Paths.get(areasDirPath.toString(), "readyArea.json");
+            File readyAreaFile = readyAreaFilePath.toFile();
+
+            JsonObject jsonObject = new JsonObject();
+
+            // Save ready area
+            JsonObject readyAreaObj = new JsonObject();
+            readyAreaObj.addProperty("minX", this.readyArea.minX);
+            readyAreaObj.addProperty("minY", this.readyArea.minY);
+            readyAreaObj.addProperty("minZ", this.readyArea.minZ);
+            readyAreaObj.addProperty("maxX", this.readyArea.maxX);
+            readyAreaObj.addProperty("maxY", this.readyArea.maxY);
+            readyAreaObj.addProperty("maxZ", this.readyArea.maxZ);
+            jsonObject.add("readyArea", readyAreaObj);
+
+            // Write to file
+            FileWriter writer = new FileWriter(readyAreaFile);
+            new Gson().toJson(jsonObject, writer);
+            writer.close();
+            
+            TMM.LOGGER.info("Successfully saved readyArea to readyArea.json");
+        } catch (IOException e) {
+            TMM.LOGGER.error("Failed to save readyArea to readyArea.json", e);
+        }
+    }
+    
+    // 重载准备区域配置并同步到客户端
+    public void reloadReadyArea() {
+        // 先保存当前的 readyArea 到单独的文件
+        saveReadyAreaToFile();
+        
+        // 从单独的文件加载 readyArea
+        loadReadyAreaFromFile();
+        
+        // 同步到客户端
+        sync();
     }
 
     public void saveToFile() {

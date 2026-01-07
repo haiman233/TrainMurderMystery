@@ -7,6 +7,7 @@ import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.cca.AreasWorldComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.AABB;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -19,7 +20,7 @@ import java.util.Random;
 public class MapManager {
     private static final Gson gson = new Gson();
     private static final Random random = new Random();
-    
+
     /**
      * 保存当前地图配置到指定的地图文件
      * @param serverWorld 服务器世界
@@ -30,76 +31,90 @@ public class MapManager {
         try {
             // 获取AreasWorldComponent中的当前配置
             AreasWorldComponent areas = AreasWorldComponent.KEY.get(serverWorld);
-            
+
             // 创建地图目录
             Path mapsDirPath = Paths.get(serverWorld.getServer().getServerDirectory().toString(), "world", "maps");
             File mapsDir = mapsDirPath.toFile();
             if (!mapsDir.exists()) {
                 mapsDir.mkdirs();
             }
-            
+
             // 构建地图配置文件路径
             Path mapConfigPath = Paths.get(mapsDirPath.toString(), mapName + ".json");
             File mapConfigFile = mapConfigPath.toFile();
-            
-            // 创建JSON对象并填充当前地图配置
+
+            // 创建JSON对象并填充当前地图配置，使用新的嵌套结构
             JsonObject jsonObject = new JsonObject();
-            
-            // 保存出生点位置
-            jsonObject.addProperty("spawnX", areas.getSpawnPos().pos.x());
-            jsonObject.addProperty("spawnY", areas.getSpawnPos().pos.y());
-            jsonObject.addProperty("spawnZ", areas.getSpawnPos().pos.z());
-            jsonObject.addProperty("spawnYaw", areas.getSpawnPos().yaw);
-            jsonObject.addProperty("spawnPitch", areas.getSpawnPos().pitch);
-            
-            // 保存观战者出生点位置
-            jsonObject.addProperty("spectatorSpawnX", areas.getSpectatorSpawnPos().pos.x());
-            jsonObject.addProperty("spectatorSpawnY", areas.getSpectatorSpawnPos().pos.y());
-            jsonObject.addProperty("spectatorSpawnZ", areas.getSpectatorSpawnPos().pos.z());
-            jsonObject.addProperty("spectatorSpawnYaw", areas.getSpectatorSpawnPos().yaw);
-            jsonObject.addProperty("spectatorSpawnPitch", areas.getSpectatorSpawnPos().pitch);
-            
-            // 保存准备区域
-            jsonObject.addProperty("readyAreaMinX", areas.getReadyArea().minX);
-            jsonObject.addProperty("readyAreaMinY", areas.getReadyArea().minY);
-            jsonObject.addProperty("readyAreaMinZ", areas.getReadyArea().minZ);
-            jsonObject.addProperty("readyAreaMaxX", areas.getReadyArea().maxX);
-            jsonObject.addProperty("readyAreaMaxY", areas.getReadyArea().maxY);
-            jsonObject.addProperty("readyAreaMaxZ", areas.getReadyArea().maxZ);
-            
-            // 保存游戏区域偏移
-            jsonObject.addProperty("playAreaOffsetX", areas.getPlayAreaOffset().x());
-            jsonObject.addProperty("playAreaOffsetY", areas.getPlayAreaOffset().y());
-            jsonObject.addProperty("playAreaOffsetZ", areas.getPlayAreaOffset().z());
-            
-            // 保存游戏区域
-            jsonObject.addProperty("playAreaMinX", areas.getPlayArea().minX);
-            jsonObject.addProperty("playAreaMinY", areas.getPlayArea().minY);
-            jsonObject.addProperty("playAreaMinZ", areas.getPlayArea().minZ);
-            jsonObject.addProperty("playAreaMaxX", areas.getPlayArea().maxX);
-            jsonObject.addProperty("playAreaMaxY", areas.getPlayArea().maxY);
-            jsonObject.addProperty("playAreaMaxZ", areas.getPlayArea().maxZ);
-            
-            // 保存重置模板区域
-            jsonObject.addProperty("resetTemplateAreaMinX", areas.getResetTemplateArea().minX);
-            jsonObject.addProperty("resetTemplateAreaMinY", areas.getResetTemplateArea().minY);
-            jsonObject.addProperty("resetTemplateAreaMinZ", areas.getResetTemplateArea().minZ);
-            jsonObject.addProperty("resetTemplateAreaMaxX", areas.getResetTemplateArea().maxX);
-            jsonObject.addProperty("resetTemplateAreaMaxY", areas.getResetTemplateArea().maxY);
-            jsonObject.addProperty("resetTemplateAreaMaxZ", areas.getResetTemplateArea().maxZ);
-            
-            // 保存重置粘贴区域
-            jsonObject.addProperty("resetPasteAreaMinX", areas.getResetPasteArea().minX);
-            jsonObject.addProperty("resetPasteAreaMinY", areas.getResetPasteArea().minY);
-            jsonObject.addProperty("resetPasteAreaMinZ", areas.getResetPasteArea().minZ);
-            jsonObject.addProperty("resetPasteAreaMaxX", areas.getResetPasteArea().maxX);
-            jsonObject.addProperty("resetPasteAreaMaxY", areas.getResetPasteArea().maxY);
-            jsonObject.addProperty("resetPasteAreaMaxZ", areas.getResetPasteArea().maxZ);
-            
+
+            // 保存出生点位置 - 使用嵌套对象
+            JsonObject spawnPosObj = new JsonObject();
+            spawnPosObj.addProperty("x", areas.getSpawnPos().pos.x());
+            spawnPosObj.addProperty("y", areas.getSpawnPos().pos.y());
+            spawnPosObj.addProperty("z", areas.getSpawnPos().pos.z());
+            spawnPosObj.addProperty("yaw", areas.getSpawnPos().yaw);
+            spawnPosObj.addProperty("pitch", areas.getSpawnPos().pitch);
+            jsonObject.add("spawnPos", spawnPosObj);
+
+            // 保存观战者出生点位置 - 使用嵌套对象
+            JsonObject spectatorSpawnPosObj = new JsonObject();
+            spectatorSpawnPosObj.addProperty("x", areas.getSpectatorSpawnPos().pos.x());
+            spectatorSpawnPosObj.addProperty("y", areas.getSpectatorSpawnPos().pos.y());
+            spectatorSpawnPosObj.addProperty("z", areas.getSpectatorSpawnPos().pos.z());
+            spectatorSpawnPosObj.addProperty("yaw", areas.getSpectatorSpawnPos().yaw);
+            spectatorSpawnPosObj.addProperty("pitch", areas.getSpectatorSpawnPos().pitch);
+            jsonObject.add("spectatorSpawnPos", spectatorSpawnPosObj);
+
+            // 保存准备区域 - 使用嵌套对象
+            JsonObject readyAreaObj = new JsonObject();
+            readyAreaObj.addProperty("minX", areas.getReadyArea().minX);
+            readyAreaObj.addProperty("minY", areas.getReadyArea().minY);
+            readyAreaObj.addProperty("minZ", areas.getReadyArea().minZ);
+            readyAreaObj.addProperty("maxX", areas.getReadyArea().maxX);
+            readyAreaObj.addProperty("maxY", areas.getReadyArea().maxY);
+            readyAreaObj.addProperty("maxZ", areas.getReadyArea().maxZ);
+            jsonObject.add("readyArea", readyAreaObj);
+
+            // 保存游戏区域偏移 - 使用嵌套对象
+            JsonObject playAreaOffsetObj = new JsonObject();
+            playAreaOffsetObj.addProperty("x", areas.getPlayAreaOffset().x());
+            playAreaOffsetObj.addProperty("y", areas.getPlayAreaOffset().y());
+            playAreaOffsetObj.addProperty("z", areas.getPlayAreaOffset().z());
+            jsonObject.add("playAreaOffset", playAreaOffsetObj);
+
+            // 保存游戏区域 - 使用嵌套对象
+            JsonObject playAreaObj = new JsonObject();
+            playAreaObj.addProperty("minX", areas.getPlayArea().minX);
+            playAreaObj.addProperty("minY", areas.getPlayArea().minY);
+            playAreaObj.addProperty("minZ", areas.getPlayArea().minZ);
+            playAreaObj.addProperty("maxX", areas.getPlayArea().maxX);
+            playAreaObj.addProperty("maxY", areas.getPlayArea().maxY);
+            playAreaObj.addProperty("maxZ", areas.getPlayArea().maxZ);
+            jsonObject.add("playArea", playAreaObj);
+
+            // 保存重置粘贴区域 - 使用嵌套对象
+            JsonObject resetPasteAreaObj = new JsonObject();
+            resetPasteAreaObj.addProperty("minX", areas.getResetPasteArea().minX);
+            resetPasteAreaObj.addProperty("minY", areas.getResetPasteArea().minY);
+            resetPasteAreaObj.addProperty("minZ", areas.getResetPasteArea().minZ);
+            resetPasteAreaObj.addProperty("maxX", areas.getResetPasteArea().maxX);
+            resetPasteAreaObj.addProperty("maxY", areas.getResetPasteArea().maxY);
+            resetPasteAreaObj.addProperty("maxZ", areas.getResetPasteArea().maxZ);
+            jsonObject.add("resetPasteArea", resetPasteAreaObj);
+
+            // 保存重置模板区域 - 使用嵌套对象
+            JsonObject resetTemplateAreaObj = new JsonObject();
+            resetTemplateAreaObj.addProperty("minX", areas.getResetTemplateArea().minX);
+            resetTemplateAreaObj.addProperty("minY", areas.getResetTemplateArea().minY);
+            resetTemplateAreaObj.addProperty("minZ", areas.getResetTemplateArea().minZ);
+            resetTemplateAreaObj.addProperty("maxX", areas.getResetTemplateArea().maxX);
+            resetTemplateAreaObj.addProperty("maxY", areas.getResetTemplateArea().maxY);
+            resetTemplateAreaObj.addProperty("maxZ", areas.getResetTemplateArea().maxZ);
+            jsonObject.add("resetTemplateArea", resetTemplateAreaObj);
+
             // 保存房间数量
             jsonObject.addProperty("roomCount", areas.getRoomCount());
-            
-            // 保存房间位置
+
+            // 保存房间位置 - 使用嵌套对象
             JsonObject roomPositionsObj = new JsonObject();
             for (int i = 1; i <= areas.getRoomCount(); i++) {
                 Vec3 roomPos = areas.getRoomPosition(i);
@@ -112,12 +127,12 @@ public class MapManager {
                 }
             }
             jsonObject.add("roomPositions", roomPositionsObj);
-            
+
             // 写入文件
             FileWriter writer = new FileWriter(mapConfigFile);
             gson.toJson(jsonObject, writer);
             writer.close();
-            
+
             TMM.LOGGER.info("Successfully saved map: " + mapName);
             return true;
         } catch (Exception e) {
@@ -125,7 +140,7 @@ public class MapManager {
             return false;
         }
     }
-    
+
     /**
      * 加载指定的地图配置
      * @param serverWorld 服务器世界
@@ -137,102 +152,149 @@ public class MapManager {
             // 构建地图配置文件路径
             Path mapConfigPath = Paths.get(serverWorld.getServer().getServerDirectory().toString(), "world", "maps", mapName + ".json");
             File mapConfigFile = mapConfigPath.toFile();
-            
+
             // 检查地图配置文件是否存在
             if (!mapConfigFile.exists()) {
                 TMM.LOGGER.warn("Map configuration file does not exist: " + mapConfigFile.getAbsolutePath());
                 return false;
             }
-            
+
             // 获取AreasWorldComponent
             AreasWorldComponent areas = AreasWorldComponent.KEY.get(serverWorld);
-            
+
             // 读取JSON文件
             FileReader reader = new FileReader(mapConfigFile);
             JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
             reader.close();
-            
-            // 应用配置到AreasWorldComponent
-            if (jsonObject.has("spawnX") && jsonObject.has("spawnY") && jsonObject.has("spawnZ")) {
+
+            // 应用配置到AreasWorldComponent，使用新的嵌套结构
+            if (jsonObject.has("spawnPos")) {
+                JsonObject spawnPosObj = jsonObject.getAsJsonObject("spawnPos");
+                float spawnYaw = spawnPosObj.has("yaw") ? spawnPosObj.get("yaw").getAsFloat() : 0f;
+                float spawnPitch = spawnPosObj.has("pitch") ? spawnPosObj.get("pitch").getAsFloat() : 0f;
                 areas.setSpawnPos(new AreasWorldComponent.PosWithOrientation(
-                        jsonObject.get("spawnX").getAsDouble(),
-                        jsonObject.get("spawnY").getAsDouble(),
-                        jsonObject.get("spawnZ").getAsDouble(),
-                        jsonObject.has("spawnYaw") ? jsonObject.get("spawnYaw").getAsFloat() : 0f,
-                        jsonObject.has("spawnPitch") ? jsonObject.get("spawnPitch").getAsFloat() : 0f
+                        spawnPosObj.get("x").getAsDouble(),
+                        spawnPosObj.get("y").getAsDouble(),
+                        spawnPosObj.get("z").getAsDouble(),
+                        spawnYaw,
+                        spawnPitch
                 ));
+                TMM.LOGGER.info("Loaded spawn position: " + spawnPosObj.get("x").getAsDouble() + ", " +
+                        spawnPosObj.get("y").getAsDouble() + ", " + spawnPosObj.get("z").getAsDouble());
+            } else {
+                TMM.LOGGER.warn("Missing spawn position data in map config: " + mapName);
             }
-            
-            if (jsonObject.has("spectatorSpawnX") && jsonObject.has("spectatorSpawnY") && jsonObject.has("spectatorSpawnZ")) {
+
+            if (jsonObject.has("spectatorSpawnPos")) {
+                JsonObject spectatorSpawnPosObj = jsonObject.getAsJsonObject("spectatorSpawnPos");
+                float spectatorSpawnYaw = spectatorSpawnPosObj.has("yaw") ? spectatorSpawnPosObj.get("yaw").getAsFloat() : 0f;
+                float spectatorSpawnPitch = spectatorSpawnPosObj.has("pitch") ? spectatorSpawnPosObj.get("pitch").getAsFloat() : 0f;
                 areas.setSpectatorSpawnPos(new AreasWorldComponent.PosWithOrientation(
-                        jsonObject.get("spectatorSpawnX").getAsDouble(),
-                        jsonObject.get("spectatorSpawnY").getAsDouble(),
-                        jsonObject.get("spectatorSpawnZ").getAsDouble(),
-                        jsonObject.has("spectatorSpawnYaw") ? jsonObject.get("spectatorSpawnYaw").getAsFloat() : 0f,
-                        jsonObject.has("spectatorSpawnPitch") ? jsonObject.get("spectatorSpawnPitch").getAsFloat() : 0f
+                        spectatorSpawnPosObj.get("x").getAsDouble(),
+                        spectatorSpawnPosObj.get("y").getAsDouble(),
+                        spectatorSpawnPosObj.get("z").getAsDouble(),
+                        spectatorSpawnYaw,
+                        spectatorSpawnPitch
                 ));
+                TMM.LOGGER.info("Loaded spectator spawn position: " + spectatorSpawnPosObj.get("x").getAsDouble() + ", " +
+                        spectatorSpawnPosObj.get("y").getAsDouble() + ", " + spectatorSpawnPosObj.get("z").getAsDouble());
+            } else {
+                TMM.LOGGER.warn("Missing spectator spawn position data in map config: " + mapName);
             }
-            
-            if (jsonObject.has("readyAreaMinX") && jsonObject.has("readyAreaMinY") && jsonObject.has("readyAreaMinZ") &&
-                jsonObject.has("readyAreaMaxX") && jsonObject.has("readyAreaMaxY") && jsonObject.has("readyAreaMaxZ")) {
-                areas.setReadyArea(new net.minecraft.world.phys.AABB(
-                        jsonObject.get("readyAreaMinX").getAsDouble(),
-                        jsonObject.get("readyAreaMinY").getAsDouble(),
-                        jsonObject.get("readyAreaMinZ").getAsDouble(),
-                        jsonObject.get("readyAreaMaxX").getAsDouble(),
-                        jsonObject.get("readyAreaMaxY").getAsDouble(),
-                        jsonObject.get("readyAreaMaxZ").getAsDouble()
+
+            if (jsonObject.has("readyArea")) {
+                JsonObject readyAreaObj = jsonObject.getAsJsonObject("readyArea");
+                areas.setReadyArea(new AABB(
+                        readyAreaObj.get("minX").getAsDouble(),
+                        readyAreaObj.get("minY").getAsDouble(),
+                        readyAreaObj.get("minZ").getAsDouble(),
+                        readyAreaObj.get("maxX").getAsDouble(),
+                        readyAreaObj.get("maxY").getAsDouble(),
+                        readyAreaObj.get("maxZ").getAsDouble()
                 ));
+                TMM.LOGGER.info("Loaded ready area: " + readyAreaObj.get("minX").getAsDouble() + "," +
+                        readyAreaObj.get("minY").getAsDouble() + "," + readyAreaObj.get("minZ").getAsDouble() + " to " +
+                        readyAreaObj.get("maxX").getAsDouble() + "," + readyAreaObj.get("maxY").getAsDouble() + "," +
+                        readyAreaObj.get("maxZ").getAsDouble());
+            } else {
+                TMM.LOGGER.warn("Missing ready area data in map config: " + mapName);
             }
-            
-            if (jsonObject.has("playAreaOffsetX") && jsonObject.has("playAreaOffsetY") && jsonObject.has("playAreaOffsetZ")) {
+
+            if (jsonObject.has("playAreaOffset")) {
+                JsonObject playAreaOffsetObj = jsonObject.getAsJsonObject("playAreaOffset");
                 areas.setPlayAreaOffset(new Vec3(
-                        jsonObject.get("playAreaOffsetX").getAsDouble(),
-                        jsonObject.get("playAreaOffsetY").getAsDouble(),
-                        jsonObject.get("playAreaOffsetZ").getAsDouble()
+                        playAreaOffsetObj.get("x").getAsDouble(),
+                        playAreaOffsetObj.get("y").getAsDouble(),
+                        playAreaOffsetObj.get("z").getAsDouble()
                 ));
+                TMM.LOGGER.info("Loaded play area offset: " + playAreaOffsetObj.get("x").getAsDouble() + ", " +
+                        playAreaOffsetObj.get("y").getAsDouble() + ", " + playAreaOffsetObj.get("z").getAsDouble());
+            } else {
+                TMM.LOGGER.warn("Missing play area offset data in map config: " + mapName);
             }
-            
-            if (jsonObject.has("playAreaMinX") && jsonObject.has("playAreaMinY") && jsonObject.has("playAreaMinZ") &&
-                jsonObject.has("playAreaMaxX") && jsonObject.has("playAreaMaxY") && jsonObject.has("playAreaMaxZ")) {
-                areas.setPlayArea(new net.minecraft.world.phys.AABB(
-                        jsonObject.get("playAreaMinX").getAsDouble(),
-                        jsonObject.get("playAreaMinY").getAsDouble(),
-                        jsonObject.get("playAreaMinZ").getAsDouble(),
-                        jsonObject.get("playAreaMaxX").getAsDouble(),
-                        jsonObject.get("playAreaMaxY").getAsDouble(),
-                        jsonObject.get("playAreaMaxZ").getAsDouble()
+
+            if (jsonObject.has("playArea")) {
+                JsonObject playAreaObj = jsonObject.getAsJsonObject("playArea");
+                areas.setPlayArea(new AABB(
+                        playAreaObj.get("minX").getAsDouble(),
+                        playAreaObj.get("minY").getAsDouble(),
+                        playAreaObj.get("minZ").getAsDouble(),
+                        playAreaObj.get("maxX").getAsDouble(),
+                        playAreaObj.get("maxY").getAsDouble(),
+                        playAreaObj.get("maxZ").getAsDouble()
                 ));
+                TMM.LOGGER.info("Loaded play area: " + playAreaObj.get("minX").getAsDouble() + "," +
+                        playAreaObj.get("minY").getAsDouble() + "," + playAreaObj.get("minZ").getAsDouble() + " to " +
+                        playAreaObj.get("maxX").getAsDouble() + "," + playAreaObj.get("maxY").getAsDouble() + "," +
+                        playAreaObj.get("maxZ").getAsDouble());
+            } else {
+                TMM.LOGGER.warn("Missing play area data in map config: " + mapName);
             }
-            
-            if (jsonObject.has("resetTemplateAreaMinX") && jsonObject.has("resetTemplateAreaMinY") && jsonObject.has("resetTemplateAreaMinZ") &&
-                jsonObject.has("resetTemplateAreaMaxX") && jsonObject.has("resetTemplateAreaMaxY") && jsonObject.has("resetTemplateAreaMaxZ")) {
-                areas.setResetTemplateArea(new net.minecraft.world.phys.AABB(
-                        jsonObject.get("resetTemplateAreaMinX").getAsDouble(),
-                        jsonObject.get("resetTemplateAreaMinY").getAsDouble(),
-                        jsonObject.get("resetTemplateAreaMinZ").getAsDouble(),
-                        jsonObject.get("resetTemplateAreaMaxX").getAsDouble(),
-                        jsonObject.get("resetTemplateAreaMaxY").getAsDouble(),
-                        jsonObject.get("resetTemplateAreaMaxZ").getAsDouble()
+
+            if (jsonObject.has("resetTemplateArea")) {
+                JsonObject resetTemplateAreaObj = jsonObject.getAsJsonObject("resetTemplateArea");
+                areas.setResetTemplateArea(new AABB(
+                        resetTemplateAreaObj.get("minX").getAsDouble(),
+                        resetTemplateAreaObj.get("minY").getAsDouble(),
+                        resetTemplateAreaObj.get("minZ").getAsDouble(),
+                        resetTemplateAreaObj.get("maxX").getAsDouble(),
+                        resetTemplateAreaObj.get("maxY").getAsDouble(),
+                        resetTemplateAreaObj.get("maxZ").getAsDouble()
                 ));
+                TMM.LOGGER.info("Loaded reset template area: " + resetTemplateAreaObj.get("minX").getAsDouble() + "," +
+                        resetTemplateAreaObj.get("minY").getAsDouble() + "," + resetTemplateAreaObj.get("minZ").getAsDouble() + " to " +
+                        resetTemplateAreaObj.get("maxX").getAsDouble() + "," + resetTemplateAreaObj.get("maxY").getAsDouble() + "," +
+                        resetTemplateAreaObj.get("maxZ").getAsDouble());
+            } else {
+                TMM.LOGGER.warn("Missing reset template area data in map config: " + mapName);
             }
-            
-            if (jsonObject.has("resetPasteAreaMinX") && jsonObject.has("resetPasteAreaMinY") && jsonObject.has("resetPasteAreaMinZ") &&
-                jsonObject.has("resetPasteAreaMaxX") && jsonObject.has("resetPasteAreaMaxY") && jsonObject.has("resetPasteAreaMaxZ")) {
-                areas.setResetPasteArea(new net.minecraft.world.phys.AABB(
-                        jsonObject.get("resetPasteAreaMinX").getAsDouble(),
-                        jsonObject.get("resetPasteAreaMinY").getAsDouble(),
-                        jsonObject.get("resetPasteAreaMinZ").getAsDouble(),
-                        jsonObject.get("resetPasteAreaMaxX").getAsDouble(),
-                        jsonObject.get("resetPasteAreaMaxY").getAsDouble(),
-                        jsonObject.get("resetPasteAreaMaxZ").getAsDouble()
+
+            if (jsonObject.has("resetPasteArea")) {
+                JsonObject resetPasteAreaObj = jsonObject.getAsJsonObject("resetPasteArea");
+                areas.setResetPasteArea(new AABB(
+                        resetPasteAreaObj.get("minX").getAsDouble(),
+                        resetPasteAreaObj.get("minY").getAsDouble(),
+                        resetPasteAreaObj.get("minZ").getAsDouble(),
+                        resetPasteAreaObj.get("maxX").getAsDouble(),
+                        resetPasteAreaObj.get("maxY").getAsDouble(),
+                        resetPasteAreaObj.get("maxZ").getAsDouble()
                 ));
+                TMM.LOGGER.info("Loaded reset paste area: " + resetPasteAreaObj.get("minX").getAsDouble() + "," +
+                        resetPasteAreaObj.get("minY").getAsDouble() + "," + resetPasteAreaObj.get("minZ").getAsDouble() + " to " +
+                        resetPasteAreaObj.get("maxX").getAsDouble() + "," + resetPasteAreaObj.get("maxY").getAsDouble() + "," +
+                        resetPasteAreaObj.get("maxZ").getAsDouble());
+            } else {
+                TMM.LOGGER.warn("Missing reset paste area data in map config: " + mapName);
             }
-            
+
             if (jsonObject.has("roomCount")) {
-                areas.setRoomCount(jsonObject.get("roomCount").getAsInt());
+                int roomCount = jsonObject.get("roomCount").getAsInt();
+                areas.setRoomCount(roomCount);
+                TMM.LOGGER.info("Loaded room count: " + roomCount);
+            } else {
+                TMM.LOGGER.warn("Missing room count data in map config: " + mapName);
             }
-            
+
             if (jsonObject.has("roomPositions")) {
                 JsonObject roomPositionsObj = jsonObject.getAsJsonObject("roomPositions");
                 areas.getRoomPositions().clear();
@@ -240,21 +302,28 @@ public class MapManager {
                     try {
                         int roomNumber = Integer.parseInt(key);
                         JsonObject posObj = roomPositionsObj.getAsJsonObject(key);
-                        Vec3 position = new Vec3(
-                                posObj.get("x").getAsDouble(),
-                                posObj.get("y").getAsDouble(),
-                                posObj.get("z").getAsDouble()
-                        );
-                        areas.getRoomPositions().put(roomNumber, position);
+                        if (posObj.has("x") && posObj.has("y") && posObj.has("z")) {
+                            Vec3 position = new Vec3(
+                                    posObj.get("x").getAsDouble(),
+                                    posObj.get("y").getAsDouble(),
+                                    posObj.get("z").getAsDouble()
+                            );
+                            areas.getRoomPositions().put(roomNumber, position);
+                            TMM.LOGGER.info("Loaded room " + roomNumber + " position: " + position.x() + ", " + position.y() + ", " + position.z());
+                        } else {
+                            TMM.LOGGER.warn("Invalid position data for room " + key + " in map config: " + mapName);
+                        }
                     } catch (NumberFormatException e) {
                         TMM.LOGGER.warn("Invalid room number in map config: " + key);
                     }
                 }
+            } else {
+                TMM.LOGGER.warn("Missing room positions data in map config: " + mapName);
             }
-            
+
             // 同步到客户端
             areas.sync();
-            
+
             TMM.LOGGER.info("Successfully loaded map: " + mapName);
             return true;
         } catch (Exception e) {
@@ -262,7 +331,7 @@ public class MapManager {
             return false;
         }
     }
-    
+
     /**
      * 随机加载一个可用的地图配置
      * @param serverWorld 服务器世界
@@ -270,19 +339,19 @@ public class MapManager {
      */
     public static boolean loadRandomMap(ServerLevel serverWorld) {
         List<String> availableMaps = getAvailableMaps(serverWorld);
-        
+
         if (availableMaps.isEmpty()) {
             TMM.LOGGER.warn("No maps available to load randomly");
             return false;
         }
-        
+
         // 随机选择一个地图
         String randomMap = availableMaps.get(random.nextInt(availableMaps.size()));
         TMM.LOGGER.info("Randomly selected map: " + randomMap);
-        
+
         return loadMap(serverWorld, randomMap);
     }
-    
+
     /**
      * 获取所有可用的地图列表
      * @param serverWorld 服务器世界
@@ -290,11 +359,11 @@ public class MapManager {
      */
     public static List<String> getAvailableMaps(ServerLevel serverWorld) {
         List<String> maps = new ArrayList<>();
-        
+
         try {
             Path mapsDirPath = Paths.get(serverWorld.getServer().getServerDirectory().toString(), "world", "maps");
             File mapsDir = mapsDirPath.toFile();
-            
+
             if (mapsDir.exists() && mapsDir.isDirectory()) {
                 File[] files = mapsDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".json"));
                 if (files != null) {
@@ -308,7 +377,7 @@ public class MapManager {
         } catch (Exception e) {
             TMM.LOGGER.error("Failed to list available maps", e);
         }
-        
+
         return maps;
     }
 }

@@ -152,7 +152,7 @@ public class TMMConfig extends MidnightConfig {
     @Entry(category = "game")
     public static boolean enableAutoTrainReset = true;
     @Entry(category = "game")
-    public static boolean verboseTrainResetLogs = false;
+    public static boolean verboseTrainResetLogs = true;
 
     @Environment(EnvType.CLIENT)
     public static boolean isUltraPerfMode() {

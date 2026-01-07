@@ -37,7 +37,7 @@ public abstract class MountableBlock extends Block {
     public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         float radius = 1;
         if (!player.isShiftKeyDown()
-                && player.position().subtract(pos.getCenter()).length() <= 2f
+                && player.position().subtract(pos.getCenter()).length() <= 1.4f
                 && !(player.getMainHandItem().getItem() instanceof BlockItem blockItem
                 && blockItem.getBlock() instanceof MountableBlock)
                 && world.getEntitiesOfClass(SeatEntity.class, AABB.ofSize(pos.getCenter(), radius, radius, radius), Entity::isAlive).isEmpty()) {

@@ -313,7 +313,7 @@ public class GameFunctions {
 
     public static void finalizeGame(ServerLevel world) {
         GameWorldComponent gameComponent = GameWorldComponent.KEY.get(world);
-       var areasWorldComponent = AreasWorldComponent.KEY.get(world);
+       //var areasWorldComponent = AreasWorldComponent.KEY.get(world);
 
         world.setDayTime(18000);
         gameComponent.getGameMode().finalizeGame(world, gameComponent);

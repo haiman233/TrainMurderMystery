@@ -5,6 +5,7 @@ import dev.doctor4t.trainmurdermystery.TMMConfig;
 import dev.doctor4t.trainmurdermystery.block.DoorPartBlock;
 import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.command.*;
+import dev.doctor4t.trainmurdermystery.command.ReloadReadyAreaCommand;
 import dev.doctor4t.trainmurdermystery.command.argument.GameModeArgumentType;
 import dev.doctor4t.trainmurdermystery.command.argument.TimeOfDayArgumentType;
 import dev.doctor4t.trainmurdermystery.event.PlayerInteractionHandler;
@@ -101,6 +102,7 @@ public class TMM implements ModInitializer {
             SetRoleCountCommand.register(dispatcher);
             ConfigCommand.register(dispatcher);
             SwitchMapCommand.register(dispatcher);
+            ReloadReadyAreaCommand.register(dispatcher);
         }));
 
         // server lock to supporters
