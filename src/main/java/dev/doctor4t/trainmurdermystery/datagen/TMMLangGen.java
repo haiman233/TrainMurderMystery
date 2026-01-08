@@ -114,7 +114,28 @@ public class TMMLangGen extends FabricLanguageProvider {
         builder.add("game.win.loose_end", "They tied all of their loose ends!");
 
         builder.add("key.trainmurdermystery.instinct", "Instinct");
+        builder.add("key.trainmurdermystery.stats", "Player Stats");
         builder.add("category.trainmurdermystery.keybinds", "Train Murder Mystery");
+
+        // Player Stats GUI translations
+        builder.add("gui.tmm.stats.title", "Player Statistics");
+        builder.add("gui.tmm.stats.total_play_time", "Total Play Time: %s");
+        builder.add("gui.tmm.stats.total_games_played", "Total Games Played: %s");
+        builder.add("gui.tmm.stats.total_kills", "Total Kills: %s");
+        builder.add("gui.tmm.stats.total_deaths", "Total Deaths: %s");
+        builder.add("gui.tmm.stats.total_wins", "Total Wins: %s");
+        builder.add("gui.tmm.stats.total_losses", "Total Losses: %s");
+        builder.add("gui.tmm.stats.kd_ratio", "K/D Ratio: %s");
+        builder.add("gui.tmm.stats.win_rate", "Win Rate: %s");
+        builder.add("gui.tmm.stats.role_stats_header", "Role Statistics");
+        builder.add("gui.tmm.stats.role_name", "Role: %s");
+        builder.add("gui.tmm.stats.times_played", "Times Played: %s");
+        builder.add("gui.tmm.stats.kills_as_role", "Kills as Role: %s");
+        builder.add("gui.tmm.stats.deaths_as_role", "Deaths as Role: %s");
+        builder.add("gui.tmm.stats.wins_as_role", "Wins as Role: %s");
+        builder.add("gui.tmm.stats.losses_as_role", "Losses as Role: %s");
+        builder.add("gui.tmm.stats.role_win_rate", "Win Rate: %s");
+        builder.add("gui.tmm.stats.role_kd_ratio", "K/D Ratio: %s");
 
         builder.add("task.feel", "You feel like ");
         builder.add("task.fake", "You could fake ");

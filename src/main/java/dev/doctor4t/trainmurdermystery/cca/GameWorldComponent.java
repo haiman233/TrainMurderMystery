@@ -32,6 +32,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import dev.doctor4t.trainmurdermystery.cca.TMMComponents;
 
 public class GameWorldComponent implements AutoSyncedComponent, ServerTickingComponent, ClientTickingComponent {
     public static final ComponentKey<GameWorldComponent> KEY = ComponentRegistry.getOrCreate(TMM.id("game"), GameWorldComponent.class);
@@ -376,20 +377,25 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
                             player.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
                         }
                     }
-
                 }
 
+                // Update total play time for active players
+                for (ServerPlayer player : serverWorld.players()) {
+                    if (GameFunctions.isPlayerAliveAndSurvival(player)) {
+                        PlayerStatsComponent.KEY.get(player).addPlayTime(1);
+                    }
+                }
 
                 // run game loop logic
                 gameMode.tickServerGameLoop(serverWorld, this);
             }
-        }
 
-        if (serverWorld.getGameTime() % 40 == 0) {
-            this.sync();
+            if (serverWorld.getGameTime() % 40 == 0) {
+                this.sync();
+            }
         }
     }
-
+    
     private void tickCommon() {
         // fade and start / stop game
         if (this.getGameStatus() == GameStatus.STARTING || this.getGameStatus() == GameStatus.STOPPING) {

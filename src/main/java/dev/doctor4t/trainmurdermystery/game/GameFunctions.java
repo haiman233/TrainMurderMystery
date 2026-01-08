@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.TMMConfig;
 import dev.doctor4t.trainmurdermystery.api.GameMode;
+import dev.doctor4t.trainmurdermystery.api.Role;
 import dev.doctor4t.trainmurdermystery.cca.*;
 import dev.doctor4t.trainmurdermystery.compat.TrainVoicePlugin;
 import dev.doctor4t.trainmurdermystery.entity.FirecrackerEntity;
@@ -144,6 +145,17 @@ public class GameFunctions {
         
         // 更新所有玩家的计分板显示
         scoreboardComponent.updateAllPlayerScores();
+
+        // --- 新增统计数据更新逻辑 ---
+        for (ServerPlayer player : readyPlayerList) {
+            PlayerStatsComponent stats = PlayerStatsComponent.KEY.get(player);
+            stats.incrementTotalGamesPlayed();
+            Role playerRole = gameComponent.getRole(player);
+            if (playerRole != null) {
+                stats.getOrCreateRoleStats(playerRole.identifier()).incrementTimesPlayed();
+            }
+        }
+        // --- 结束新增统计数据更新逻辑 ---
     }
 
     public static Vec3 getSpawnPos(AreasWorldComponent areas, int room){
@@ -320,6 +332,37 @@ public class GameFunctions {
         gameComponent.getGameMode().finalizeGame(world, gameComponent);
         TMM.REPLAY_MANAGER.finalizeReplay(gameComponent.getLastWinStatus());
 
+        // --- 新增统计数据更新逻辑 (胜利/失败) ---
+        GameFunctions.WinStatus winStatus = gameComponent.getLastWinStatus();
+        for (ServerPlayer player : world.players()) {
+            PlayerStatsComponent stats = PlayerStatsComponent.KEY.get(player);
+            Role playerRole = gameComponent.getRole(player);
+            
+            boolean isWinner = false;
+            if (winStatus == WinStatus.KILLERS && playerRole != null && playerRole.canUseKiller()) {
+                isWinner = true;
+            } else if (winStatus == WinStatus.PASSENGERS && playerRole != null && playerRole.isInnocent()) {
+                isWinner = true;
+            } else if (winStatus == WinStatus.LOOSE_END && player.getUUID().equals(gameComponent.getLooseEndWinner())) {
+                isWinner = true;
+            } else if (winStatus == WinStatus.GAMBLER && playerRole != null && playerRole.isGambler()) {
+                isWinner = true;
+            }
+
+            if (isWinner) {
+                stats.incrementTotalWins();
+                if (playerRole != null) {
+                    stats.getOrCreateRoleStats(playerRole.identifier()).incrementWinsAsRole();
+                }
+            } else {
+                stats.incrementTotalLosses();
+                if (playerRole != null) {
+                    stats.getOrCreateRoleStats(playerRole.identifier()).incrementLossesAsRole();
+                }
+            }
+        }
+        // --- 结束新增统计数据更新逻辑 (胜利/失败) ---
+
         // Show replay to all players
         for (ServerPlayer player : world.players()) {
             TMM.REPLAY_MANAGER.showReplayToPlayer(player);
@@ -408,6 +451,28 @@ public class GameFunctions {
                 component.stopPsycho();
             }
         }
+        
+        // --- 新增统计数据更新逻辑 (击杀者) ---
+        if (killer instanceof ServerPlayer serverKiller) {
+            PlayerStatsComponent killerStats = PlayerStatsComponent.KEY.get(serverKiller);
+            killerStats.incrementTotalKills();
+            Role killerRole = gameWorldComponent.getRole(serverKiller);
+            if (killerRole != null) {
+                killerStats.getOrCreateRoleStats(killerRole.identifier()).incrementKillsAsRole();
+            }
+        }
+        // --- 结束新增统计数据更新逻辑 (击杀者) ---
+    
+        // --- 新增统计数据更新逻辑 (受害者) ---
+        if (victim instanceof ServerPlayer serverVictim) {
+            PlayerStatsComponent victimStats = PlayerStatsComponent.KEY.get(serverVictim);
+            victimStats.incrementTotalDeaths();
+            Role victimRole = gameWorldComponent.getRole(serverVictim);
+            if (victimRole != null) {
+                victimStats.getOrCreateRoleStats(victimRole.identifier()).incrementDeathsAsRole();
+            }
+        }
+        // --- 结束新增统计数据更新逻辑 (受害者) ---
 
         if (victim instanceof ServerPlayer serverPlayerEntity && isPlayerAliveAndSurvival(serverPlayerEntity)) {
             serverPlayerEntity.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);

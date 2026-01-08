@@ -55,7 +55,8 @@
 			"trainmurdermystery:time",
 			"trainmurdermystery:autostart",
 			"trainmurdermystery:roundend",
-			"trainmurdermystery:gamescoreboard"
+			"trainmurdermystery:gamescoreboard",
+			"trainmurdermystery:player_stats"
 		],
 		"loom:injected_interfaces": {
 			"net/minecraft/class_5483/class_5496" : ["dev/doctor4t/trainmurdermystery/util/BlockSettingsAdditions"]

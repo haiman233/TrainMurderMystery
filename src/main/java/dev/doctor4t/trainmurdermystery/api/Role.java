@@ -96,4 +96,8 @@ public final class Role {
     public boolean canSeeTime() {
         return canSeeTime;
     }
+
+    public boolean isGambler() {
+        return false; // 暂时没有赌徒角色
+    }
 }

@@ -14,6 +14,7 @@ import dev.doctor4t.trainmurdermystery.cca.TrainWorldComponent;
 import dev.doctor4t.trainmurdermystery.client.gui.RoundTextRenderer;
 import dev.doctor4t.trainmurdermystery.client.gui.StoreRenderer;
 import dev.doctor4t.trainmurdermystery.client.gui.TimeRenderer;
+import dev.doctor4t.trainmurdermystery.client.gui.screen.PlayerStatsScreen;
 import dev.doctor4t.trainmurdermystery.client.model.TMMModelLayers;
 import dev.doctor4t.trainmurdermystery.client.render.block_entity.PlateBlockEntityRenderer;
 import dev.doctor4t.trainmurdermystery.client.render.block_entity.SmallDoorBlockEntityRenderer;
@@ -83,6 +84,7 @@ public class TMMClient implements ClientModInitializer {
     public static final Map<UUID, PlayerInfo> PLAYER_ENTRIES_CACHE = Maps.newHashMap();
 
     public static KeyMapping instinctKeybind;
+    public static KeyMapping statsKeybind; // 新增统计面板热键
     public static boolean isInstinctToggleEnabled = false; // 新增变量用于跟踪切换状态
     public static boolean prevInstinctKeyDown = false; // 用于检测按键按下事件
     public static float prevInstinctLightLevel = -.04f;
@@ -337,6 +339,14 @@ public class TMMClient implements ClientModInitializer {
                 GLFW.GLFW_KEY_LEFT_ALT,
                 "category." + TMM.MOD_ID + ".keybinds"
         ));
+
+        // Register stats keybind
+        statsKeybind = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key." + TMM.MOD_ID + ".stats",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_O, // 默认热键 'O'
+                "category." + TMM.MOD_ID + ".keybinds"
+        ));
         
         // Initialize Command UI system
         TMMCommandUI.init();
@@ -348,6 +358,17 @@ public class TMMClient implements ClientModInitializer {
         net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.register((guiGraphics, deltaTick) -> {
             SecurityCameraHUD.render(guiGraphics, Minecraft.getInstance().getWindow().getGuiScaledWidth(), Minecraft.getInstance().getWindow().getGuiScaledHeight());
             SecurityCameraHUD.renderCameraFeed(guiGraphics, Minecraft.getInstance().getWindow().getGuiScaledWidth(), Minecraft.getInstance().getWindow().getGuiScaledHeight());
+        });
+
+        // Register client tick event for stats keybind
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (statsKeybind.consumeClick()) {
+                if (client.screen instanceof PlayerStatsScreen) {
+                    client.setScreen(null);
+                } else {
+                    client.setScreen(new PlayerStatsScreen());
+                }
+            }
         });
     }
 
