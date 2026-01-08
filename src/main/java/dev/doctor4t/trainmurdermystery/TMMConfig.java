@@ -75,6 +75,10 @@ public class TMMConfig extends MidnightConfig {
     @Entry(category = "client")
     public static boolean disableStaminaBarSmoothing = false;
 
+    @Environment(EnvType.CLIENT)
+    @Entry(category = "client")
+    public static boolean enableSecurityCameraHUD = true; // 启用安全摄像头HUD显示
+
     // 商店物品价格配置 - 服务端只读
     @Comment(category = "shop", centered = true)
     public static Comment shopPricesComment;

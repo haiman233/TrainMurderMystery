@@ -7,6 +7,7 @@ import dev.doctor4t.ratatouille.client.util.ambience.AmbienceUtil;
 import dev.doctor4t.ratatouille.client.util.ambience.BackgroundAmbience;
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.TMMConfig;
+import dev.doctor4t.trainmurdermystery.block.SecurityMonitorBlock;
 import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.cca.PlayerMoodComponent;
 import dev.doctor4t.trainmurdermystery.cca.TrainWorldComponent;
@@ -21,6 +22,7 @@ import dev.doctor4t.trainmurdermystery.client.render.entity.FirecrackerEntityRen
 import dev.doctor4t.trainmurdermystery.client.render.entity.HornBlockEntityRenderer;
 import dev.doctor4t.trainmurdermystery.client.render.entity.NoteEntityRenderer;
 import dev.doctor4t.trainmurdermystery.client.util.TMMItemTooltips;
+import dev.doctor4t.trainmurdermystery.client.gui.SecurityCameraHUD;
 import dev.doctor4t.trainmurdermystery.entity.FirecrackerEntity;
 import dev.doctor4t.trainmurdermystery.entity.NoteEntity;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
@@ -28,6 +30,7 @@ import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.*;
 import dev.doctor4t.trainmurdermystery.item.GrenadeItem;
 import dev.doctor4t.trainmurdermystery.item.KnifeItem;
+import dev.doctor4t.trainmurdermystery.network.SecurityCameraModePayload;
 import dev.doctor4t.trainmurdermystery.ui.TMMCommandUI;
 import dev.doctor4t.trainmurdermystery.ui.event.KeyPressHandler;
 import dev.doctor4t.trainmurdermystery.util.*;
@@ -39,9 +42,11 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -78,6 +83,8 @@ public class TMMClient implements ClientModInitializer {
     public static final Map<UUID, PlayerInfo> PLAYER_ENTRIES_CACHE = Maps.newHashMap();
 
     public static KeyMapping instinctKeybind;
+    public static boolean isInstinctToggleEnabled = false; // 新增变量用于跟踪切换状态
+    public static boolean prevInstinctKeyDown = false; // 用于检测按键按下事件
     public static float prevInstinctLightLevel = -.04f;
     public static float instinctLightLevel = -.04f;
 
@@ -232,14 +239,25 @@ public class TMMClient implements ClientModInitializer {
         OptionLocker.overrideSoundCategoryVolume("player", 1.0);
         OptionLocker.overrideSoundCategoryVolume("ambient", 1.0);
         OptionLocker.overrideSoundCategoryVolume("voice", 1.0);
-
+        ClientPlayNetworking.registerGlobalReceiver(SecurityCameraModePayload.ID, new SecurityCameraModePayload.ClientReceiver());
 
         // Item tooltips
         TMMItemTooltips.addTooltips();
 
         ClientTickEvents.START_WORLD_TICK.register(clientWorld -> {
+            if (Screen.hasShiftDown()){
+                SecurityMonitorBlock.setSecurityMode(false);
+                Minecraft.getInstance().options.setCameraType(CameraType.FIRST_PERSON);
+            }
             prevInstinctLightLevel = instinctLightLevel;
-            // instinct night vision
+            // 检测按键按下事件，只在按键状态从释放变为按下时切换
+            boolean isKeyDown = instinctKeybind.isDown();
+            if (isKeyDown && !prevInstinctKeyDown) {
+                isInstinctToggleEnabled = !isInstinctToggleEnabled; // 切换状态
+            }
+            prevInstinctKeyDown = isKeyDown;
+            
+            // instinct night vision - 现在基于切换状态而不是按键按下来判断
             if (TMMClient.isInstinctEnabled()) {
                 instinctLightLevel += .1f;
             } else {
@@ -323,6 +341,14 @@ public class TMMClient implements ClientModInitializer {
         // Initialize Command UI system
         TMMCommandUI.init();
         KeyPressHandler.register();
+        
+
+        
+        // Register HUD rendering for security camera
+        net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.register((guiGraphics, deltaTick) -> {
+            SecurityCameraHUD.render(guiGraphics, Minecraft.getInstance().getWindow().getGuiScaledWidth(), Minecraft.getInstance().getWindow().getGuiScaledHeight());
+            SecurityCameraHUD.renderCameraFeed(guiGraphics, Minecraft.getInstance().getWindow().getGuiScaledWidth(), Minecraft.getInstance().getWindow().getGuiScaledHeight());
+        });
     }
 
     public static TrainWorldComponent getTrainComponent() {
@@ -419,7 +445,7 @@ public class TMMClient implements ClientModInitializer {
     };
     public static boolean isInstinctEnabled() {
         final var player = Minecraft.getInstance().player;
-        return (instinctKeybind.isDown() && ((isKiller() && isPlayerAliveAndInSurvival()) || isPlayerSpectatingOrCreative())) || (isKiller() && isHoldSpecialItem.test(player));
+        return (isInstinctToggleEnabled && ((isKiller() && isPlayerAliveAndInSurvival()) || isPlayerSpectatingOrCreative())) || (isKiller() && isHoldSpecialItem.test(player));
     }
 
     public static Object getLockedRenderDistance(boolean ultraPerfMode) {

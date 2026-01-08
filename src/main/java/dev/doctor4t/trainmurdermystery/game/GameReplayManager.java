@@ -26,19 +26,19 @@ public class GameReplayManager {
 
     private GameReplayData currentReplayData;
     private final MinecraftServer server;
-    private final Map<UUID, String> playerNames; // To store player names for replay display
+    public static final Map<UUID, String> playerNames= new HashMap<>();
     private GameReplay currentReplay;
 
     public GameReplayManager(MinecraftServer server) {
         this.server = server;
         this.currentReplayData = new GameReplayData();
-        this.playerNames = new HashMap<>();
+        //this.playerNames = new HashMap<>();
         this.currentReplay = new GameReplay(0, GameFunctions.WinStatus.NONE, new java.util.ArrayList<>(), new java.util.ArrayList<>());
     }
 
 public void resetReplay() {
     this.currentReplayData = new GameReplayData();
-    this.playerNames.clear();
+    //this.playerNames.clear();
     this.currentReplay = new GameReplay(0, GameFunctions.WinStatus.NONE, new java.util.ArrayList<>(), new java.util.ArrayList<>());
     }
 

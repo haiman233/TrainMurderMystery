@@ -8,6 +8,7 @@
     "AbstractBlockSettingsMixin",
     "CanRightClickMixin",
     "ChatMixin2",
+    "DecServerJoinPlayer",
     "DedicatedPlayerManagerMixin",
     "EntityMixin",
     "HungerManagerMixin",
@@ -28,6 +29,10 @@
     "defaultRequire": 1
   },
   "client": [
+    "CameraPositionMixin",
+    "KeyboardHandlerMixin",
+    "LocalPlayerMixin",
+    "MouseHandlerMixin",
     "ScreenDrawableGetMixin",
     "client.AbstractClientPlayerEntityMixin",
     "client.EntityRendererDispatchMixin",

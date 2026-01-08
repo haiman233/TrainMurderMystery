@@ -47,6 +47,7 @@ public @SuppressWarnings("unchecked") interface TMMItems {
     Item COSMOPOLITAN = registrar.create("cosmopolitan", new CocktailItem(new Item.Properties().stacksTo(1).food(Foods.HONEY_BOTTLE)), EQUIPMENT_GROUP);
     Item CHAMPAGNE = registrar.create("champagne", new CocktailItem(new Item.Properties().stacksTo(1).food(Foods.HONEY_BOTTLE)), EQUIPMENT_GROUP);
     Item NOTE = registrar.create("note", new NoteItem(new Item.Properties().stacksTo(4)), EQUIPMENT_GROUP);
+    Item BINDING_TOOL = registrar.create("binding_tool", new BindingToolItem(new Item.Properties().stacksTo(1)), EQUIPMENT_GROUP);
 
     static void initialize() {
         registrar.registerEntries();

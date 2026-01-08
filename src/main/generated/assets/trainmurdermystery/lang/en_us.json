@@ -522,5 +522,10 @@
   "commands.tmm.switchmap.list.none": "No maps available",
   "commands.tmm.switchmap.current_map_info": "Current map configuration:",
   "commands.tmm.switchmap.random.success": "Successfully loaded a random map",
-  "commands.tmm.switchmap.random.error.no_maps": "No maps available to load randomly"
+  "commands.tmm.switchmap.random.error.no_maps": "No maps available to load randomly",
+  "commands.tmm.entitydata.set.success": "Successfully set custom data for %s entities: %s",
+  "block.trainmurdermystery.camera": "Security Camera",
+  "block.trainmurdermystery.security_monitor": "Security Monitor",
+  "item.trainmurdermystery.binding_tool": "Binding Tool",
+  "item.trainmurdermystery.binding_tool.tooltip": "Right-click a camera to save its location, then right-click a monitor to bind it"
 }

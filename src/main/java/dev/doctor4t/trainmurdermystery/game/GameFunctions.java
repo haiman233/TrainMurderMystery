@@ -52,6 +52,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 public class GameFunctions {
@@ -117,8 +118,8 @@ public class GameFunctions {
     public static void initializeGame(ServerLevel serverWorld) {
 
         GameWorldComponent gameComponent = GameWorldComponent.KEY.get(serverWorld);
-        AreasWorldComponent areasWorldComponent = AreasWorldComponent.KEY.get(serverWorld);
-        areasWorldComponent.loadFromFile();
+        //AreasWorldComponent areasWorldComponent = AreasWorldComponent.KEY.get(serverWorld);
+
 
         List<ServerPlayer> readyPlayerList = getReadyPlayerList(serverWorld);
 
@@ -467,6 +468,7 @@ public class GameFunctions {
 
         TrainVoicePlugin.addPlayer(victim.getUUID());
     }
+
 
     public static boolean shouldDropOnDeath(@NotNull ItemStack stack) {
         return !stack.isEmpty() && (stack.is(TMMItems.REVOLVER)|| stack.is(Items.SPYGLASS) || ShouldDropOnDeath.EVENT.invoker().shouldDrop(stack));

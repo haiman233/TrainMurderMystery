@@ -3,6 +3,7 @@ package dev.doctor4t.trainmurdermystery.index;
 import dev.doctor4t.ratatouille.util.registrar.EntityTypeRegistrar;
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.block.entity.SeatEntity;
+import dev.doctor4t.trainmurdermystery.block_entity.SecurityMonitorBlockEntity;
 import dev.doctor4t.trainmurdermystery.entity.FirecrackerEntity;
 import dev.doctor4t.trainmurdermystery.entity.GrenadeEntity;
 import dev.doctor4t.trainmurdermystery.entity.NoteEntity;
@@ -19,6 +20,7 @@ public interface TMMEntities {
             .clientTrackingRange(128)
             .noSummon()
     );
+
     EntityType<PlayerBodyEntity> PLAYER_BODY = registrar.create("player_body", EntityType.Builder.of(PlayerBodyEntity::new, MobCategory.MISC)
             .sized(1f, 0.25f)
             .clientTrackingRange(128)

@@ -640,5 +640,10 @@
   "screen.noellesroles.conspirator.hint": "按ESC返回上一步或取消",
   "screen.noellesroles.conspirator.prev_page": "上一页",
   "screen.noellesroles.conspirator.next_page": "下一页",
-  "screen.noellesroles.conspirator.page_info": "第 %s / %s 页"
+  "screen.noellesroles.conspirator.page_info": "第 %s / %s 页",
+  "commands.tmm.entitydata.set.success": "成功为 %s 个实体设置了自定义数据: %s",
+  "block.trainmurdermystery.camera": "监控摄像头",
+  "block.trainmurdermystery.security_monitor": "安全监控器",
+  "item.trainmurdermystery.binding_tool": "绑定工具",
+  "item.trainmurdermystery.binding_tool.tooltip": "右键点击摄像头保存位置，再右键点击监控器进行绑定"
 }

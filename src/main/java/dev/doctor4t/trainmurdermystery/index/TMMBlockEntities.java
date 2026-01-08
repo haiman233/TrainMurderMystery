@@ -4,6 +4,8 @@ import dev.doctor4t.ratatouille.util.registrar.BlockEntityTypeRegistrar;
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.block.entity.HornBlockEntity;
 import dev.doctor4t.trainmurdermystery.block_entity.*;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public interface TMMBlockEntities {
@@ -23,6 +25,8 @@ public interface TMMBlockEntities {
     BlockEntityType<TrimmedBedBlockEntity> TRIMMED_BED = registrar.create("trimmed_bed", BlockEntityType.Builder.of(TrimmedBedBlockEntity::create, TMMBlocks.RED_TRIMMED_BED, TMMBlocks.WHITE_TRIMMED_BED));
     BlockEntityType<HornBlockEntity> HORN = registrar.create("horn", BlockEntityType.Builder.of(HornBlockEntity::new, TMMBlocks.HORN));
     BlockEntityType<ChimneyBlockEntity> CHIMNEY = registrar.create("chimney", BlockEntityType.Builder.of(ChimneyBlockEntity::new, TMMBlocks.CHIMNEY));
+    BlockEntityType<CameraBlockEntity> CAMERA = registrar.create("camera", BlockEntityType.Builder.of(CameraBlockEntity::new, TMMBlocks.CAMERA));
+    BlockEntityType<SecurityMonitorBlockEntity> SECURITY_MONITOR = registrar.create("security_monitor", BlockEntityType.Builder.of(SecurityMonitorBlockEntity::new, TMMBlocks.SECURITY_MONITOR));
 
     static void initialize() {
         registrar.registerEntries();
