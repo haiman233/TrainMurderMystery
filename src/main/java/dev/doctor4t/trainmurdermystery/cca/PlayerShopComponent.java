@@ -65,6 +65,7 @@ public class PlayerShopComponent implements AutoSyncedComponent, ServerTickingCo
             this.balance -= entry.price();
             if (this.player instanceof ServerPlayer player) {
                 player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(TMMSounds.UI_SHOP_BUY), SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 1.0f, 0.9f + this.player.getRandom().nextFloat() * 0.2f, player.getRandom().nextLong()));
+                TMM.REPLAY_MANAGER.recordStoreBuy(player.getUUID(), BuiltInRegistries.ITEM.getKey(entry.stack().getItem()), entry.stack().getCount(), entry.price());
             }
         } else {
             this.player.displayClientMessage(Component.literal("购买失败").withStyle(ChatFormatting.DARK_RED), true);
@@ -107,12 +108,20 @@ public class PlayerShopComponent implements AutoSyncedComponent, ServerTickingCo
 
     public static boolean useBlackout(@NotNull Player player) {
         player.getCooldowns().addCooldown(TMMItems.BLACKOUT, GameConstants.ITEM_COOLDOWNS.getOrDefault(TMMItems.BLACKOUT, 0));
-        return WorldBlackoutComponent.KEY.get(player.level()).triggerBlackout();
+        boolean triggered = WorldBlackoutComponent.KEY.get(player.level()).triggerBlackout();
+        if (triggered) {
+            TMM.REPLAY_MANAGER.recordSkillUsed(player.getUUID(), BuiltInRegistries.ITEM.getKey(TMMItems.BLACKOUT));
+        }
+        return triggered;
     }
 
     public static boolean usePsychoMode(@NotNull Player player) {
         player.getCooldowns().addCooldown(TMMItems.PSYCHO_MODE, GameConstants.ITEM_COOLDOWNS.getOrDefault(TMMItems.PSYCHO_MODE, 0));
-        return PlayerPsychoComponent.KEY.get(player).startPsycho();
+        boolean started = PlayerPsychoComponent.KEY.get(player).startPsycho();
+        if (started) {
+            TMM.REPLAY_MANAGER.recordSkillUsed(player.getUUID(), BuiltInRegistries.ITEM.getKey(TMMItems.PSYCHO_MODE));
+        }
+        return started;
     }
 
     @Override

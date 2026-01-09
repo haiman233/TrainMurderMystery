@@ -5,8 +5,11 @@ import com.google.gson.GsonBuilder;
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.api.Role;
 import dev.doctor4t.trainmurdermystery.api.TMMRoles;
+import dev.doctor4t.trainmurdermystery.api.replay.ReplayEvent;
+import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes;
 import dev.doctor4t.trainmurdermystery.util.ReplayDisplayUtils;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -18,6 +21,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+
+import static net.fabricmc.loader.api.FabricLoader.getInstance;
 
 
 public class GameReplayManager {
@@ -36,191 +41,312 @@ public class GameReplayManager {
         this.currentReplay = new GameReplay(0, GameFunctions.WinStatus.NONE, new java.util.ArrayList<>(), new java.util.ArrayList<>());
     }
 
-public void resetReplay() {
-    this.currentReplayData = new GameReplayData();
-    //this.playerNames.clear();
-    this.currentReplay = new GameReplay(0, GameFunctions.WinStatus.NONE, new java.util.ArrayList<>(), new java.util.ArrayList<>());
+    public void resetReplay() {
+        this.currentReplayData = new GameReplayData();
+        //this.playerNames.clear();
+        this.currentReplay = new GameReplay(0, GameFunctions.WinStatus.NONE, new java.util.ArrayList<>(), new java.util.ArrayList<>());
     }
 
-    private GameReplay.EventType mapEventType(GameReplayData.EventType dataEventType) {
+    private ReplayEventTypes.EventType mapEventType(GameReplayData.EventType dataEventType) {
         return switch (dataEventType) {
-            case KILL -> GameReplay.EventType.PLAYER_KILL;
-            case POISON -> GameReplay.EventType.PLAYER_POISONED;
-            case GAME_START -> GameReplay.EventType.GAME_START;
-            case GAME_END -> GameReplay.EventType.GAME_END;
-            case PLAYER_JOIN -> GameReplay.EventType.PLAYER_JOIN;
-            case PLAYER_LEAVE -> GameReplay.EventType.PLAYER_LEAVE;
-            case CUSTOM_MESSAGE, ROLE_ASSIGNMENT, ITEM_USE -> GameReplay.EventType.GAME_START; // Temporary mapping
+            // 主要事件
+            case KILL -> ReplayEventTypes.EventType.PLAYER_KILL;
+            case POISON -> ReplayEventTypes.EventType.PLAYER_POISONED;
+            case GUN_FIRED -> ReplayEventTypes.EventType.GUN_FIRED;
+            case GRENADE_THROWN -> ReplayEventTypes.EventType.GRENADE_THROWN;
+            case SKILL_USED -> ReplayEventTypes.EventType.ITEM_USED;
+            // 系统事件
+            case GAME_START -> ReplayEventTypes.EventType.GAME_START;
+            case GAME_END -> ReplayEventTypes.EventType.GAME_END;
+            case ROLE_ASSIGNMENT -> ReplayEventTypes.EventType.GAME_START;
+            case PLAYER_JOIN -> ReplayEventTypes.EventType.PLAYER_JOIN;
+            case PLAYER_LEAVE -> ReplayEventTypes.EventType.PLAYER_LEAVE;
+            // 次要事件
+            case ITEM_USE -> ReplayEventTypes.EventType.ITEM_USED;
+            case DOOR_OPEN -> ReplayEventTypes.EventType.DOOR_OPEN;
+            case DOOR_CLOSE -> ReplayEventTypes.EventType.DOOR_CLOSE;
+            case LOCKPICK_ATTEMPT -> ReplayEventTypes.EventType.LOCKPICK_ATTEMPT;
+            case TASK_COMPLETE -> ReplayEventTypes.EventType.TASK_COMPLETE;
+            case STORE_BUY -> ReplayEventTypes.EventType.STORE_BUY;
+            case MOOD_CHANGE -> ReplayEventTypes.EventType.MOOD_CHANGE;
+            case NOTE_EDIT -> ReplayEventTypes.EventType.NOTE_EDIT;
+            // 新增映射
+            case PLAYER_KILL -> ReplayEventTypes.EventType.PLAYER_KILL;
+            case PLAYER_POISONED -> ReplayEventTypes.EventType.PLAYER_POISONED;
+            case DOOR_LOCK -> ReplayEventTypes.EventType.DOOR_LOCK;
+            case DOOR_UNLOCK -> ReplayEventTypes.EventType.DOOR_UNLOCK;
+            case ITEM_USED -> ReplayEventTypes.EventType.ITEM_USED;
+            case PSYCHO_STATE_CHANGE -> ReplayEventTypes.EventType.PSYCHO_STATE_CHANGE;
+            case BLACKOUT_START -> ReplayEventTypes.EventType.BLACKOUT_START;
+            case BLACKOUT_END -> ReplayEventTypes.EventType.BLACKOUT_END;
+            case ROUND_END -> ReplayEventTypes.EventType.ROUND_END;
+            case KEY_USED -> ReplayEventTypes.EventType.KEY_USED;
+            // 默认映射
+            case CUSTOM_MESSAGE -> ReplayEventTypes.EventType.GAME_START;
         };
     }
 
-    private GameReplay.ReplayEvent convertReplayEvent(GameReplayData.ReplayEvent dataEvent) {
-        GameReplay.EventType eventType = mapEventType(dataEvent.getType());
-        GameReplay.EventDetails details = switch (dataEvent.getType()) {
+    private ReplayEvent convertReplayEvent(GameReplayData.ReplayEvent dataEvent) {
+        ReplayEventTypes.EventType eventType = mapEventType(dataEvent.getType());
+        ReplayEventTypes.EventDetails details = switch (dataEvent.getType()) {
+            // 主要事件
             case KILL ->
-                    new GameReplay.PlayerKillDetails(dataEvent.getSourcePlayer(), dataEvent.getTargetPlayer(), ResourceLocation.parse(dataEvent.getItemUsed()));
+                    new ReplayEventTypes.PlayerKillDetails(dataEvent.getSourcePlayer(), dataEvent.getTargetPlayer(), ResourceLocation.parse(dataEvent.getItemUsed()));
             case POISON ->
-                    new GameReplay.PlayerPoisonedDetails(dataEvent.getSourcePlayer(), dataEvent.getTargetPlayer());
-            default -> new GameReplay.EventDetails() {
-            }; // Generic empty details
+                    new ReplayEventTypes.PlayerPoisonedDetails(dataEvent.getSourcePlayer(), dataEvent.getTargetPlayer());
+            case GUN_FIRED ->
+                    new ReplayEventTypes.GunFiredDetails(dataEvent.getSourcePlayer(), Boolean.parseBoolean(dataEvent.getMessage()), dataEvent.getTargetPlayer());
+            case GRENADE_THROWN -> {
+                BlockPos pos = BlockPos.of(Long.parseLong(dataEvent.getItemUsed()));
+                yield new ReplayEventTypes.GrenadeThrownDetails(dataEvent.getSourcePlayer(), pos);
+            }
+            case SKILL_USED ->
+                    new ReplayEventTypes.ItemUsedDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(dataEvent.getItemUsed()));
+            // 次要事件
+            case ITEM_USE ->
+                    new ReplayEventTypes.ItemUsedDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(dataEvent.getItemUsed()));
+            case DOOR_OPEN, DOOR_CLOSE -> {
+                BlockPos pos = BlockPos.of(Long.parseLong(dataEvent.getItemUsed()));
+                yield new ReplayEventTypes.DoorActionDetails(dataEvent.getSourcePlayer(), pos, true);
+            }
+            case LOCKPICK_ATTEMPT -> {
+                BlockPos pos = BlockPos.of(Long.parseLong(dataEvent.getItemUsed()));
+                yield new ReplayEventTypes.LockpickAttemptDetails(dataEvent.getSourcePlayer(), pos, Boolean.parseBoolean(dataEvent.getMessage()));
+            }
+            case TASK_COMPLETE ->
+                    new ReplayEventTypes.TaskCompleteDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(dataEvent.getItemUsed()));
+            case STORE_BUY -> {
+                String itemUsed = dataEvent.getItemUsed();
+                int lastColon = itemUsed.lastIndexOf(':');
+                if (lastColon == -1) {
+                    // 如果没有冒号，假设数量为1
+                    yield new ReplayEventTypes.StoreBuyDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(itemUsed), 1);
+                } else {
+                    String itemId = itemUsed.substring(0, lastColon);
+                    String amountStr = itemUsed.substring(lastColon + 1);
+                    try {
+                        int amount = Integer.parseInt(amountStr);
+                        yield new ReplayEventTypes.StoreBuyDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(itemId), amount);
+                    } catch (NumberFormatException e) {
+                        // 如果解析失败，使用默认数量1
+                        yield new ReplayEventTypes.StoreBuyDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(itemId), 1);
+                    }
+                }
+            }
+            case MOOD_CHANGE -> {
+                String[] parts = dataEvent.getMessage().split(":");
+                yield new ReplayEventTypes.MoodChangeDetails(dataEvent.getSourcePlayer(), Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+            }
+            case NOTE_EDIT ->
+                    new ReplayEventTypes.NoteEditDetails(dataEvent.getSourcePlayer(), dataEvent.getMessage());
+            // 新增事件类型
+            case PLAYER_KILL ->
+                    new ReplayEventTypes.PlayerKillDetails(dataEvent.getSourcePlayer(), dataEvent.getTargetPlayer(), ResourceLocation.parse(dataEvent.getItemUsed()));
+            case PLAYER_POISONED ->
+                    new ReplayEventTypes.PlayerPoisonedDetails(dataEvent.getSourcePlayer(), dataEvent.getTargetPlayer());
+            case DOOR_LOCK, DOOR_UNLOCK -> {
+                BlockPos pos = BlockPos.of(Long.parseLong(dataEvent.getItemUsed()));
+                yield new ReplayEventTypes.DoorActionDetails(dataEvent.getSourcePlayer(), pos, true);
+            }
+            case ITEM_USED ->
+                    new ReplayEventTypes.ItemUsedDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(dataEvent.getItemUsed()));
+            case PSYCHO_STATE_CHANGE -> {
+                String[] parts = dataEvent.getMessage().split(":");
+                yield new ReplayEventTypes.PsychoStateChangeDetails(dataEvent.getSourcePlayer(), Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+            }
+            case BLACKOUT_START, BLACKOUT_END -> {
+                long duration = Long.parseLong(dataEvent.getMessage());
+                yield new ReplayEventTypes.BlackoutEventDetails(duration);
+            }
+            case ROUND_END -> {
+                GameFunctions.WinStatus roundResult = GameFunctions.WinStatus.valueOf(dataEvent.getMessage());
+                yield new ReplayEventTypes.RoundEndDetails(roundResult);
+            }
+            case KEY_USED -> {
+                String itemUsed = dataEvent.getItemUsed();
+                int lastColon = itemUsed.lastIndexOf(':');
+                if (lastColon == -1) {
+                    // 如果没有冒号，假设没有额外数据
+                    yield new ReplayEventTypes.KeyUsedDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(itemUsed), BlockPos.of(Long.parseLong(dataEvent.getMessage())));
+                } else {
+                    String itemId = itemUsed.substring(0, lastColon);
+                    // 这里可能还有额外数据，但根据recordStoreBuy的格式，最后一个冒号后是数量
+                    // 对于KEY_USED，我们只需要物品ID，忽略数量
+                    yield new ReplayEventTypes.KeyUsedDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(itemId), BlockPos.of(Long.parseLong(dataEvent.getMessage())));
+                }
+            }
+            // 默认空详情
+            default -> new ReplayEventTypes.EventDetails() {};
         };
 
-        return new GameReplay.ReplayEvent(eventType, dataEvent.getTimestamp(), details);
-}
-
-public void initializeReplay(List<ServerPlayer> players, HashMap<UUID, Role> roles) {
-    resetReplay();
-    for (ServerPlayer player : players) {
-        recordPlayerName(player);
+        return new ReplayEvent(eventType, dataEvent.getTimestamp(), details);
     }
-    currentReplayData.setPlayerCount(players.size());
-    // Set roles based on the provided HashMap
-    currentReplayData.setCivilianPlayers(roles.entrySet().stream().filter(entry -> entry.getValue().equals(dev.doctor4t.trainmurdermystery.api.TMMRoles.CIVILIAN)).map(Map.Entry::getKey).collect(java.util.ArrayList::new, java.util.ArrayList::add, java.util.ArrayList::addAll));
-    currentReplayData.setKillerPlayers(roles.entrySet().stream().filter(entry -> entry.getValue().equals(dev.doctor4t.trainmurdermystery.api.TMMRoles.KILLER)).map(Map.Entry::getKey).collect(java.util.ArrayList::new, java.util.ArrayList::add, java.util.ArrayList::addAll));
-    currentReplayData.setVigilantePlayers(roles.entrySet().stream().filter(entry -> entry.getValue().equals(dev.doctor4t.trainmurdermystery.api.TMMRoles.VIGILANTE)).map(Map.Entry::getKey).collect(java.util.ArrayList::new, java.util.ArrayList::add, java.util.ArrayList::addAll));
-    currentReplayData.setLooseEndPlayers(roles.entrySet().stream().filter(entry -> entry.getValue().equals(dev.doctor4t.trainmurdermystery.api.TMMRoles.LOOSE_END)).map(Map.Entry::getKey).collect(java.util.ArrayList::new, java.util.ArrayList::add, java.util.ArrayList::addAll));
-    
-    // 填充玩家角色映射
-    Map<UUID, String> roleMap = new HashMap<>();
-    for (Map.Entry<UUID, Role> entry : roles.entrySet()) {
-        roleMap.put(entry.getKey(), entry.getValue().identifier().toString());
-        // 确保所有玩家的名称都被记录，即使他们尚未在游戏中被显式记录
-        if (!playerNames.containsKey(entry.getKey())) {
-            // 如果找不到玩家名称，尝试从服务器获取
-            ServerPlayer serverPlayer = server.getPlayerList().getPlayer(entry.getKey());
-            if (serverPlayer != null) {
-                recordPlayerName(serverPlayer);
-            } else {
-                // 如果无法获取玩家，使用UUID作为名称
-                recordPlayerName(entry.getKey(), "未知玩家(" + entry.getKey().toString().substring(0, 8) + ")");
+
+    public void initializeReplay(List<ServerPlayer> players, HashMap<UUID, Role> roles) {
+        resetReplay();
+        for (ServerPlayer player : players) {
+            recordPlayerName(player);
+        }
+        currentReplayData.setPlayerCount(players.size());
+        // Set roles based on the provided HashMap
+        currentReplayData.setCivilianPlayers(roles.entrySet().stream().filter(entry -> entry.getValue().identifier().equals(dev.doctor4t.trainmurdermystery.api.TMMRoles.CIVILIAN.identifier())).map(Map.Entry::getKey).collect(java.util.ArrayList::new, java.util.ArrayList::add, java.util.ArrayList::addAll));
+        currentReplayData.setKillerPlayers(roles.entrySet().stream().filter(entry -> entry.getValue().identifier().equals(dev.doctor4t.trainmurdermystery.api.TMMRoles.KILLER.identifier())).map(Map.Entry::getKey).collect(java.util.ArrayList::new, java.util.ArrayList::add, java.util.ArrayList::addAll));
+        currentReplayData.setVigilantePlayers(roles.entrySet().stream().filter(entry -> entry.getValue().identifier().equals(dev.doctor4t.trainmurdermystery.api.TMMRoles.VIGILANTE.identifier())).map(Map.Entry::getKey).collect(java.util.ArrayList::new, java.util.ArrayList::add, java.util.ArrayList::addAll));
+        currentReplayData.setLooseEndPlayers(roles.entrySet().stream().filter(entry -> entry.getValue().identifier().equals(dev.doctor4t.trainmurdermystery.api.TMMRoles.LOOSE_END.identifier())).map(Map.Entry::getKey).collect(java.util.ArrayList::new, java.util.ArrayList::add, java.util.ArrayList::addAll));
+
+        // 填充玩家角色映射
+        Map<UUID, String> roleMap = new HashMap<>();
+        for (Map.Entry<UUID, Role> entry : roles.entrySet()) {
+            roleMap.put(entry.getKey(), entry.getValue().identifier().toString());
+            // 确保所有玩家的名称都被记录，即使他们尚未在游戏中被显式记录
+            if (!playerNames.containsKey(entry.getKey())) {
+                // 如果找不到玩家名称，尝试从服务器获取
+                ServerPlayer serverPlayer = server.getPlayerList().getPlayer(entry.getKey());
+                if (serverPlayer != null) {
+                    recordPlayerName(serverPlayer);
+                } else {
+                    // 如果无法获取玩家，使用UUID作为名称
+                    recordPlayerName(entry.getKey(), "未知玩家(" + entry.getKey().toString().substring(0, 8) + ")");
+                }
             }
         }
+        currentReplayData.setPlayerRoles(roleMap);
     }
-    currentReplayData.setPlayerRoles(roleMap);
-}
 
-public void updateRolesFromComponent(dev.doctor4t.trainmurdermystery.cca.GameWorldComponent component) {
-    currentReplayData.setCivilianPlayers(component.getAllWithRole(dev.doctor4t.trainmurdermystery.api.TMMRoles.CIVILIAN));
-    currentReplayData.setKillerPlayers(component.getAllWithRole(dev.doctor4t.trainmurdermystery.api.TMMRoles.KILLER));
-    currentReplayData.setVigilantePlayers(component.getAllWithRole(dev.doctor4t.trainmurdermystery.api.TMMRoles.VIGILANTE));
-    currentReplayData.setLooseEndPlayers(component.getAllWithRole(dev.doctor4t.trainmurdermystery.api.TMMRoles.LOOSE_END));
+    public void updateRolesFromComponent(dev.doctor4t.trainmurdermystery.cca.GameWorldComponent component) {
+        currentReplayData.setCivilianPlayers(component.getAllWithRole(dev.doctor4t.trainmurdermystery.api.TMMRoles.CIVILIAN));
+        currentReplayData.setKillerPlayers(component.getAllWithRole(dev.doctor4t.trainmurdermystery.api.TMMRoles.KILLER));
+        currentReplayData.setVigilantePlayers(component.getAllWithRole(dev.doctor4t.trainmurdermystery.api.TMMRoles.VIGILANTE));
+        currentReplayData.setLooseEndPlayers(component.getAllWithRole(dev.doctor4t.trainmurdermystery.api.TMMRoles.LOOSE_END));
 
-    Map<UUID, String> roleMap = new HashMap<>();
-    for (Map.Entry<UUID, dev.doctor4t.trainmurdermystery.api.Role> entry : component.getRoles().entrySet()) {
-        roleMap.put(entry.getKey(), entry.getValue().identifier().toString());
-    }
-    currentReplayData.setPlayerRoles(roleMap);
-}
-
-public void finalizeReplay(GameFunctions.WinStatus winStatus) {
-    currentReplayData.setWinningTeam(winStatus.name()); // Assuming WinStatus enum names can be used as team names
-    saveReplay();
-}
-
-public void recordPlayerName(Player player) {
-    playerNames.put(player.getUUID(), player.getName().getString());
-}
-
-public void recordPlayerName(UUID uuid, String name) {
-    playerNames.put(uuid, name);
-}
-
-public void recordPlayerNames(Map<UUID, String> playerNamesMap) {
-    playerNames.putAll(playerNamesMap);
-}
-
-public boolean isPlayerNameRecorded(UUID uuid) {
-    return playerNames.containsKey(uuid);
-}
-
-public Map<UUID, String> getPlayerNames() {
-    return new HashMap<>(playerNames);
-}
-
-public Component getPlayerName(UUID uuid) {
-    String name = playerNames.get(uuid);
-    if (name != null) {
-        return Component.literal(name);
-    } else {
-        // 如果在回放期间遇到未记录的玩家，尝试从服务器获取名称
-        if (server != null) {
-            ServerPlayer serverPlayer = server.getPlayerList().getPlayer(uuid);
-            if (serverPlayer != null) {
-                String playerName = serverPlayer.getName().getString();
-                recordPlayerName(uuid, playerName); // 记录以便将来使用
-                return Component.literal(playerName);
-            }
+        Map<UUID, String> roleMap = new HashMap<>();
+        for (Map.Entry<UUID, dev.doctor4t.trainmurdermystery.api.Role> entry : component.getRoles().entrySet()) {
+            roleMap.put(entry.getKey(), entry.getValue().identifier().toString());
         }
-        // 如果无法获取玩家名称，返回带UUID的描述
-        return Component.literal("未知玩家(" + uuid.toString().substring(0, 8) + ")");
+        currentReplayData.setPlayerRoles(roleMap);
     }
-}
 
-public void addEvent(GameReplayData.EventType type, UUID sourcePlayer, UUID targetPlayer, String itemUsed, String message) {
-    currentReplayData.addEvent(new GameReplayData.ReplayEvent(type, sourcePlayer, targetPlayer, itemUsed, message));
-}
-
-public void recordPlayerKill(UUID killerUuid, UUID victimUuid, ResourceLocation deathReason) {
-    addEvent(GameReplayData.EventType.KILL, killerUuid, victimUuid, deathReason.toString(), null);
-}
-
-public void setPlayerCount(int count) {
-    currentReplayData.setPlayerCount(count);
-}
-
-public void setCivilianPlayers(java.util.List<UUID> players) {
-    currentReplayData.setCivilianPlayers(players);
-}
-
-public void setKillerPlayers(java.util.List<UUID> players) {
-    currentReplayData.setKillerPlayers(players);
-}
-
-public void setVigilantePlayers(java.util.List<UUID> players) {
-    currentReplayData.setVigilantePlayers(players);
-}
-
-public void setLooseEndPlayers(java.util.List<UUID> players) {
-    currentReplayData.setLooseEndPlayers(players);
-}
-
-public void setWinningPlayer(UUID player) {
-    currentReplayData.setWinningPlayer(player);
-}
-
-public void setWinningTeam(String team) {
-    currentReplayData.setWinningTeam(team);
-}
-
-public GameReplay getCurrentReplay() {
-    return currentReplay;
-}
-
-public void saveReplay() {
-    File replayFile = new File(server.getServerDirectory().toFile(), REPLAY_FILE_NAME);
-    try (FileWriter writer = new FileWriter(replayFile)) {
-        GSON.toJson(currentReplayData, writer);
-        TMM.LOGGER.info("Game replay saved to {}", replayFile.getAbsolutePath());
-    } catch (IOException e) {
-        TMM.LOGGER.error("Failed to save game replay", e);
+    public void finalizeReplay(GameFunctions.WinStatus winStatus) {
+        currentReplayData.setWinningTeam(winStatus.name()); // Assuming WinStatus enum names can be used as team names
+        saveReplay();
     }
-}
 
-public GameReplayData loadReplay() {
-    File replayFile = new File(server.getServerDirectory().toFile(), REPLAY_FILE_NAME);
-    if (!replayFile.exists()) {
-        TMM.LOGGER.warn("No previous game replay found.");
-        return null;
+    public void recordPlayerName(Player player) {
+        playerNames.put(player.getUUID(), player.getName().getString());
     }
-    try (FileReader reader = new FileReader(replayFile)) {
-        GameReplayData loadedData = GSON.fromJson(reader, GameReplayData.class);
-        TMM.LOGGER.info("Game replay loaded from {}", replayFile.getAbsolutePath());
-        return loadedData;
-    } catch (IOException e) {
-        TMM.LOGGER.error("Failed to load game replay", e);
-        return null;
+
+    public void recordPlayerName(UUID uuid, String name) {
+        playerNames.put(uuid, name);
     }
-}
+
+    public void recordPlayerNames(Map<UUID, String> playerNamesMap) {
+        playerNames.putAll(playerNamesMap);
+    }
+
+    public boolean isPlayerNameRecorded(UUID uuid) {
+        return playerNames.containsKey(uuid);
+    }
+
+    public Map<UUID, String> getPlayerNames() {
+        return new HashMap<>(playerNames);
+    }
+
+    public Component getPlayerName(UUID uuid) {
+        String name = playerNames.get(uuid);
+        if (name != null) {
+            return Component.literal(name);
+        } else {
+            // 如果在回放期间遇到未记录的玩家，尝试从服务器获取名称
+            if (server != null) {
+                ServerPlayer serverPlayer = server.getPlayerList().getPlayer(uuid);
+                if (serverPlayer != null) {
+                    String playerName = serverPlayer.getName().getString();
+                    recordPlayerName(uuid, playerName); // 记录以便将来使用
+                    return Component.literal(playerName);
+                }
+            }
+            // 如果无法获取玩家名称，返回带UUID的描述
+            return Component.literal("未知玩家(" + uuid.toString().substring(0, 8) + ")");
+        }
+    }
+
+    public void addEvent(GameReplayData.EventType type, UUID sourcePlayer, UUID targetPlayer, String itemUsed, String message) {
+        currentReplayData.addEvent(new GameReplayData.ReplayEvent(type, sourcePlayer, targetPlayer, itemUsed, message));
+    }
+
+    public void recordPlayerKill(UUID killerUuid, UUID victimUuid, ResourceLocation deathReason) {
+        addEvent(GameReplayData.EventType.KILL, killerUuid, victimUuid, deathReason.toString(), null);
+    }
+
+    public void recordStoreBuy(UUID playerUuid, ResourceLocation itemBought, int amount, int price) {
+        addEvent(GameReplayData.EventType.STORE_BUY, playerUuid, null, itemBought.toString() + ":" + amount, String.valueOf(price));
+    }
+
+    public void recordItemUse(UUID playerUuid, ResourceLocation itemUsed) {
+        addEvent(GameReplayData.EventType.ITEM_USE, playerUuid, null, itemUsed.toString(), null);
+    }
+
+    public void recordSkillUsed(UUID playerUuid, ResourceLocation skillUsed) {
+        addEvent(GameReplayData.EventType.SKILL_USED, playerUuid, null, skillUsed.toString(), null);
+    }
+
+    public void setPlayerCount(int count) {
+        currentReplayData.setPlayerCount(count);
+    }
+
+    public void setCivilianPlayers(java.util.List<UUID> players) {
+        currentReplayData.setCivilianPlayers(players);
+    }
+
+    public void setKillerPlayers(java.util.List<UUID> players) {
+        currentReplayData.setKillerPlayers(players);
+    }
+
+    public void setVigilantePlayers(java.util.List<UUID> players) {
+        currentReplayData.setVigilantePlayers(players);
+    }
+
+    public void setLooseEndPlayers(java.util.List<UUID> players) {
+        currentReplayData.setLooseEndPlayers(players);
+    }
+
+    public void setWinningPlayer(UUID player) {
+        currentReplayData.setWinningPlayer(player);
+    }
+
+    public void setWinningTeam(String team) {
+        currentReplayData.setWinningTeam(team);
+    }
+
+    public GameReplay getCurrentReplay() {
+        return currentReplay;
+    }
+
+    public void saveReplay() {
+        File replayFile = new File(server.getServerDirectory().toFile(), REPLAY_FILE_NAME);
+        try (FileWriter writer = new FileWriter(replayFile)) {
+            GSON.toJson(currentReplayData, writer);
+            TMM.LOGGER.info("Game replay saved to {}", replayFile.getAbsolutePath());
+        } catch (IOException e) {
+            TMM.LOGGER.error("Failed to save game replay", e);
+        }
+    }
+
+    public GameReplayData loadReplay() {
+        File replayFile = new File(getInstance().getGameDir().toFile(), REPLAY_FILE_NAME);
+        if (!replayFile.exists()) {
+            TMM.LOGGER.warn("No previous game replay found.");
+            return null;
+        }
+        try (FileReader reader = new FileReader(replayFile)) {
+            GameReplayData loadedData = GSON.fromJson(reader, GameReplayData.class);
+            TMM.LOGGER.info("Game replay loaded from {}", replayFile.getAbsolutePath());
+            return loadedData;
+        } catch (IOException e) {
+            TMM.LOGGER.error("Failed to load game replay", e);
+            return null;
+        }
+    }
     public void showReplayToPlayer(ServerPlayer player) {
         GameReplayData replayData = currentReplayData;
         if (replayData == null) {
@@ -237,13 +363,13 @@ public GameReplayData loadReplay() {
         // Send game statistics
         player.sendSystemMessage(Component.translatable("tmm.replay.header").withStyle(ChatFormatting.BOLD, ChatFormatting.GOLD));
         player.sendSystemMessage(Component.translatable("tmm.replay.player_count", replayData.getPlayerCount()).withStyle(ChatFormatting.WHITE));
-        
+
         player.sendSystemMessage(Component.literal("---").withStyle(ChatFormatting.GRAY));
 
         Map<UUID, String> playerRoles = replayData.getPlayerRoles();
         if (playerRoles != null && !playerRoles.isEmpty()) {
             List<UUID> deadPlayers = getDeadPlayers(replayData);
-            
+
             // 分别获取不同阵营的存活和死亡玩家
             List<UUID> aliveCivilians = new java.util.ArrayList<>();
             List<UUID> deadCivilians = new java.util.ArrayList<>();
@@ -251,7 +377,7 @@ public GameReplayData loadReplay() {
             List<UUID> deadNeutrals = new java.util.ArrayList<>();
             List<UUID> aliveKillers = new java.util.ArrayList<>();
             List<UUID> deadKillers = new java.util.ArrayList<>();
-            
+
             for (Map.Entry<UUID, String> entry : playerRoles.entrySet()) {
                 UUID uuid = entry.getKey();
                 String roleId = entry.getValue();
@@ -285,7 +411,7 @@ public GameReplayData loadReplay() {
                     }
                 }
             }
-            
+
             // 显示平民
             if (!aliveCivilians.isEmpty() || !deadCivilians.isEmpty()) {
                 player.sendSystemMessage(Component.translatable("tmm.replay.civilians").withStyle(ChatFormatting.BLUE));
@@ -302,7 +428,7 @@ public GameReplayData loadReplay() {
                     }
                 }
             }
-            
+
             // 显示中立
             if (!aliveNeutrals.isEmpty() || !deadNeutrals.isEmpty()) {
                 player.sendSystemMessage(Component.translatable("tmm.replay.neutrals").withStyle(ChatFormatting.YELLOW));
@@ -319,7 +445,7 @@ public GameReplayData loadReplay() {
                     }
                 }
             }
-            
+
             // 显示杀手
             if (!aliveKillers.isEmpty() || !deadKillers.isEmpty()) {
                 player.sendSystemMessage(Component.translatable("tmm.replay.killers").withStyle(ChatFormatting.DARK_RED));
@@ -337,31 +463,32 @@ public GameReplayData loadReplay() {
                 }
             }
         }
-        
+
         player.sendSystemMessage(Component.literal("---").withStyle(ChatFormatting.GRAY));
-        
+
         // Send winning information
         if (replayData.getWinningTeam() != null) {
             player.sendSystemMessage(Component.translatable("tmm.replay.winning_team", Component.literal(replayData.getWinningTeam()).withStyle(ChatFormatting.GOLD)).withStyle(ChatFormatting.WHITE));
         }
-        
+
         player.sendSystemMessage(Component.literal("---").withStyle(ChatFormatting.GRAY));
-        
+
         // Send timeline
         player.sendSystemMessage(Component.translatable("tmm.replay.timeline").withStyle(ChatFormatting.BOLD, ChatFormatting.WHITE));
-        
+
         long gameStartTime = ReplayDisplayUtils.findGameStartTime(replayData);
-        for (GameReplayData.ReplayEvent event : replayData.getTimeline()) {
-            long relativeTime = event.getTimestamp() - gameStartTime;
+        for (GameReplayData.ReplayEvent dataEvent : replayData.getTimeline()) {
+            long relativeTime = dataEvent.getTimestamp() - gameStartTime;
             String timePrefix = ReplayDisplayUtils.formatTime(relativeTime) + " ";
-            Component eventText = event.toText(this, replayData);
+            ReplayEvent event = convertReplayEvent(dataEvent);
+            Component eventText = replayData.toText(this, replayData, event);
             player.sendSystemMessage(Component.literal(timePrefix).append(eventText));
         }
-        
+
         player.sendSystemMessage(Component.literal("---").withStyle(ChatFormatting.GRAY));
         player.sendSystemMessage(Component.translatable("tmm.replay.footer").withStyle(ChatFormatting.GRAY));
     }
-    
+
     private List<UUID> getDeadPlayers(GameReplayData replayData) {
         List<UUID> dead = new java.util.ArrayList<>();
         for (GameReplayData.ReplayEvent event : replayData.getTimeline()) {

@@ -1,9 +1,11 @@
 package dev.doctor4t.trainmurdermystery.item;
 
+import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.entity.FirecrackerEntity;
 import dev.doctor4t.trainmurdermystery.index.TMMEntities;
 import dev.doctor4t.trainmurdermystery.util.AdventureUsable;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -29,7 +31,10 @@ public class FirecrackerItem extends Item implements AdventureUsable {
                 firecracker.setPos(spawnPos.x(), spawnPos.y(), spawnPos.z());
                 firecracker.setYRot(player.getYHeadRot());
                 world.addFreshEntity(firecracker);
-                if (!player.isCreative()) player.getItemInHand(context.getHand()).shrink(1);
+                if (!player.isCreative()) {
+                    TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+                    player.getItemInHand(context.getHand()).shrink(1);
+                }
             }
             return InteractionResult.SUCCESS;
         }

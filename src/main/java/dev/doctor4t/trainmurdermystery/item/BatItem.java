@@ -1,7 +1,10 @@
 package dev.doctor4t.trainmurdermystery.item;
 
+import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.cca.PlayerPsychoComponent;
 import java.util.List;
+
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -29,6 +32,7 @@ public class BatItem extends Item {
             } else {
                 playerPsychoComponent.startPsycho();
             }
+            TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
             return InteractionResultHolder.success(user.getItemInHand(hand));
         }
 

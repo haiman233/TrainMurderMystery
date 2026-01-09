@@ -1,8 +1,10 @@
 package dev.doctor4t.trainmurdermystery.item;
 
+import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.entity.GrenadeEntity;
 import dev.doctor4t.trainmurdermystery.index.TMMEntities;
 import dev.doctor4t.trainmurdermystery.index.TMMSounds;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -52,6 +54,7 @@ public class GrenadeItem extends Item {
 			// 设置手榴弹的速度和方向
 			grenade.shootFromRotation(user, user.getXRot(), user.getYRot(), 0.0F, velocity, 1.0F);
 			world.addFreshEntity(grenade);
+			         TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
 		}
 
 

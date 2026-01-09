@@ -1,9 +1,11 @@
 package dev.doctor4t.trainmurdermystery.item;
 
+import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.TMMSounds;
 import dev.doctor4t.trainmurdermystery.util.KnifeStabPayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
@@ -29,6 +31,9 @@ public class KnifeItem extends Item {
         ItemStack itemStack = user.getItemInHand(hand);
         user.startUsingItem(hand);
         user.playSound(TMMSounds.ITEM_KNIFE_PREPARE, 1.0f, 1.0f);
+        if (!world.isClientSide) {
+            TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+        }
         return InteractionResultHolder.consume(itemStack);
     }
 

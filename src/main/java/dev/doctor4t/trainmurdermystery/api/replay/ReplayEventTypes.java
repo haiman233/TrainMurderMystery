@@ -1,0 +1,92 @@
+package dev.doctor4t.trainmurdermystery.api.replay;
+
+import dev.doctor4t.trainmurdermystery.api.Role;
+import dev.doctor4t.trainmurdermystery.game.GameFunctions;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import java.util.UUID;
+
+public class ReplayEventTypes {
+
+    public interface EventDetails {
+        // 标记接口，所有事件详情类都应实现此接口
+    }
+
+    public enum EventType {
+        GAME_START,
+        GAME_END,
+        PLAYER_JOIN,
+        PLAYER_LEAVE,
+        PLAYER_KILL,
+        PLAYER_POISONED,
+        TASK_COMPLETE,
+        STORE_BUY,
+        DOOR_LOCK,
+        DOOR_UNLOCK,
+        DOOR_OPEN,
+        DOOR_CLOSE,
+        LOCKPICK_ATTEMPT,
+        ITEM_USED,
+        MOOD_CHANGE,
+        PSYCHO_STATE_CHANGE,
+        NOTE_EDIT,
+        BLACKOUT_START,
+        BLACKOUT_END,
+        ROUND_END,
+        GUN_FIRED,
+        GRENADE_THROWN,
+        KEY_USED,
+        // Add more event types as needed
+        CUSTOM_EVENT // 用于第三方模组的自定义事件
+    }
+
+    public record PlayerKillDetails(UUID killerUuid, UUID victimUuid, ResourceLocation deathReason) implements EventDetails {
+    }
+
+    public record PlayerPoisonedDetails(UUID poisonerUuid, UUID victimUuid) implements EventDetails {
+    }
+
+    // 任务完成事件详情
+    public record TaskCompleteDetails(UUID playerUuid, ResourceLocation taskId) implements EventDetails {}
+
+    // 商店购买事件详情
+    public record StoreBuyDetails(UUID playerUuid, ResourceLocation itemId, int cost) implements EventDetails {}
+
+    // 门操作事件详情（锁定、解锁、打开、关闭）
+    public record DoorActionDetails(UUID playerUuid, BlockPos doorPos, boolean success) implements EventDetails {}
+
+    // 撬锁尝试事件详情
+    public record LockpickAttemptDetails(UUID playerUuid, BlockPos doorPos, boolean success) implements EventDetails {}
+
+    // 物品使用事件详情
+    public record ItemUsedDetails(UUID playerUuid, ResourceLocation itemId) implements EventDetails {}
+
+    // 心情变化事件详情
+    public record MoodChangeDetails(UUID playerUuid, int oldMood, int newMood) implements EventDetails {}
+
+    // 精神病状态变化事件详情
+    public record PsychoStateChangeDetails(UUID playerUuid, int oldState, int newState) implements EventDetails {}
+
+    // 笔记编辑事件详情
+    public record NoteEditDetails(UUID playerUuid, String noteContent) implements EventDetails {}
+
+    // 停电事件详情
+    public record BlackoutEventDetails(long duration) implements EventDetails {}
+
+    // 回合结束事件详情
+    public record RoundEndDetails(GameFunctions.WinStatus roundResult) implements EventDetails {}
+
+    // 枪射击事件详情
+    public record GunFiredDetails(UUID playerUuid, boolean hit, UUID targetUuid) implements EventDetails {}
+
+    // 手榴弹投掷事件详情
+    public record GrenadeThrownDetails(UUID playerUuid, BlockPos position) implements EventDetails {}
+
+    // 钥匙使用事件详情
+    public record KeyUsedDetails(UUID playerUuid, ResourceLocation keyItemId, BlockPos doorPos) implements EventDetails {}
+
+    // 自定义事件详情，用于第三方模组
+    public record CustomEventDetails(ResourceLocation eventId, String data) implements EventDetails {}
+
+    // Add more specific EventDetails classes for other event types
+}

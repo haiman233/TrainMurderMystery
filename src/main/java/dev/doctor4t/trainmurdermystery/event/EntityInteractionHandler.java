@@ -53,8 +53,8 @@ public class EntityInteractionHandler {
             if (world.isClientSide) {
                 return InteractionResult.PASS;
             }
-            if (!hand.equals(InteractionHand.OFF_HAND)) {
-                if (hitResult.getEntity()!=null ){
+            if (!hand.equals(InteractionHand.OFF_HAND) && hitResult != null) {
+                if (hitResult.getEntity() != null) {
 
                 // 获取实体上的自定义数据
                 String customData = entity.getAttached(EntityDataCommand.ENTITY_CUSTOM_DATA_COMMAND);

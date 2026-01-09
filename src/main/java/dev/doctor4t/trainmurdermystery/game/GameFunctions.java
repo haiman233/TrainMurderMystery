@@ -127,6 +127,8 @@ public class GameFunctions {
         serverWorld.setWeatherParameters(0,-1, true, true);
         baseInitialize(serverWorld, gameComponent, readyPlayerList);
         TMM.REPLAY_MANAGER.initializeReplay(readyPlayerList, gameComponent.getRoles());
+        // 记录游戏开始事件
+        TMM.REPLAY_MANAGER.addEvent(GameReplayData.EventType.GAME_START, null, null, null, null);
         gameComponent.getGameMode().initializeGame(serverWorld, gameComponent, readyPlayerList);
         // Update replay with actual roles after assignment
         TMM.REPLAY_MANAGER.updateRolesFromComponent(gameComponent);

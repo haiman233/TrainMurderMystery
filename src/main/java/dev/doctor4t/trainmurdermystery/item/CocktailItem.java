@@ -1,7 +1,9 @@
 package dev.doctor4t.trainmurdermystery.item;
 
+import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.cca.PlayerMoodComponent;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -28,6 +30,7 @@ public class CocktailItem extends Item {
             CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayerEntity, stack);
             serverPlayerEntity.awardStat(Stats.ITEM_USED.get(this));
             PlayerMoodComponent.KEY.get(serverPlayerEntity).drinkCocktail();
+            TMM.REPLAY_MANAGER.recordItemUse(serverPlayerEntity.getUUID(), BuiltInRegistries.ITEM.getKey(this));
         }
         return stack;
     }

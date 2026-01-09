@@ -3,13 +3,17 @@ package dev.doctor4t.trainmurdermystery.util;
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.api.Role;
 import dev.doctor4t.trainmurdermystery.api.TMMRoles;
+import dev.doctor4t.trainmurdermystery.api.replay.ReplayEvent;
+import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.game.GameReplay;
 import java.util.*;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 
 public record ReplayPayload(GameReplay replay) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<ReplayPayload> ID = new CustomPacketPayload.Type<>(TMM.id("replay"));
@@ -24,7 +28,7 @@ public record ReplayPayload(GameReplay replay) implements CustomPacketPayload {
     }
 
     @Override
-    public Type<? extends CustomPacketPayload> type() {
+    public @NotNull Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 
@@ -47,11 +51,11 @@ public record ReplayPayload(GameReplay replay) implements CustomPacketPayload {
         }
 
         int numEvents = buf.readInt();
-        List<GameReplay.ReplayEvent> timelineEvents = new ArrayList<>();
+        List<ReplayEvent> timelineEvents = new ArrayList<>();
         for (int i = 0; i < numEvents; i++) {
-            GameReplay.EventType eventType = buf.readEnum(GameReplay.EventType.class);
+            ReplayEventTypes.EventType eventType = buf.readEnum(ReplayEventTypes.EventType.class);
             long timestamp = buf.readInt();
-            GameReplay.EventDetails details = null;
+            ReplayEventTypes.EventDetails details = null;
 
             switch (eventType) {
                 case PLAYER_KILL: {
@@ -60,7 +64,7 @@ public record ReplayPayload(GameReplay replay) implements CustomPacketPayload {
                     int victimIndex = buf.readVarInt();
                     UUID victimUuid = players.get(victimIndex).uuid();
                     ResourceLocation deathReason = buf.readResourceLocation();
-                    details = new GameReplay.PlayerKillDetails(killerUuid, victimUuid, deathReason);
+                    details = new ReplayEventTypes.PlayerKillDetails(killerUuid, victimUuid, deathReason);
                     break;
                 }
                 case PLAYER_POISONED: {
@@ -68,12 +72,85 @@ public record ReplayPayload(GameReplay replay) implements CustomPacketPayload {
                     UUID poisonerUuid = players.get(poisonerIndex).uuid();
                     int victimIndex = buf.readVarInt();
                     UUID poisonedVictimUuid = players.get(victimIndex).uuid();
-                    details = new GameReplay.PlayerPoisonedDetails(poisonerUuid, poisonedVictimUuid);
+                    details = new ReplayEventTypes.PlayerPoisonedDetails(poisonerUuid, poisonedVictimUuid);
                     break;
                 }
-                // Add more cases for other event types
+                case GUN_FIRED: {
+                    int shooterIndex = buf.readVarInt();
+                    UUID shooterUuid = players.get(shooterIndex).uuid();
+                    boolean hit = buf.readBoolean();
+                    UUID targetUuid = null;
+                    if (hit) {
+                        int targetIndex = buf.readVarInt();
+                        targetUuid = players.get(targetIndex).uuid();
+                    }
+                    details = new ReplayEventTypes.GunFiredDetails(shooterUuid, hit, targetUuid);
+                    break;
+                }
+                case GRENADE_THROWN: {
+                    int throwerIndex = buf.readVarInt();
+                    UUID throwerUuid = players.get(throwerIndex).uuid();
+                    BlockPos pos = buf.readBlockPos();
+                    details = new ReplayEventTypes.GrenadeThrownDetails(throwerUuid, pos);
+                    break;
+                }
+                case ITEM_USED: {
+                    int userIndex = buf.readVarInt();
+                    UUID userUuid = players.get(userIndex).uuid();
+                    ResourceLocation itemId = buf.readResourceLocation();
+                    details = new ReplayEventTypes.ItemUsedDetails(userUuid, itemId);
+                    break;
+                }
+                case TASK_COMPLETE: {
+                    int playerIndex = buf.readVarInt();
+                    UUID playerUuid = players.get(playerIndex).uuid();
+                    ResourceLocation taskId = buf.readResourceLocation();
+                    details = new ReplayEventTypes.TaskCompleteDetails(playerUuid, taskId);
+                    break;
+                }
+                case STORE_BUY: {
+                    int buyerIndex = buf.readVarInt();
+                    UUID buyerUuid = players.get(buyerIndex).uuid();
+                    ResourceLocation itemId = buf.readResourceLocation();
+                    int cost = buf.readInt();
+                    details = new ReplayEventTypes.StoreBuyDetails(buyerUuid, itemId, cost);
+                    break;
+                }
+                case DOOR_OPEN:
+                case DOOR_CLOSE: {
+                    int playerIndex = buf.readVarInt();
+                    UUID playerUuid = players.get(playerIndex).uuid();
+                    BlockPos doorPos = buf.readBlockPos();
+                    boolean success = buf.readBoolean();
+                    details = new ReplayEventTypes.DoorActionDetails(playerUuid, doorPos, success);
+                    break;
+                }
+                case LOCKPICK_ATTEMPT: {
+                    int playerIndex = buf.readVarInt();
+                    UUID playerUuid = players.get(playerIndex).uuid();
+                    BlockPos doorPos = buf.readBlockPos();
+                    boolean success = buf.readBoolean();
+                    details = new ReplayEventTypes.LockpickAttemptDetails(playerUuid, doorPos, success);
+                    break;
+                }
+                case MOOD_CHANGE: {
+                    int playerIndex = buf.readVarInt();
+                    UUID playerUuid = players.get(playerIndex).uuid();
+                    int oldMood = buf.readInt();
+                    int newMood = buf.readInt();
+                    details = new ReplayEventTypes.MoodChangeDetails(playerUuid, oldMood, newMood);
+                    break;
+                }
+                case NOTE_EDIT: {
+                    int playerIndex = buf.readVarInt();
+                    UUID playerUuid = players.get(playerIndex).uuid();
+                    String noteContent = buf.readUtf();
+                    details = new ReplayEventTypes.NoteEditDetails(playerUuid, noteContent);
+                    break;
+                }
+                // Add more cases for other event types if needed
             }
-            timelineEvents.add(new GameReplay.ReplayEvent(eventType, timestamp, details));
+            timelineEvents.add(new ReplayEvent(eventType, timestamp, details));
         }
         return new GameReplay(playerCount, winningTeam, players, timelineEvents);
     }
@@ -89,30 +166,82 @@ public record ReplayPayload(GameReplay replay) implements CustomPacketPayload {
             buf.writeResourceLocation(playerInfo.finalRole().identifier());
         }
 
-
         Map<UUID, Integer> playerUuidToIndex = new HashMap<>();
         for (int i = 0; i < replay.players().size(); i++) {
             playerUuidToIndex.put(replay.players().get(i).uuid(), i);
         }
 
         buf.writeInt(replay.timelineEvents().size());
-        for (GameReplay.ReplayEvent event : replay.timelineEvents()) {
+        for (ReplayEvent event : replay.timelineEvents()) {
             buf.writeEnum(event.eventType());
             buf.writeInt((int) event.timestamp());
 
             switch (event.eventType()) {
                 case PLAYER_KILL:
-                    GameReplay.PlayerKillDetails killDetails = (GameReplay.PlayerKillDetails) event.details();
+                    ReplayEventTypes.PlayerKillDetails killDetails = (ReplayEventTypes.PlayerKillDetails) event.details();
                     buf.writeVarInt(playerUuidToIndex.get(killDetails.killerUuid()));
                     buf.writeVarInt(playerUuidToIndex.get(killDetails.victimUuid()));
                     buf.writeResourceLocation(killDetails.deathReason());
                     break;
                 case PLAYER_POISONED:
-                    GameReplay.PlayerPoisonedDetails poisonedDetails = (GameReplay.PlayerPoisonedDetails) event.details();
+                    ReplayEventTypes.PlayerPoisonedDetails poisonedDetails = (ReplayEventTypes.PlayerPoisonedDetails) event.details();
                     buf.writeVarInt(playerUuidToIndex.get(poisonedDetails.poisonerUuid()));
                     buf.writeVarInt(playerUuidToIndex.get(poisonedDetails.victimUuid()));
                     break;
-                // Add more cases for other event types
+                case GUN_FIRED:
+                    ReplayEventTypes.GunFiredDetails gunDetails = (ReplayEventTypes.GunFiredDetails) event.details();
+                    buf.writeVarInt(playerUuidToIndex.get(gunDetails.playerUuid()));
+                    buf.writeBoolean(gunDetails.hit());
+                    if (gunDetails.hit() && gunDetails.targetUuid() != null) {
+                        buf.writeVarInt(playerUuidToIndex.get(gunDetails.targetUuid()));
+                    }
+                    break;
+                case GRENADE_THROWN:
+                    ReplayEventTypes.GrenadeThrownDetails grenadeDetails = (ReplayEventTypes.GrenadeThrownDetails) event.details();
+                    buf.writeVarInt(playerUuidToIndex.get(grenadeDetails.playerUuid()));
+                    buf.writeBlockPos(grenadeDetails.position());
+                    break;
+                case ITEM_USED:
+                    ReplayEventTypes.ItemUsedDetails itemDetails = (ReplayEventTypes.ItemUsedDetails) event.details();
+                    buf.writeVarInt(playerUuidToIndex.get(itemDetails.playerUuid()));
+                    buf.writeResourceLocation(itemDetails.itemId());
+                    break;
+                case TASK_COMPLETE:
+                    ReplayEventTypes.TaskCompleteDetails taskDetails = (ReplayEventTypes.TaskCompleteDetails) event.details();
+                    buf.writeVarInt(playerUuidToIndex.get(taskDetails.playerUuid()));
+                    buf.writeResourceLocation(taskDetails.taskId());
+                    break;
+                case STORE_BUY:
+                    ReplayEventTypes.StoreBuyDetails storeDetails = (ReplayEventTypes.StoreBuyDetails) event.details();
+                    buf.writeVarInt(playerUuidToIndex.get(storeDetails.playerUuid()));
+                    buf.writeResourceLocation(storeDetails.itemId());
+                    buf.writeInt(storeDetails.cost());
+                    break;
+                case DOOR_OPEN:
+                case DOOR_CLOSE:
+                    ReplayEventTypes.DoorActionDetails doorDetails = (ReplayEventTypes.DoorActionDetails) event.details();
+                    buf.writeVarInt(playerUuidToIndex.get(doorDetails.playerUuid()));
+                    buf.writeBlockPos(doorDetails.doorPos());
+                    buf.writeBoolean(doorDetails.success());
+                    break;
+                case LOCKPICK_ATTEMPT:
+                    ReplayEventTypes.LockpickAttemptDetails lockpickDetails = (ReplayEventTypes.LockpickAttemptDetails) event.details();
+                    buf.writeVarInt(playerUuidToIndex.get(lockpickDetails.playerUuid()));
+                    buf.writeBlockPos(lockpickDetails.doorPos());
+                    buf.writeBoolean(lockpickDetails.success());
+                    break;
+                case MOOD_CHANGE:
+                    ReplayEventTypes.MoodChangeDetails moodDetails = (ReplayEventTypes.MoodChangeDetails) event.details();
+                    buf.writeVarInt(playerUuidToIndex.get(moodDetails.playerUuid()));
+                    buf.writeInt(moodDetails.oldMood());
+                    buf.writeInt(moodDetails.newMood());
+                    break;
+                case NOTE_EDIT:
+                    ReplayEventTypes.NoteEditDetails noteDetails = (ReplayEventTypes.NoteEditDetails) event.details();
+                    buf.writeVarInt(playerUuidToIndex.get(noteDetails.playerUuid()));
+                    buf.writeUtf(noteDetails.noteContent());
+                    break;
+                // Add more cases for other event types if needed
             }
         }
     }

@@ -1,11 +1,13 @@
 package dev.doctor4t.trainmurdermystery.item;
 
+import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.block.SmallDoorBlock;
 import dev.doctor4t.trainmurdermystery.block_entity.SmallDoorBlockEntity;
 import dev.doctor4t.trainmurdermystery.util.AdventureUsable;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -44,6 +46,7 @@ public class KeyItem extends Item implements AdventureUsable {
                     if (player.isCreative() && player.isShiftKeyDown()) {
                         String roomName = lines.getFirst().getString();
                         entity.setKeyName(roomName);
+                        TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(this));
                         return InteractionResult.SUCCESS;
                     }
                 }

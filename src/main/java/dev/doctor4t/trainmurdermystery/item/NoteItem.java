@@ -1,10 +1,12 @@
 package dev.doctor4t.trainmurdermystery.item;
 
+import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.cca.PlayerNoteComponent;
 import dev.doctor4t.trainmurdermystery.entity.NoteEntity;
 import dev.doctor4t.trainmurdermystery.index.TMMEntities;
 import dev.doctor4t.trainmurdermystery.util.AdventureUsable;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -57,7 +59,10 @@ public class NoteItem extends Item implements AdventureUsable {
         Vec3 hitPos = context.getClickLocation().add(context.getClickLocation().subtract(player.getEyePosition()).normalize().scale(-.01f)).subtract(0, note.getBbHeight() / 2f, 0);
         note.setPos(hitPos.x(), hitPos.y(), hitPos.z());
         world.addFreshEntity(note);
-        if (!player.isCreative()) player.getItemInHand(context.getHand()).shrink(1);
+        if (!player.isCreative()) {
+            TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+            player.getItemInHand(context.getHand()).shrink(1);
+        }
         return InteractionResult.SUCCESS;
     }
 }

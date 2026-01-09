@@ -7,6 +7,7 @@ import dev.doctor4t.trainmurdermystery.client.render.TMMRenderLayers;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.util.GunShootPayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
@@ -47,6 +48,7 @@ public class RevolverItem extends Item {
         } else {
             // 在服务端消耗耐久度
 //            stack.setDamage(stack.getDamage() + 1);
+            TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
         }
         return InteractionResultHolder.consume(stack);
     }

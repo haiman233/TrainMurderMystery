@@ -9,6 +9,7 @@ import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.TMMDataComponentTypes;
 import dev.doctor4t.trainmurdermystery.util.GunShootPayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -45,6 +46,9 @@ public class DerringerItem extends RevolverItem {
             if (!used) {
                 user.setXRot(user.getXRot() - 4);
                 spawnHandParticle();
+                if (!world.isClientSide) {
+                    TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+                }
             }
         }
         return InteractionResultHolder.consume(stack);

@@ -43,6 +43,8 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.doctor4t.trainmurdermystery.api.replay.ReplayApiInitializer;
+
 import java.util.Optional;
 import java.util.Set;
 
@@ -65,6 +67,9 @@ public class TMM implements ModInitializer {
         
         // Init constants
         GameConstants.init();
+
+        // Initialize Replay API serializers
+        ReplayApiInitializer.init();
 
         // Register event handlers
         PlayerInteractionHandler.register();
@@ -120,10 +125,6 @@ public class TMM implements ModInitializer {
             
             // 优化：提前检查是否启用锁定，避免不必要的API调用
             if (!gameWorldComponent.isLockedToSupporters()) {
-                // 服务器未锁定，直接允许加入
-                if (gameWorldComponent.getGameStatus() == GameWorldComponent.GameStatus.ACTIVE) {
-                    // gameWorldComponent.addPlayer(player); // Removed as method does not exist
-                }
                 if (REPLAY_MANAGER != null) {
                     REPLAY_MANAGER.recordPlayerName(player);
                     REPLAY_MANAGER.addEvent(GameReplayData.EventType.PLAYER_JOIN, null, player.getUUID(), null, null);
@@ -154,9 +155,7 @@ public class TMM implements ModInitializer {
                 }
             }, player.level().getServer());
 
-            if (gameWorldComponent.getGameStatus() == GameWorldComponent.GameStatus.ACTIVE) {
-                // gameWorldComponent.addPlayer(player); // Removed as method does not exist
-            }
+            // gameWorldComponent.addPlayer(player); // Removed as method does not exist
         });
 
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {

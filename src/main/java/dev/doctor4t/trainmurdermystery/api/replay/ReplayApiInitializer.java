@@ -1,0 +1,35 @@
+package dev.doctor4t.trainmurdermystery.api.replay;
+
+import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.*;
+import dev.doctor4t.trainmurdermystery.api.replay.serializers.*;
+import net.minecraft.resources.ResourceLocation;
+
+public class ReplayApiInitializer {
+
+    public static void init() {
+        // 注册所有内置事件的序列化器和反序列化器
+        ReplayEventRegistry.register(EventType.PLAYER_KILL, PlayerKillDetails.class, new PlayerKillDetailsSerializer(), new PlayerKillDetailsSerializer());
+        ReplayEventRegistry.register(EventType.PLAYER_POISONED, PlayerPoisonedDetails.class, new PlayerPoisonedDetailsSerializer(), new PlayerPoisonedDetailsSerializer());
+        ReplayEventRegistry.register(EventType.TASK_COMPLETE, TaskCompleteDetails.class, new TaskCompleteDetailsSerializer(), new TaskCompleteDetailsSerializer());
+        ReplayEventRegistry.register(EventType.STORE_BUY, StoreBuyDetails.class, new StoreBuyDetailsSerializer(), new StoreBuyDetailsSerializer());
+        ReplayEventRegistry.register(EventType.DOOR_LOCK, DoorActionDetails.class, new DoorActionDetailsSerializer(), new DoorActionDetailsSerializer());
+        ReplayEventRegistry.register(EventType.DOOR_UNLOCK, DoorActionDetails.class, new DoorActionDetailsSerializer(), new DoorActionDetailsSerializer());
+        ReplayEventRegistry.register(EventType.DOOR_OPEN, DoorActionDetails.class, new DoorActionDetailsSerializer(), new DoorActionDetailsSerializer());
+        ReplayEventRegistry.register(EventType.DOOR_CLOSE, DoorActionDetails.class, new DoorActionDetailsSerializer(), new DoorActionDetailsSerializer());
+        ReplayEventRegistry.register(EventType.LOCKPICK_ATTEMPT, LockpickAttemptDetails.class, new LockpickAttemptDetailsSerializer(), new LockpickAttemptDetailsSerializer());
+        ReplayEventRegistry.register(EventType.ITEM_USED, ItemUsedDetails.class, new ItemUsedDetailsSerializer(), new ItemUsedDetailsSerializer());
+        ReplayEventRegistry.register(EventType.MOOD_CHANGE, MoodChangeDetails.class, new MoodChangeDetailsSerializer(), new MoodChangeDetailsSerializer());
+        ReplayEventRegistry.register(EventType.PSYCHO_STATE_CHANGE, PsychoStateChangeDetails.class, new PsychoStateChangeDetailsSerializer(), new PsychoStateChangeDetailsSerializer());
+        ReplayEventRegistry.register(EventType.NOTE_EDIT, NoteEditDetails.class, new NoteEditDetailsSerializer(), new NoteEditDetailsSerializer());
+        ReplayEventRegistry.register(EventType.BLACKOUT_START, BlackoutEventDetails.class, new BlackoutEventDetailsSerializer(), new BlackoutEventDetailsSerializer());
+        ReplayEventRegistry.register(EventType.BLACKOUT_END, BlackoutEventDetails.class, new BlackoutEventDetailsSerializer(), new BlackoutEventDetailsSerializer());
+        ReplayEventRegistry.register(EventType.ROUND_END, RoundEndDetails.class, new RoundEndDetailsSerializer(), new RoundEndDetailsSerializer());
+        ReplayEventRegistry.register(EventType.GUN_FIRED, GunFiredDetails.class, new GunFiredDetailsSerializer(), new GunFiredDetailsSerializer());
+        ReplayEventRegistry.register(EventType.GRENADE_THROWN, GrenadeThrownDetails.class, new GrenadeThrownDetailsSerializer(), new GrenadeThrownDetailsSerializer());
+        ReplayEventRegistry.register(EventType.KEY_USED, KeyUsedDetails.class, new KeyUsedDetailsSerializer(), new KeyUsedDetailsSerializer());
+
+        // 注册自定义事件的默认序列化器和反序列化器
+        // 注意：CUSTOM_EVENT 本身不直接注册，而是通过 registerCustomEvent 注册具体的自定义事件ID
+        // ReplayEventRegistry.register(EventType.CUSTOM_EVENT, CustomEventDetails.class, new CustomEventDetailsSerializer(), new CustomEventDetailsSerializer());
+    }
+}
