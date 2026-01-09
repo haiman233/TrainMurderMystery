@@ -4,6 +4,7 @@ import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.block.SmallDoorBlock;
 import dev.doctor4t.trainmurdermystery.block_entity.SmallDoorBlockEntity;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
+import dev.doctor4t.trainmurdermystery.index.TMMItems;
 import dev.doctor4t.trainmurdermystery.index.TMMSounds;
 import dev.doctor4t.trainmurdermystery.util.AdventureUsable;
 import net.minecraft.core.BlockPos;
@@ -36,7 +37,9 @@ public class LockpickItem extends Item implements AdventureUsable {
                     entity.jam();
 
                     if (!player.isCreative()) {
-                        TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+                        if (TMM.REPLAY_MANAGER != null) {
+                            TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+                        }
                         player.getCooldowns().addCooldown(this, GameConstants.ITEM_COOLDOWNS.get(this));
                     }
 

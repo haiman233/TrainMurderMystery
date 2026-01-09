@@ -75,18 +75,6 @@ public record ReplayPayload(GameReplay replay) implements CustomPacketPayload {
                     details = new ReplayEventTypes.PlayerPoisonedDetails(poisonerUuid, poisonedVictimUuid);
                     break;
                 }
-                case GUN_FIRED: {
-                    int shooterIndex = buf.readVarInt();
-                    UUID shooterUuid = players.get(shooterIndex).uuid();
-                    boolean hit = buf.readBoolean();
-                    UUID targetUuid = null;
-                    if (hit) {
-                        int targetIndex = buf.readVarInt();
-                        targetUuid = players.get(targetIndex).uuid();
-                    }
-                    details = new ReplayEventTypes.GunFiredDetails(shooterUuid, hit, targetUuid);
-                    break;
-                }
                 case GRENADE_THROWN: {
                     int throwerIndex = buf.readVarInt();
                     UUID throwerUuid = players.get(throwerIndex).uuid();
@@ -141,13 +129,6 @@ public record ReplayPayload(GameReplay replay) implements CustomPacketPayload {
                     details = new ReplayEventTypes.MoodChangeDetails(playerUuid, oldMood, newMood);
                     break;
                 }
-                case NOTE_EDIT: {
-                    int playerIndex = buf.readVarInt();
-                    UUID playerUuid = players.get(playerIndex).uuid();
-                    String noteContent = buf.readUtf();
-                    details = new ReplayEventTypes.NoteEditDetails(playerUuid, noteContent);
-                    break;
-                }
                 // Add more cases for other event types if needed
             }
             timelineEvents.add(new ReplayEvent(eventType, timestamp, details));
@@ -188,14 +169,6 @@ public record ReplayPayload(GameReplay replay) implements CustomPacketPayload {
                     buf.writeVarInt(playerUuidToIndex.get(poisonedDetails.poisonerUuid()));
                     buf.writeVarInt(playerUuidToIndex.get(poisonedDetails.victimUuid()));
                     break;
-                case GUN_FIRED:
-                    ReplayEventTypes.GunFiredDetails gunDetails = (ReplayEventTypes.GunFiredDetails) event.details();
-                    buf.writeVarInt(playerUuidToIndex.get(gunDetails.playerUuid()));
-                    buf.writeBoolean(gunDetails.hit());
-                    if (gunDetails.hit() && gunDetails.targetUuid() != null) {
-                        buf.writeVarInt(playerUuidToIndex.get(gunDetails.targetUuid()));
-                    }
-                    break;
                 case GRENADE_THROWN:
                     ReplayEventTypes.GrenadeThrownDetails grenadeDetails = (ReplayEventTypes.GrenadeThrownDetails) event.details();
                     buf.writeVarInt(playerUuidToIndex.get(grenadeDetails.playerUuid()));
@@ -235,11 +208,6 @@ public record ReplayPayload(GameReplay replay) implements CustomPacketPayload {
                     buf.writeVarInt(playerUuidToIndex.get(moodDetails.playerUuid()));
                     buf.writeInt(moodDetails.oldMood());
                     buf.writeInt(moodDetails.newMood());
-                    break;
-                case NOTE_EDIT:
-                    ReplayEventTypes.NoteEditDetails noteDetails = (ReplayEventTypes.NoteEditDetails) event.details();
-                    buf.writeVarInt(playerUuidToIndex.get(noteDetails.playerUuid()));
-                    buf.writeUtf(noteDetails.noteContent());
                     break;
                 // Add more cases for other event types if needed
             }

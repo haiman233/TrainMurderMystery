@@ -36,7 +36,7 @@ public class NoteItem extends Item implements AdventureUsable {
         if (player == null || player.isShiftKeyDown()) return InteractionResult.PASS;
         PlayerNoteComponent component = PlayerNoteComponent.KEY.get(player);
         if (!component.written) {
-            player.displayClientMessage(Component.literal("I should write something first").withColor(Mth.hsvToRgb(0F, 1.0F, 0.6F)), true);
+            player.displayClientMessage(Component.literal("我应该先写下点东西").withColor(Mth.hsvToRgb(0F, 1.0F, 0.6F)), true);
             return InteractionResult.PASS;
         }
         Level world = player.level();
@@ -60,7 +60,9 @@ public class NoteItem extends Item implements AdventureUsable {
         note.setPos(hitPos.x(), hitPos.y(), hitPos.z());
         world.addFreshEntity(note);
         if (!player.isCreative()) {
-            TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+            if (TMM.REPLAY_MANAGER != null) {
+                TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+            }
             player.getItemInHand(context.getHand()).shrink(1);
         }
         return InteractionResult.SUCCESS;

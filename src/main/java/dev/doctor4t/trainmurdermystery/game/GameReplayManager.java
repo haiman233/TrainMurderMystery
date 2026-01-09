@@ -50,11 +50,11 @@ public class GameReplayManager {
     private ReplayEventTypes.EventType mapEventType(GameReplayData.EventType dataEventType) {
         return switch (dataEventType) {
             // 主要事件
-            case KILL -> ReplayEventTypes.EventType.PLAYER_KILL;
-            case POISON -> ReplayEventTypes.EventType.PLAYER_POISONED;
-            case GUN_FIRED -> ReplayEventTypes.EventType.GUN_FIRED;
+            case PLAYER_KILL -> ReplayEventTypes.EventType.PLAYER_KILL;
+            case PLAYER_POISONED -> ReplayEventTypes.EventType.PLAYER_POISONED;
             case GRENADE_THROWN -> ReplayEventTypes.EventType.GRENADE_THROWN;
             case SKILL_USED -> ReplayEventTypes.EventType.ITEM_USED;
+            case ITEM_USED -> ReplayEventTypes.EventType.ITEM_USED;
             // 系统事件
             case GAME_START -> ReplayEventTypes.EventType.GAME_START;
             case GAME_END -> ReplayEventTypes.EventType.GAME_END;
@@ -62,25 +62,17 @@ public class GameReplayManager {
             case PLAYER_JOIN -> ReplayEventTypes.EventType.PLAYER_JOIN;
             case PLAYER_LEAVE -> ReplayEventTypes.EventType.PLAYER_LEAVE;
             // 次要事件
-            case ITEM_USE -> ReplayEventTypes.EventType.ITEM_USED;
             case DOOR_OPEN -> ReplayEventTypes.EventType.DOOR_OPEN;
             case DOOR_CLOSE -> ReplayEventTypes.EventType.DOOR_CLOSE;
+            case DOOR_LOCK -> ReplayEventTypes.EventType.DOOR_LOCK;
+            case DOOR_UNLOCK -> ReplayEventTypes.EventType.DOOR_UNLOCK;
             case LOCKPICK_ATTEMPT -> ReplayEventTypes.EventType.LOCKPICK_ATTEMPT;
             case TASK_COMPLETE -> ReplayEventTypes.EventType.TASK_COMPLETE;
             case STORE_BUY -> ReplayEventTypes.EventType.STORE_BUY;
             case MOOD_CHANGE -> ReplayEventTypes.EventType.MOOD_CHANGE;
-            case NOTE_EDIT -> ReplayEventTypes.EventType.NOTE_EDIT;
-            // 新增映射
-            case PLAYER_KILL -> ReplayEventTypes.EventType.PLAYER_KILL;
-            case PLAYER_POISONED -> ReplayEventTypes.EventType.PLAYER_POISONED;
-            case DOOR_LOCK -> ReplayEventTypes.EventType.DOOR_LOCK;
-            case DOOR_UNLOCK -> ReplayEventTypes.EventType.DOOR_UNLOCK;
-            case ITEM_USED -> ReplayEventTypes.EventType.ITEM_USED;
             case PSYCHO_STATE_CHANGE -> ReplayEventTypes.EventType.PSYCHO_STATE_CHANGE;
             case BLACKOUT_START -> ReplayEventTypes.EventType.BLACKOUT_START;
             case BLACKOUT_END -> ReplayEventTypes.EventType.BLACKOUT_END;
-            case ROUND_END -> ReplayEventTypes.EventType.ROUND_END;
-            case KEY_USED -> ReplayEventTypes.EventType.KEY_USED;
             // 默认映射
             case CUSTOM_MESSAGE -> ReplayEventTypes.EventType.GAME_START;
         };
@@ -90,25 +82,19 @@ public class GameReplayManager {
         ReplayEventTypes.EventType eventType = mapEventType(dataEvent.getType());
         ReplayEventTypes.EventDetails details = switch (dataEvent.getType()) {
             // 主要事件
-            case KILL ->
+            case PLAYER_KILL ->
                     new ReplayEventTypes.PlayerKillDetails(dataEvent.getSourcePlayer(), dataEvent.getTargetPlayer(), ResourceLocation.parse(dataEvent.getItemUsed()));
-            case POISON ->
+            case PLAYER_POISONED ->
                     new ReplayEventTypes.PlayerPoisonedDetails(dataEvent.getSourcePlayer(), dataEvent.getTargetPlayer());
-            case GUN_FIRED ->
-                    new ReplayEventTypes.GunFiredDetails(dataEvent.getSourcePlayer(), Boolean.parseBoolean(dataEvent.getMessage()), dataEvent.getTargetPlayer());
             case GRENADE_THROWN -> {
                 BlockPos pos = BlockPos.of(Long.parseLong(dataEvent.getItemUsed()));
                 yield new ReplayEventTypes.GrenadeThrownDetails(dataEvent.getSourcePlayer(), pos);
             }
             case SKILL_USED ->
                     new ReplayEventTypes.ItemUsedDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(dataEvent.getItemUsed()));
-            // 次要事件
-            case ITEM_USE ->
+            case ITEM_USED ->
                     new ReplayEventTypes.ItemUsedDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(dataEvent.getItemUsed()));
-            case DOOR_OPEN, DOOR_CLOSE -> {
-                BlockPos pos = BlockPos.of(Long.parseLong(dataEvent.getItemUsed()));
-                yield new ReplayEventTypes.DoorActionDetails(dataEvent.getSourcePlayer(), pos, true);
-            }
+            // 次要事件
             case LOCKPICK_ATTEMPT -> {
                 BlockPos pos = BlockPos.of(Long.parseLong(dataEvent.getItemUsed()));
                 yield new ReplayEventTypes.LockpickAttemptDetails(dataEvent.getSourcePlayer(), pos, Boolean.parseBoolean(dataEvent.getMessage()));
@@ -137,19 +123,10 @@ public class GameReplayManager {
                 String[] parts = dataEvent.getMessage().split(":");
                 yield new ReplayEventTypes.MoodChangeDetails(dataEvent.getSourcePlayer(), Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
             }
-            case NOTE_EDIT ->
-                    new ReplayEventTypes.NoteEditDetails(dataEvent.getSourcePlayer(), dataEvent.getMessage());
-            // 新增事件类型
-            case PLAYER_KILL ->
-                    new ReplayEventTypes.PlayerKillDetails(dataEvent.getSourcePlayer(), dataEvent.getTargetPlayer(), ResourceLocation.parse(dataEvent.getItemUsed()));
-            case PLAYER_POISONED ->
-                    new ReplayEventTypes.PlayerPoisonedDetails(dataEvent.getSourcePlayer(), dataEvent.getTargetPlayer());
             case DOOR_LOCK, DOOR_UNLOCK -> {
                 BlockPos pos = BlockPos.of(Long.parseLong(dataEvent.getItemUsed()));
                 yield new ReplayEventTypes.DoorActionDetails(dataEvent.getSourcePlayer(), pos, true);
             }
-            case ITEM_USED ->
-                    new ReplayEventTypes.ItemUsedDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(dataEvent.getItemUsed()));
             case PSYCHO_STATE_CHANGE -> {
                 String[] parts = dataEvent.getMessage().split(":");
                 yield new ReplayEventTypes.PsychoStateChangeDetails(dataEvent.getSourcePlayer(), Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
@@ -157,23 +134,6 @@ public class GameReplayManager {
             case BLACKOUT_START, BLACKOUT_END -> {
                 long duration = Long.parseLong(dataEvent.getMessage());
                 yield new ReplayEventTypes.BlackoutEventDetails(duration);
-            }
-            case ROUND_END -> {
-                GameFunctions.WinStatus roundResult = GameFunctions.WinStatus.valueOf(dataEvent.getMessage());
-                yield new ReplayEventTypes.RoundEndDetails(roundResult);
-            }
-            case KEY_USED -> {
-                String itemUsed = dataEvent.getItemUsed();
-                int lastColon = itemUsed.lastIndexOf(':');
-                if (lastColon == -1) {
-                    // 如果没有冒号，假设没有额外数据
-                    yield new ReplayEventTypes.KeyUsedDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(itemUsed), BlockPos.of(Long.parseLong(dataEvent.getMessage())));
-                } else {
-                    String itemId = itemUsed.substring(0, lastColon);
-                    // 这里可能还有额外数据，但根据recordStoreBuy的格式，最后一个冒号后是数量
-                    // 对于KEY_USED，我们只需要物品ID，忽略数量
-                    yield new ReplayEventTypes.KeyUsedDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(itemId), BlockPos.of(Long.parseLong(dataEvent.getMessage())));
-                }
             }
             // 默认空详情
             default -> new ReplayEventTypes.EventDetails() {};
@@ -275,7 +235,7 @@ public class GameReplayManager {
     }
 
     public void recordPlayerKill(UUID killerUuid, UUID victimUuid, ResourceLocation deathReason) {
-        addEvent(GameReplayData.EventType.KILL, killerUuid, victimUuid, deathReason.toString(), null);
+        addEvent(GameReplayData.EventType.PLAYER_KILL, killerUuid, victimUuid, deathReason.toString(), null);
     }
 
     public void recordStoreBuy(UUID playerUuid, ResourceLocation itemBought, int amount, int price) {
@@ -283,7 +243,7 @@ public class GameReplayManager {
     }
 
     public void recordItemUse(UUID playerUuid, ResourceLocation itemUsed) {
-        addEvent(GameReplayData.EventType.ITEM_USE, playerUuid, null, itemUsed.toString(), null);
+        addEvent(GameReplayData.EventType.ITEM_USED, playerUuid, null, itemUsed.toString(), null);
     }
 
     public void recordSkillUsed(UUID playerUuid, ResourceLocation skillUsed) {
@@ -492,7 +452,7 @@ public class GameReplayManager {
     private List<UUID> getDeadPlayers(GameReplayData replayData) {
         List<UUID> dead = new java.util.ArrayList<>();
         for (GameReplayData.ReplayEvent event : replayData.getTimeline()) {
-            if (event.getType() == GameReplayData.EventType.KILL) {
+            if (event.getType() == GameReplayData.EventType.PLAYER_KILL) {
                 UUID target = event.getTargetPlayer();
                 if (target != null && !dead.contains(target)) {
                     dead.add(target);

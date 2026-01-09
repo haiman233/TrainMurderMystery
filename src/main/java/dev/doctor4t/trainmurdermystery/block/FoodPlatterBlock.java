@@ -1,10 +1,12 @@
 package dev.doctor4t.trainmurdermystery.block;
 
 import com.mojang.serialization.MapCodec;
+import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.block_entity.BeveragePlateBlockEntity;
 import dev.doctor4t.trainmurdermystery.index.TMMBlockEntities;
 import dev.doctor4t.trainmurdermystery.index.TMMDataComponentTypes;
 import dev.doctor4t.trainmurdermystery.index.TMMItems;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -69,13 +71,21 @@ public class FoodPlatterBlock extends BaseEntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, @NotNull Level world, BlockPos pos, Player player, BlockHitResult hit) {
-        if (world.isClientSide) return InteractionResult.SUCCESS;
+        if (world.isClientSide) {
+            if (TMM.REPLAY_MANAGER != null) {
+                TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(TMMItems.POISON_VIAL));
+            }
+            return InteractionResult.SUCCESS;
+        };
         if (!(world.getBlockEntity(pos) instanceof BeveragePlateBlockEntity blockEntity)) return InteractionResult.PASS;
 
         if (player.isCreative()) {
             ItemStack heldItem = player.getItemInHand(InteractionHand.MAIN_HAND);
             if (!heldItem.isEmpty()) {
                 blockEntity.addItem(heldItem);
+                if (TMM.REPLAY_MANAGER != null) {
+                    TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(TMMItems.POISON_VIAL));
+                }
                 return InteractionResult.SUCCESS;
             }
         }
@@ -83,12 +93,19 @@ public class FoodPlatterBlock extends BaseEntityBlock {
             blockEntity.setPoisoner(player.getStringUUID());
             player.getItemInHand(InteractionHand.MAIN_HAND).shrink(1);
             player.playNotifySound(SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.5f, 1f);
+            if (TMM.REPLAY_MANAGER != null) {
+                TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(TMMItems.POISON_VIAL));
+            }
             return InteractionResult.SUCCESS;
         }
         if (player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()) {
             List<ItemStack> platter = blockEntity.getStoredItems();
-            if (platter.isEmpty()) return InteractionResult.SUCCESS;
-
+            if (platter.isEmpty()) {
+                if (TMM.REPLAY_MANAGER != null) {
+                    TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(TMMItems.POISON_VIAL));
+                }
+                return InteractionResult.SUCCESS;
+            };
 
             boolean hasPlatterItem = false;
             for (ItemStack platterItem : platter) {

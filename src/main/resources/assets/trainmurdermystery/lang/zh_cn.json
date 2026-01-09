@@ -441,7 +441,6 @@
   "tmm.replay.event.player_join": "%s 加入了游戏",
   "tmm.replay.event.player_leave": "%s 离开了游戏",
   "tmm.replay.event.poison": "%s 用 %s 毒害了 %s",
-  "tmm.replay.event.gun_fired": "%s 开枪，%s 了 %s",
   "tmm.replay.event.hit": "命中",
   "tmm.replay.event.miss": "未命中",
   "tmm.replay.event.grenade_thrown": "%s 投掷了手榴弹",

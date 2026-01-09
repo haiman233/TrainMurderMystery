@@ -29,7 +29,7 @@ public class RevolverItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(@NotNull Level world, @NotNull Player user, InteractionHand hand) {
         ItemStack stack = user.getItemInHand(hand);
-        
+
         // 检查物品是否已经损坏（耐久度为0）
 //        if (stack.getDamage() >= stack.getMaxDamage()-1) {
 //            return TypedActionResult.fail(stack);
@@ -48,7 +48,6 @@ public class RevolverItem extends Item {
         } else {
             // 在服务端消耗耐久度
 //            stack.setDamage(stack.getDamage() + 1);
-            TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
         }
         return InteractionResultHolder.consume(stack);
     }

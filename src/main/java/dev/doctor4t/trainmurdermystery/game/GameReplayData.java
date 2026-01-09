@@ -4,20 +4,15 @@ import dev.doctor4t.trainmurdermystery.api.TMMRoles;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.BlackoutEventDetails;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.DoorActionDetails;
-import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.GunFiredDetails;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.GrenadeThrownDetails;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.ItemUsedDetails;
-import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.KeyUsedDetails;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.LockpickAttemptDetails;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.MoodChangeDetails;
-import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.NoteEditDetails;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.PlayerKillDetails;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.PlayerPoisonedDetails;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.PsychoStateChangeDetails;
-import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.RoundEndDetails;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.StoreBuyDetails;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.TaskCompleteDetails;
-import dev.doctor4t.trainmurdermystery.game.GameFunctions.WinStatus;
 import dev.doctor4t.trainmurdermystery.index.TMMItems;
 import dev.doctor4t.trainmurdermystery.util.ReplayDisplayUtils;
 import net.minecraft.ChatFormatting;
@@ -191,28 +186,13 @@ public class GameReplayData {
         } else if (event.details() instanceof PsychoStateChangeDetails(UUID playerUuid, int oldState, int newState)) {
             sourcePlayer = playerUuid;
             message = String.format("%d -> %d", oldState, newState);
-        } else if (event.details() instanceof NoteEditDetails(UUID playerUuid, String noteContent)) {
-            sourcePlayer = playerUuid;
-            message = noteContent;
         } else if (event.details() instanceof BlackoutEventDetails(long duration)) {
             message = String.valueOf(duration);
-        } else if (event.details() instanceof RoundEndDetails(WinStatus roundResult)) {
-            message = roundResult.name(); // WinStatus to String
-        } else if (event.details() instanceof GunFiredDetails(UUID playerUuid, boolean hit, UUID targetUuid)) {
-            sourcePlayer = playerUuid;
-            targetPlayer = targetUuid;
-            message = String.valueOf(hit);
         } else if (event.details() instanceof GrenadeThrownDetails(
                 UUID playerUuid, net.minecraft.core.BlockPos position
         )) {
             sourcePlayer = playerUuid;
             message = String.valueOf(position);
-        } else if (event.details() instanceof KeyUsedDetails(
-                UUID playerUuid, ResourceLocation keyItemId, net.minecraft.core.BlockPos doorPos
-        )) {
-            sourcePlayer = playerUuid;
-            itemUsedText = getItemDisplayName(keyItemId);
-            message = String.valueOf(doorPos);
         } else if (event.details() instanceof ReplayEventTypes.CustomEventDetails details) {
             // CustomEventDetails 没有 playerUuid 和 message，只有 eventId 和 data
             // 暂时不设置 sourcePlayer 和 message
@@ -246,10 +226,8 @@ public class GameReplayData {
             // 主要事件
             case PLAYER_KILL -> Component.translatable("tmm.replay.event.kill", sourceName, itemUsedText, targetName);
             case PLAYER_POISONED -> Component.translatable("tmm.replay.event.poison", sourceName, itemUsedText, targetName);
-            case GUN_FIRED -> Component.translatable("tmm.replay.event.gun_fired", sourceName, Boolean.parseBoolean(message) ? Component.translatable("tmm.replay.event.hit").withStyle(ChatFormatting.RED) : Component.translatable("tmm.replay.event.miss").withStyle(ChatFormatting.GRAY), targetName);
             case GRENADE_THROWN -> Component.translatable("tmm.replay.event.grenade_thrown", sourceName);
             case ITEM_USED -> Component.translatable("tmm.replay.event.skill_used", sourceName, itemUsedText);
-            case NOTE_EDIT -> Component.translatable("tmm.replay.event.note_edit", sourceName, Component.literal(message));
             case BLACKOUT_START -> Component.translatable("tmm.replay.event.blackout_start", Component.literal(message));
             case BLACKOUT_END -> Component.translatable("tmm.replay.event.blackout_end");
             // 系统事件
@@ -268,9 +246,6 @@ public class GameReplayData {
                 yield Component.translatable("tmm.replay.event.store_buy", sourceName, itemUsedText, costComponent);
             }
             case MOOD_CHANGE -> Component.translatable("tmm.replay.event.mood_change", sourceName, Component.literal(message));
-
-            case ROUND_END -> Component.translatable("tmm.replay.event.round_end", Component.literal(message));
-            case KEY_USED -> Component.translatable("tmm.replay.event.key_used", sourceName, itemUsedText, Component.literal(message));
             case DOOR_LOCK -> Component.translatable("tmm.replay.event.door_lock", sourceName, Component.literal(message));
             case DOOR_UNLOCK -> Component.translatable("tmm.replay.event.door_unlock", sourceName, Component.literal(message));
             case PSYCHO_STATE_CHANGE -> Component.translatable("tmm.replay.event.psycho_state_change", sourceName, Component.literal(message));*/
@@ -283,7 +258,7 @@ public class GameReplayData {
                 }
                 yield Component.translatable("tmm.replay.event.custom_event", Component.literal("未知自定义事件"));
             }
-            case TASK_COMPLETE,LOCKPICK_ATTEMPT,DOOR_CLOSE,DOOR_OPEN,DOOR_UNLOCK,DOOR_LOCK,STORE_BUY,MOOD_CHANGE,PSYCHO_STATE_CHANGE,ROUND_END,KEY_USED -> null;
+            case TASK_COMPLETE,LOCKPICK_ATTEMPT,DOOR_CLOSE,DOOR_OPEN,DOOR_UNLOCK,DOOR_LOCK,STORE_BUY,MOOD_CHANGE,PSYCHO_STATE_CHANGE -> null;
         };
     }
     
@@ -314,31 +289,24 @@ public class GameReplayData {
         GAME_END,
         PLAYER_JOIN,
         PLAYER_LEAVE,
-        KILL,
-        POISON,
-        GUN_FIRED,
+        PLAYER_KILL,
+        PLAYER_POISONED,
         GRENADE_THROWN,
         SKILL_USED,
-        ITEM_USE,
         DOOR_OPEN,
         DOOR_CLOSE,
         LOCKPICK_ATTEMPT,
         TASK_COMPLETE,
         STORE_BUY,
         MOOD_CHANGE,
-        NOTE_EDIT,
         CUSTOM_MESSAGE,
         ROLE_ASSIGNMENT,
-        PLAYER_KILL,
-        PLAYER_POISONED,
         DOOR_LOCK,
         DOOR_UNLOCK,
         ITEM_USED,
         PSYCHO_STATE_CHANGE,
         BLACKOUT_START,
-        BLACKOUT_END,
-        ROUND_END,
-        KEY_USED
+        BLACKOUT_END
     }
 
     public static class ReplayEvent {

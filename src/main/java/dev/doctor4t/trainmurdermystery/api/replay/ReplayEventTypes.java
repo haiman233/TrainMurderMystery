@@ -1,6 +1,5 @@
 package dev.doctor4t.trainmurdermystery.api.replay;
 
-import dev.doctor4t.trainmurdermystery.api.Role;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -29,13 +28,9 @@ public class ReplayEventTypes {
         ITEM_USED,
         MOOD_CHANGE,
         PSYCHO_STATE_CHANGE,
-        NOTE_EDIT,
         BLACKOUT_START,
         BLACKOUT_END,
-        ROUND_END,
-        GUN_FIRED,
         GRENADE_THROWN,
-        KEY_USED,
         // Add more event types as needed
         CUSTOM_EVENT // 用于第三方模组的自定义事件
     }
@@ -67,23 +62,11 @@ public class ReplayEventTypes {
     // 精神病状态变化事件详情
     public record PsychoStateChangeDetails(UUID playerUuid, int oldState, int newState) implements EventDetails {}
 
-    // 笔记编辑事件详情
-    public record NoteEditDetails(UUID playerUuid, String noteContent) implements EventDetails {}
-
     // 停电事件详情
     public record BlackoutEventDetails(long duration) implements EventDetails {}
 
-    // 回合结束事件详情
-    public record RoundEndDetails(GameFunctions.WinStatus roundResult) implements EventDetails {}
-
-    // 枪射击事件详情
-    public record GunFiredDetails(UUID playerUuid, boolean hit, UUID targetUuid) implements EventDetails {}
-
     // 手榴弹投掷事件详情
     public record GrenadeThrownDetails(UUID playerUuid, BlockPos position) implements EventDetails {}
-
-    // 钥匙使用事件详情
-    public record KeyUsedDetails(UUID playerUuid, ResourceLocation keyItemId, BlockPos doorPos) implements EventDetails {}
 
     // 自定义事件详情，用于第三方模组
     public record CustomEventDetails(ResourceLocation eventId, String data) implements EventDetails {}

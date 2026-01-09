@@ -1,11 +1,13 @@
 package dev.doctor4t.trainmurdermystery.block;
 
+import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.block_entity.TrimmedBedBlockEntity;
 import dev.doctor4t.trainmurdermystery.index.TMMBlockEntities;
 import dev.doctor4t.trainmurdermystery.index.TMMItems;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.Entity;
@@ -151,7 +153,9 @@ public class TrimmedBedBlock extends BedBlock {
                     if (!blockEntity.hasScorpion()) {
                         blockEntity.setHasScorpion(true, player.getUUID());
                         player.getItemInHand(InteractionHand.MAIN_HAND).shrink(1);
-
+                        if (TMM.REPLAY_MANAGER != null) {
+                            TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(TMMItems.SCORPION));
+                        }
                         return InteractionResult.SUCCESS;
                     }
                 }
