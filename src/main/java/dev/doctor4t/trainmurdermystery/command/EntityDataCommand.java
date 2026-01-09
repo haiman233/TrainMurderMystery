@@ -42,20 +42,19 @@ public class EntityDataCommand {
     }
 
     private static int setEntityData(CommandSourceStack source, Collection<? extends Entity> targets, String data) {
-        return TMM.executeSupporterCommand(source, () -> {
-            int count = 0;
-            for (Entity entity : targets) {
-                // 设置实体的自定义数据
-                entity.setAttached(ENTITY_CUSTOM_DATA_COMMAND, data);
-                count++;
-            }
+        int count = 0;
+        for (Entity entity : targets) {
+            // 设置实体的自定义数据
+            entity.setAttached(ENTITY_CUSTOM_DATA_COMMAND, data);
+            count++;
+        }
 
-            int finalCount = count;
-            source.sendSuccess(
+        int finalCount = count;
+        source.sendSuccess(
                 () -> Component.translatable("commands.tmm.entitydata.set.success", finalCount, data)
-                    .withStyle(style -> style.withColor(0x00FF00)),
+                        .withStyle(style -> style.withColor(0x00FF00)),
                 true
-            );
-        });
+        );
+        return 0;
     }
 }

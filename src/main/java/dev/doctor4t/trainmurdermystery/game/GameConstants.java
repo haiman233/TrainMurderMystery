@@ -21,7 +21,12 @@ public interface GameConstants {
     int FADE_TIME = 40;
     int FADE_PAUSE = 20;
     int MIN_PLAYER_COUNT = 6;
-    
+    Function<Long, Integer> PASSIVE_MONEY_TICKER = time -> {
+        if (time % getInTicks(0, 10) == 0) {
+            return 5;
+        }
+        return 0;
+    };
     // Role Configuration (Server-side, mutable via command)
     class RoleConfig {
         public static int killerCount = 1;

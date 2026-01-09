@@ -48,23 +48,40 @@ public class SecurityMonitorBlock extends BaseEntityBlock {
     public static float lastCameraPitch;
     public static float yawIncrease;
     public static float pitchIncrease;
+    public static float currentYaw = 0.0f; // 记录当前视角的yaw
+    public static float currentPitch = 0.0f; // 记录当前视角的pitch
 
 
     public static boolean onPlayerRotated(double yawAdd, double pitchAdd) {
         if (isInSecurityMode()) {
+            LocalPlayer player = Minecraft.getInstance().player;
+            if (player == null) return false;
+            
+            // 检查玩家是否在创造模式
+            boolean isCreativeMode = player.isCreative();
+            
             float scale = 0.2f ;
             yawIncrease += (float) (yawAdd * scale);
             pitchIncrease += (float) (pitchAdd * scale);
 
+            if (isCreativeMode) {
+                // 在创造模式下，允许自由调整视角
+                currentYaw += (float) yawAdd * scale;
+                currentPitch = Mth.clamp(currentPitch + (float) pitchAdd * scale, -90, 90);
+                
+                // 更新玩家朝向
+                player.turn(Mth.wrapDegrees(currentYaw - player.yHeadRot),
+                        Mth.wrapDegrees(currentPitch - player.getXRot()));
+                player.yHeadRotO = player.yHeadRot;
+                player.xRotO = player.getXRot();
+            } else {
+                // 在非创造模式下，保持固定视角，仅用于监控
                 //make player face camera while maneuvering
-                LocalPlayer player = Minecraft.getInstance().player;
-            if (player != null) {
                 player.turn(Mth.wrapDegrees((lastCameraYaw + yawAdd) - player.yHeadRot),
                         Mth.wrapDegrees((lastCameraPitch + pitchAdd) - player.getXRot()));
                 player.yHeadRotO = player.yHeadRot;
                 player.xRotO = player.getXRot();
             }
-
 
             return true;
         }
@@ -129,8 +146,21 @@ public class SecurityMonitorBlock extends BaseEntityBlock {
         if (!SecurityMonitorBlock.isInSecurityMode()) return false;
         BlockPos cameraPos = SecurityMonitorBlock.getCurrentCameraPos();
 
-        float targetYRot = camera.getYRot() + yawIncrease;
-        float targetXRot = Mth.clamp(camera.getXRot() + pitchIncrease, -90, 90);
+        float targetYRot;
+        float targetXRot;
+        
+        LocalPlayer player = Minecraft.getInstance().player;
+        boolean isCreativeMode = player != null && player.isCreative();
+        
+        if (isCreativeMode) {
+            // 在创造模式下，使用玩家当前调整的视角
+            targetYRot = currentYaw + yawIncrease;
+            targetXRot = Mth.clamp(currentPitch + pitchIncrease, -90, 90);
+        } else {
+            // 在非创造模式下，固定视角
+            targetYRot = camera.getYRot() + yawIncrease;
+            targetXRot = Mth.clamp(camera.getXRot() + pitchIncrease, -90, 90);
+        }
         camera.setRotation(targetYRot, targetXRot);
         // lerp camera
         Vec3 targetCameraPos = cameraPos.getCenter().add(0.5, -1.2, 0.5);
@@ -225,6 +255,10 @@ public class SecurityMonitorBlock extends BaseEntityBlock {
         int nextIndex = (currentIndex + 1) % cameraPositions.size();
         currentCameraPos = cameraPositions.get(nextIndex);
 
+        // 重置视角为新摄像头的初始视角
+        currentYaw = 0.0f;
+        currentPitch = 0.0f;
+
         player.displayClientMessage(Component.literal("切换到摄像头 " + (nextIndex + 1) + ": X=" + currentCameraPos.getX() + ", Y=" + currentCameraPos.getY() + ", Z=" + currentCameraPos.getZ()).withStyle(ChatFormatting.AQUA), true);
     }
 
@@ -233,16 +267,19 @@ public class SecurityMonitorBlock extends BaseEntityBlock {
         player.displayClientMessage(Component.literal("已进入监控模式").withStyle(ChatFormatting.GREEN), true);
 
         // 发送网络包到客户端以更新视角
-        ServerPlayNetworking.send(player, new SecurityCameraModePayload(true, currentCameraPos));
+        ServerPlayNetworking.send(player, new SecurityCameraModePayload(true, currentCameraPos, currentYaw, currentPitch));
     }
 
     private static void exitSecurityMode(net.minecraft.server.level.ServerPlayer player) {
         isInSecurityMode = false;
         currentCameraPos = null;
+        // 重置视角参数
+        currentYaw = 0.0f;
+        currentPitch = 0.0f;
         player.displayClientMessage(Component.literal("已退出监控模式").withStyle(ChatFormatting.RED), true);
 
         // 发送网络包到客户端以更新视角
-        ServerPlayNetworking.send(player, new SecurityCameraModePayload(false, BlockPos.ZERO));
+        ServerPlayNetworking.send(player, new SecurityCameraModePayload(false, BlockPos.ZERO, currentYaw, currentPitch));
     }
 
     @Nullable
