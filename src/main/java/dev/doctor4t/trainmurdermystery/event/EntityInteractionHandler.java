@@ -50,7 +50,10 @@ public class EntityInteractionHandler {
     public static void register() {
         // 注册右键点击实体的事件
         UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
-            if (world.isClientSide) {
+            if (hitResult==null){
+                return InteractionResult.PASS;
+            }
+                if (world.isClientSide) {
                 return InteractionResult.PASS;
             }
             if (!hand.equals(InteractionHand.OFF_HAND) && hitResult != null) {

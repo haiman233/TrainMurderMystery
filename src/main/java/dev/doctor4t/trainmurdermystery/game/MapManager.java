@@ -234,6 +234,7 @@ public class MapManager {
             }
 
             if (jsonObject.has("playArea")) {
+
                 JsonObject playAreaObj = jsonObject.getAsJsonObject("playArea");
                 areas.setPlayArea(new AABB(
                         playAreaObj.get("minX").getAsDouble(),

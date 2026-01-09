@@ -23,7 +23,9 @@
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin",
     "TalkChatMixin",
-    "client.LivingEntityRendererMixin"
+    "client.LivingEntityRendererMixin",
+    "whitelist.ClientIntentionPacketMixin",
+    "whitelist.ServerHandshakePacketListenerImplMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -25,6 +25,7 @@ public class BindingToolItem extends Item {
     @Override
     public InteractionResult useOn(UseOnContext context) {
         Level world = context.getLevel();
+        if (world.isClientSide)return InteractionResult.PASS;
         BlockPos pos = context.getClickedPos();
         Player player = context.getPlayer();
 

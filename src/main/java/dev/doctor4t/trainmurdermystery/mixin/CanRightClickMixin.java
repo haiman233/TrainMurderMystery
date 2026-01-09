@@ -24,6 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Mixin(Player.class)
@@ -75,7 +76,11 @@ public abstract class CanRightClickMixin extends LivingEntity implements DataSyn
     protected CanRightClickMixin(EntityType<? extends LivingEntity> entityType, Level world) {
         super(entityType, world);
     }
-
+    private static List<String> canDropItem = List.of(
+            "exposure:album",
+            "exposure:photograph",
+            "noellesroles:mint_candies"
+    );
     @Inject(method = "canInteractWithBlock", at = @At("TAIL"), cancellable = true)
     public void canInteractWithBlockAt(BlockPos pos, double additionalRange,
                                        CallbackInfoReturnable<Boolean> cir) {
@@ -86,7 +91,7 @@ public abstract class CanRightClickMixin extends LivingEntity implements DataSyn
         // 检查玩家是否存活且为生存模式
         final var player = (Player) (Object) this;
         final var mainHandItem = player.getMainHandItem();
-        if ("exposure:album".equals(BuiltInRegistries.ITEM.getKey(mainHandItem.getItem()).toString())){
+        if (canDropItem.contains(BuiltInRegistries.ITEM.getKey(mainHandItem.getItem()).toString())){
             if (player.isShiftKeyDown()){
                 final var drop = player.drop(mainHandItem.copy(),true);
                 player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
@@ -110,11 +115,16 @@ public abstract class CanRightClickMixin extends LivingEntity implements DataSyn
         }
     }
 
+    public static List<String> cantClickItems = List.of(
+            "supplementaries:item_shelf",
+            "supplementaries:notice_board",
+            "supplementaries:pedestal"
+    );
     /**
      * 判断是否应该阻止与方块的交互
      */
     private boolean shouldPreventInteraction(Block block) {
-        return !isAllowedBlock(block);
+        return !isAllowedBlock(block) || cantClickItems.contains(BuiltInRegistries.BLOCK.getKey(block).toString()) ;
     }
 
     /**

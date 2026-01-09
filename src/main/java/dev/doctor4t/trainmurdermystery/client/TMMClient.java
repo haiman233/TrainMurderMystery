@@ -31,6 +31,7 @@ import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.*;
 import dev.doctor4t.trainmurdermystery.item.GrenadeItem;
 import dev.doctor4t.trainmurdermystery.item.KnifeItem;
+import dev.doctor4t.trainmurdermystery.mod_whitelist.client.ModWhitelistClient;
 import dev.doctor4t.trainmurdermystery.network.SecurityCameraModePayload;
 import dev.doctor4t.trainmurdermystery.ui.TMMCommandUI;
 import dev.doctor4t.trainmurdermystery.ui.event.KeyPressHandler;
@@ -99,7 +100,7 @@ public class TMMClient implements ClientModInitializer {
     public void onInitializeClient() {
         // Load config
         // TMMConfig.init(TMM.MOD_ID, TMMConfig.class);
-
+        ModWhitelistClient.onInitializeClient();
         // Initialize ScreenParticle
         handParticleManager = new HandParticleManager();
         particleMap = new HashMap<>();

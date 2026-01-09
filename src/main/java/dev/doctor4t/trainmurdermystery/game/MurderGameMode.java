@@ -57,7 +57,7 @@ public class MurderGameMode extends GameMode {
         for (ServerPlayer player : serverWorld.players()) {
             // passive money
             if (gameWorldComponent.canUseKillerFeatures(player)) {
-                Integer balanceToAdd = GameConstants.getPassiveMoneyTicker().apply(serverWorld.getGameTime());
+                Integer balanceToAdd = GameConstants.PASSIVE_MONEY_TICKER.apply(serverWorld.getGameTime());
                 if (balanceToAdd > 0) PlayerShopComponent.KEY.get(player).addToBalance(balanceToAdd);
             }
 
@@ -84,7 +84,6 @@ public class MurderGameMode extends GameMode {
 
         // game end on win and display
         if (winStatus != GameFunctions.WinStatus.NONE && gameWorldComponent.getGameStatus() == GameWorldComponent.GameStatus.ACTIVE) {
-            gameWorldComponent.setLastWinStatus(winStatus);
             GameRoundEndComponent.KEY.get(serverWorld).setRoundEndData(serverWorld.players(), winStatus);
 
             GameFunctions.stopGame(serverWorld);
