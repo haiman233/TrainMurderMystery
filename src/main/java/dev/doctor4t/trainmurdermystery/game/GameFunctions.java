@@ -56,6 +56,8 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
+import static dev.doctor4t.trainmurdermystery.compat.TrainVoicePlugin.isVoiceChatMissing;
+
 public class GameFunctions {
 
     public static void limitPlayerToBox(ServerPlayer player, AABB box) {
@@ -249,7 +251,9 @@ public class GameFunctions {
             PlayerPsychoComponent.KEY.get(serverPlayerEntity).reset();
             PlayerNoteComponent.KEY.get(serverPlayerEntity).reset();
             PlayerShopComponent.KEY.get(serverPlayerEntity).reset();
-            TrainVoicePlugin.resetPlayer(serverPlayerEntity.getUUID());
+            if (!isVoiceChatMissing()) {
+                TrainVoicePlugin.resetPlayer(serverPlayerEntity.getUUID());
+            }
 
             // remove item cooldowns
             HashSet<Item> copy = new HashSet<>(serverPlayerEntity.getCooldowns().cooldowns.keySet());
@@ -410,7 +414,9 @@ public class GameFunctions {
         PlayerPoisonComponent.KEY.get(player).reset();
         PlayerPsychoComponent.KEY.get(player).reset();
         PlayerNoteComponent.KEY.get(player).reset();
-        TrainVoicePlugin.resetPlayer(player.getUUID());
+        if (!isVoiceChatMissing()) {
+            TrainVoicePlugin.resetPlayer(player.getUUID());
+        }
 
         player.setGameMode(net.minecraft.world.level.GameType.ADVENTURE);
         player.stopSleeping();
@@ -532,8 +538,9 @@ public class GameFunctions {
                 }
             }
         }
-
-        TrainVoicePlugin.addPlayer(victim.getUUID());
+        if (!isVoiceChatMissing()) {
+            TrainVoicePlugin.addPlayer(victim.getUUID());
+        }
     }
 
 

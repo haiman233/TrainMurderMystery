@@ -9,26 +9,32 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
-
+ 
+import java.util.UUID;
+ 
 public class PlayerStatsScreen extends Screen {
     private final PlayerStatsComponent stats;
+    private final UUID targetPlayerUuid;
     private GeneralStatsPanel generalStatsPanel;
     private RoleStatsPanel roleStatsPanel;
     private Button generalStatsButton;
     private Button roleStatsButton;
-
+ 
     private static final int GENERAL_STATS_VIEW = 0;
     private static final int ROLE_STATS_VIEW = 1;
     private int currentView = GENERAL_STATS_VIEW;
-
+ 
     public static final @NotNull ResourceLocation ID = TMM.id("textures/gui/game.png");
-
-    public PlayerStatsScreen() {
+ 
+    public PlayerStatsScreen(UUID targetPlayerUuid) {
         super(Component.translatable("screen." + TMM.MOD_ID + ".player_stats.title"));
-        this.stats = PlayerStatsComponent.KEY.get(Minecraft.getInstance().player);
+        this.targetPlayerUuid = targetPlayerUuid;
+        Player targetPlayer = Minecraft.getInstance().level.getPlayerByUUID(targetPlayerUuid);
+        this.stats = PlayerStatsComponent.KEY.get(targetPlayer);
     }
-
+ 
     @Override
     protected void init() {
         super.init();

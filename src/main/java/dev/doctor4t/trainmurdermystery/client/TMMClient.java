@@ -24,6 +24,7 @@ import dev.doctor4t.trainmurdermystery.client.render.entity.HornBlockEntityRende
 import dev.doctor4t.trainmurdermystery.client.render.entity.NoteEntityRenderer;
 import dev.doctor4t.trainmurdermystery.client.util.TMMItemTooltips;
 import dev.doctor4t.trainmurdermystery.client.gui.SecurityCameraHUD;
+import dev.doctor4t.trainmurdermystery.command.ShowStatsCommand;
 import dev.doctor4t.trainmurdermystery.entity.FirecrackerEntity;
 import dev.doctor4t.trainmurdermystery.entity.NoteEntity;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
@@ -32,6 +33,7 @@ import dev.doctor4t.trainmurdermystery.index.*;
 import dev.doctor4t.trainmurdermystery.item.GrenadeItem;
 import dev.doctor4t.trainmurdermystery.item.KnifeItem;
 import dev.doctor4t.trainmurdermystery.network.SecurityCameraModePayload;
+import dev.doctor4t.trainmurdermystery.network.ShowStatsPayload;
 import dev.doctor4t.trainmurdermystery.ui.TMMCommandUI;
 import dev.doctor4t.trainmurdermystery.ui.event.KeyPressHandler;
 import dev.doctor4t.trainmurdermystery.util.*;
@@ -331,6 +333,12 @@ public class TMMClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(AnnounceWelcomePayload.ID, new AnnounceWelcomePayload.Receiver());
         ClientPlayNetworking.registerGlobalReceiver(AnnounceEndingPayload.ID, new AnnounceEndingPayload.Receiver());
         ClientPlayNetworking.registerGlobalReceiver(TaskCompletePayload.ID, new TaskCompletePayload.Receiver());
+        ClientPlayNetworking.registerGlobalReceiver(ShowStatsPayload.ID, (payload, context) -> {
+            UUID targetPlayerUuid = payload.targetPlayerUuid();
+            context.client().execute(() -> {
+                context.client().setScreen(new PlayerStatsScreen(targetPlayerUuid));
+            });
+        });
 
         // Instinct keybind
         instinctKeybind = KeyBindingHelper.registerKeyBinding(new KeyMapping(
@@ -366,7 +374,7 @@ public class TMMClient implements ClientModInitializer {
                 if (client.screen instanceof PlayerStatsScreen) {
                     client.setScreen(null);
                 } else {
-                    client.setScreen(new PlayerStatsScreen());
+                    client.setScreen(new PlayerStatsScreen(client.player.getUUID()));
                 }
             }
         });

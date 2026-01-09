@@ -31,9 +31,6 @@ public class KnifeItem extends Item {
         ItemStack itemStack = user.getItemInHand(hand);
         user.startUsingItem(hand);
         user.playSound(TMMSounds.ITEM_KNIFE_PREPARE, 1.0f, 1.0f);
-        if (!world.isClientSide && TMM.REPLAY_MANAGER != null) {
-            TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
-        }
         return InteractionResultHolder.consume(itemStack);
     }
 
@@ -42,12 +39,14 @@ public class KnifeItem extends Item {
         if (user.isSpectator()) {
             return;
         }
-
         if (remainingUseTicks >= this.getUseDuration(stack, user) - 7 || !(user instanceof Player attacker) || !world.isClientSide)
             return;
         HitResult collision = getKnifeTarget(attacker);
         if (collision instanceof EntityHitResult entityHitResult) {
             Entity target = entityHitResult.getEntity();
+            if (TMM.REPLAY_MANAGER != null) {
+                TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+            }
             ClientPlayNetworking.send(new KnifeStabPayload(target.getId()));
         }
     }

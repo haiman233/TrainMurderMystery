@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayApiInitializer;
+import dev.doctor4t.trainmurdermystery.network.ShowStatsPayload;
 
 import java.util.Optional;
 import java.util.Set;
@@ -64,7 +65,7 @@ public class TMM implements ModInitializer {
     public void onInitialize() {
         // Init config - must be called first to generate config file
         TMMConfig.init();
-        
+
         // Init constants
         GameConstants.init();
 
@@ -117,12 +118,13 @@ public class TMM implements ModInitializer {
             SwitchMapCommand.register(dispatcher);
             ReloadReadyAreaCommand.register(dispatcher);
             EntityDataCommand.register(dispatcher);
+            ShowStatsCommand.register(dispatcher);
         }));
 
         // server lock to supporters
         ServerPlayerEvents.JOIN.register(player -> {
             GameWorldComponent gameWorldComponent = GameWorldComponent.KEY.get(player.level());
-            
+
             // 优化：提前检查是否启用锁定，避免不必要的API调用
             if (!gameWorldComponent.isLockedToSupporters()) {
                 if (REPLAY_MANAGER != null) {
@@ -131,7 +133,7 @@ public class TMM implements ModInitializer {
                 }
                 return;
             }
-            
+
             // 服务器已锁定，需要验证支持者身份
             DataSyncAPI.refreshAllPlayerData(player.getUUID()).thenRunAsync(() -> {
                 try {
@@ -144,7 +146,7 @@ public class TMM implements ModInitializer {
                             return;
                         }
                     }
-                    
+
                     // 支持者或锁定已解除，允许加入
                     if (REPLAY_MANAGER != null) {
                         REPLAY_MANAGER.recordPlayerName(player);
@@ -177,6 +179,7 @@ public class TMM implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(AnnounceEndingPayload.ID, AnnounceEndingPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ReplayPayload.ID, ReplayPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(SecurityCameraModePayload.ID, SecurityCameraModePayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(ShowStatsPayload.ID, ShowStatsPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(KnifeStabPayload.ID, KnifeStabPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(GunShootPayload.ID, GunShootPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(StoreBuyPayload.ID, StoreBuyPayload.CODEC);
