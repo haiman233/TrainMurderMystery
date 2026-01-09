@@ -31,7 +31,7 @@ public class KnifeItem extends Item {
         ItemStack itemStack = user.getItemInHand(hand);
         user.startUsingItem(hand);
         user.playSound(TMMSounds.ITEM_KNIFE_PREPARE, 1.0f, 1.0f);
-        if (!world.isClientSide) {
+        if (!world.isClientSide && TMM.REPLAY_MANAGER != null) {
             TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
         }
         return InteractionResultHolder.consume(itemStack);

@@ -32,7 +32,9 @@ public class FirecrackerItem extends Item implements AdventureUsable {
                 firecracker.setYRot(player.getYHeadRot());
                 world.addFreshEntity(firecracker);
                 if (!player.isCreative()) {
-                    TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+                    if (TMM.REPLAY_MANAGER != null) {
+                        TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+                    }
                     player.getItemInHand(context.getHand()).shrink(1);
                 }
             }

@@ -3,6 +3,7 @@ package dev.doctor4t.trainmurdermystery.item;
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.entity.PlayerBodyEntity;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
+import net.minecraft.client.User;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -26,7 +27,9 @@ public class BodyBagItem extends Item {
                 user.level().playSound(null, body.getX(), body.getY() + .1f, body.getZ(), SoundEvents.BUNDLE_INSERT, SoundSource.PLAYERS, 0.5f, 1f + user.level().random.nextFloat() * .1f - .05f);
             }
             if (!user.isCreative()) {
-                TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+                if (TMM.REPLAY_MANAGER != null) {
+                    TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+                }
                 user.getItemInHand(hand).shrink(1);
                 user.getCooldowns().addCooldown(this, GameConstants.ITEM_COOLDOWNS.get(this));
             }

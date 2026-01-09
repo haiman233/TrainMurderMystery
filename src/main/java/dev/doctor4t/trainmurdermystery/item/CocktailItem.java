@@ -30,7 +30,9 @@ public class CocktailItem extends Item {
             CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayerEntity, stack);
             serverPlayerEntity.awardStat(Stats.ITEM_USED.get(this));
             PlayerMoodComponent.KEY.get(serverPlayerEntity).drinkCocktail();
-            TMM.REPLAY_MANAGER.recordItemUse(serverPlayerEntity.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+            if (TMM.REPLAY_MANAGER != null) {
+                TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+            }
         }
         return stack;
     }

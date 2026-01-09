@@ -46,7 +46,9 @@ public class KeyItem extends Item implements AdventureUsable {
                     if (player.isCreative() && player.isShiftKeyDown()) {
                         String roomName = lines.getFirst().getString();
                         entity.setKeyName(roomName);
-                        TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+                        if (TMM.REPLAY_MANAGER != null) {
+                            TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+                        }
                         return InteractionResult.SUCCESS;
                     }
                 }

@@ -54,7 +54,9 @@ public class GrenadeItem extends Item {
 			// 设置手榴弹的速度和方向
 			grenade.shootFromRotation(user, user.getXRot(), user.getYRot(), 0.0F, velocity, 1.0F);
 			world.addFreshEntity(grenade);
-			         TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+			if (TMM.REPLAY_MANAGER != null) {
+				TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+			}
 		}
 
 

@@ -32,7 +32,9 @@ public class CrowbarItem extends Item implements AdventureUsable {
             player.swing(InteractionHand.MAIN_HAND, true);
 
             if (!player.isCreative()) {
-                TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+                if (TMM.REPLAY_MANAGER != null) {
+                    TMM.REPLAY_MANAGER.recordItemUse(player.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+                }
                 player.getCooldowns().addCooldown(this, GameConstants.ITEM_COOLDOWNS.get(this));
             }
 

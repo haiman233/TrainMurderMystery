@@ -32,7 +32,9 @@ public class BatItem extends Item {
             } else {
                 playerPsychoComponent.startPsycho();
             }
-            TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+            if (TMM.REPLAY_MANAGER != null) {
+                TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+            }
             return InteractionResultHolder.success(user.getItemInHand(hand));
         }
 

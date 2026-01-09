@@ -47,7 +47,9 @@ public class DerringerItem extends RevolverItem {
                 user.setXRot(user.getXRot() - 4);
                 spawnHandParticle();
                 if (!world.isClientSide) {
-                    TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+                    if (TMM.REPLAY_MANAGER != null) {
+                        TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+                    }
                 }
             }
         }
