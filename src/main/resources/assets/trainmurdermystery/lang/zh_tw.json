@@ -640,5 +640,15 @@
   "screen.noellesroles.conspirator.hint": "按ESC返回上一步或取消",
   "screen.noellesroles.conspirator.prev_page": "上一頁",
   "screen.noellesroles.conspirator.next_page": "下一頁",
-  "screen.noellesroles.conspirator.page_info": "第 %s / %s 頁"
+  "screen.noellesroles.conspirator.page_info": "第 %s / %s 頁",
+  "screen.trainmurdermystery.player_stats.general_stats_button": "通用統計",
+  "screen.trainmurdermystery.player_stats.role_stats_button": "角色統計",
+  "screen.trainmurdermystery.player_stats.search_role": "搜尋角色...",
+  "screen.trainmurdermystery.player_stats.no_role_selected": "未選擇角色",
+  "screen.trainmurdermystery.player_stats.role": "角色: %s",
+  "screen.trainmurdermystery.player_stats.times_played": "遊玩次數: %d",
+  "screen.trainmurdermystery.player_stats.wins": "勝利次數: %d",
+  "screen.trainmurdermystery.player_stats.losses": "失敗次數: %d",
+  "screen.trainmurdermystery.player_stats.kills": "擊殺次數: %d",
+  "screen.trainmurdermystery.player_stats.deaths": "死亡次數: %d"
 }

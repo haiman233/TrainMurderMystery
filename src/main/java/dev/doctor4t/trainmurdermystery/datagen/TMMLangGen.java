@@ -114,7 +114,28 @@ public class TMMLangGen extends FabricLanguageProvider {
         builder.add("game.win.loose_end", "They tied all of their loose ends!");
 
         builder.add("key.trainmurdermystery.instinct", "Instinct");
-        builder.add("key.trainmurdermystery.stats", "Player Stats");
+        builder.add("key.trainmurdermystery.stats", "统计面板");
+        builder.add("screen.trainmurdermystery.player_stats.title", "玩家统计数据");
+        builder.add("screen.trainmurdermystery.player_stats.general_stats", "通用统计");
+        builder.add("screen.trainmurdermystery.player_stats.total_play_time", "总游玩时长: %s");
+        builder.add("screen.trainmurdermystery.player_stats.total_games_played", "总游玩局数: %d");
+        builder.add("screen.trainmurdermystery.player_stats.total_kills", "总击杀玩家次数: %d");
+        builder.add("screen.trainmurdermystery.player_stats.total_deaths", "总死亡次数: %d");
+        builder.add("screen.trainmurdermystery.player_stats.total_wins", "总胜利次数: %d");
+        builder.add("screen.trainmurdermystery.player_stats.total_losses", "总失败次数: %d");
+        builder.add("screen.trainmurdermystery.player_stats.kd_ratio", "击杀/死亡比: %.2f");
+        builder.add("screen.trainmurdermystery.player_stats.win_rate", "总胜率: %.2f%%");
+        builder.add("screen.trainmurdermystery.player_stats.role_stats", "角色特定统计");
+        builder.add("screen.trainmurdermystery.player_stats.role_name", "角色: %s");
+        builder.add("screen.trainmurdermystery.player_stats.role_times_played", "使用次数: %d");
+        builder.add("screen.trainmurdermystery.player_stats.role_wins", "胜利次数: %d");
+        builder.add("screen.trainmurdermystery.player_stats.role_losses", "失败次数: %d");
+        builder.add("screen.trainmurdermystery.player_stats.role_kd_ratio", "K/D比: %.2f");
+        builder.add("screen.trainmurdermystery.player_stats.role_win_rate", "胜率: %.2f%%");
+        builder.add("screen.trainmurdermystery.player_stats.time.days_hours_minutes", "%d天 %d小时 %d分钟");
+        builder.add("screen.trainmurdermystery.player_stats.time.hours_minutes", "%d小时 %d分钟");
+        builder.add("screen.trainmurdermystery.player_stats.time.minutes_seconds", "%d分钟 %d秒");
+        builder.add("screen.trainmurdermystery.player_stats.time.seconds", "%d秒");
         builder.add("category.trainmurdermystery.keybinds", "Train Murder Mystery");
 
         // Player Stats GUI translations

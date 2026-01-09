@@ -14,7 +14,7 @@ public class TMMConfig extends MidnightConfig {
     private static final Map<String, Object> DEFAULT_VALUES = new HashMap<>();
 
     static {
-        TMM.LOGGER.error("TMMConfig 静态初始化块被执行");
+        // TMM.LOGGER.error("TMMConfig 静态初始化块被执行");
         // 客户端配置默认值
         DEFAULT_VALUES.put("ultraPerfMode", false);
         DEFAULT_VALUES.put("disableScreenShake", false);
@@ -168,7 +168,7 @@ public class TMMConfig extends MidnightConfig {
      * 必须在mod初始化时调用以生成配置文件
      */
     public static void init() {
-        TMM.LOGGER.error("TMMConfig.init() 方法被调用");
+        // TMM.LOGGER.error("TMMConfig.init() 方法被调用");
         // 统一使用MidnightConfig初始化，它会处理客户端和服务端的差异
         MidnightConfig.init(TMM.MOD_ID, TMMConfig.class);
 

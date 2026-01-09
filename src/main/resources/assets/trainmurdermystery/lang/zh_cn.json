@@ -689,5 +689,15 @@
   "screen.trainmurdermystery.player_stats.time.days_hours_minutes": "%d天 %d小时 %d分钟",
   "screen.trainmurdermystery.player_stats.time.hours_minutes": "%d小时 %d分钟",
   "screen.trainmurdermystery.player_stats.time.minutes_seconds": "%d分钟 %d秒",
-  "screen.trainmurdermystery.player_stats.time.seconds": "%d秒"
+  "screen.trainmurdermystery.player_stats.time.seconds": "%d秒",
+  "screen.trainmurdermystery.player_stats.general_stats_button": "通用统计",
+  "screen.trainmurdermystery.player_stats.role_stats_button": "角色统计",
+  "screen.trainmurdermystery.player_stats.search_role": "搜索角色...",
+  "screen.trainmurdermystery.player_stats.no_role_selected": "未选择角色",
+  "screen.trainmurdermystery.player_stats.role": "角色: %s",
+  "screen.trainmurdermystery.player_stats.times_played": "游玩次数: %d",
+  "screen.trainmurdermystery.player_stats.wins": "胜利次数: %d",
+  "screen.trainmurdermystery.player_stats.losses": "失败次数: %d",
+  "screen.trainmurdermystery.player_stats.kills": "击杀次数: %d",
+  "screen.trainmurdermystery.player_stats.deaths": "死亡次数: %d"
 }
