@@ -467,6 +467,25 @@ public class GameFunctions {
             Role killerRole = gameWorldComponent.getRole(serverKiller);
             if (killerRole != null) {
                 killerStats.getOrCreateRoleStats(killerRole.identifier()).incrementKillsAsRole();
+                // 检测是否为友军击杀
+                if (victim instanceof ServerPlayer serverVictim) {
+                    Role victimRole = gameWorldComponent.getRole(serverVictim);
+                    if (victimRole != null) {
+                        boolean isTeamKill = false;
+                        // 杀手击杀杀手
+                        if (killerRole.canUseKiller() && victimRole.canUseKiller()) {
+                            isTeamKill = true;
+                        }
+                        // 无辜者击杀无辜者
+                        else if (killerRole.isInnocent() && victimRole.isInnocent()) {
+                            isTeamKill = true;
+                        }
+                        if (isTeamKill) {
+                            killerStats.incrementTotalTeamKills();
+                            killerStats.getOrCreateRoleStats(killerRole.identifier()).incrementTeamKillsAsRole();
+                        }
+                    }
+                }
             }
         }
         // --- 结束新增统计数据更新逻辑 (击杀者) ---

@@ -1,7 +1,6 @@
 
 package dev.doctor4t.trainmurdermystery.client.gui.screen;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.api.Role;
 import dev.doctor4t.trainmurdermystery.api.TMMRoles;
@@ -15,10 +14,8 @@ import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.narration.NarratableEntry.NarrationPriority;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,21 +24,29 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableEntry {
-    private final PlayerStatsComponent stats;
-    private Role selectedRole;
-    private PlayerStatsComponent.RoleStats selectedRoleStats;
-    private ScrollableRoleListComponent roleListComponent;
-    private RoleDetailsComponent roleDetailsComponent;
-    private EditBox searchBox;
+    private final PlayerStatsComponent stats; // 玩家统计数据组件
+    private Role selectedRole; // 当前选中的角色
+    private PlayerStatsComponent.RoleStats selectedRoleStats; // 当前选中角色的统计数据
+    private ScrollableRoleListComponent roleListComponent; // 滚动角色列表组件
+    private RoleDetailsComponent roleDetailsComponent; // 角色详情组件
+    private EditBox searchBox; // 搜索框
 
-    private final int x;
-    private final int y;
-    private final int width;
-    private final int height;
-    private boolean visible = true;
-    private final List<GuiEventListener> children = new ArrayList<>();
-    private final List<Renderable> renderables = new ArrayList<>();
+    private final int x; // 组件X坐标
+    private final int y; // 组件Y坐标
+    private final int width; // 组件宽度
+    private final int height; // 组件高度
+    private boolean visible = true; // 组件是否可见
+    private final List<GuiEventListener> children = new ArrayList<>(); // 子事件监听器列表
+    private final List<Renderable> renderables = new ArrayList<>(); // 可渲染对象列表
 
+    /**
+     * 构造函数
+     * @param x X坐标
+     * @param y Y坐标
+     * @param width 宽度
+     * @param height 高度
+     * @param stats 玩家统计数据
+     */
     public RoleStatsPanel(int x, int y, int width, int height, PlayerStatsComponent stats) {
         this.x = x;
         this.y = y;
@@ -51,6 +56,7 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
         setupComponents();
     }
 
+    // 获取组件位置和尺寸的方法
     public int getX() {
         return x;
     }
@@ -67,6 +73,10 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
         return height;
     }
 
+    /**
+     * 添加可渲染组件
+     * @param renderable 可渲染对象
+     */
     private void addRenderableWidget(Renderable renderable) {
         if (renderable instanceof GuiEventListener) {
             children.add((GuiEventListener) renderable);
@@ -74,6 +84,10 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
         renderables.add(renderable);
     }
 
+    /**
+     * 添加事件监听组件
+     * @param widget GUI事件监听器
+     */
     private void addWidget(GuiEventListener widget) {
         children.add(widget);
         if (widget instanceof Renderable) {
@@ -81,10 +95,17 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
         }
     }
 
+    /**
+     * 添加组件到渲染列表
+     * @param component 要添加的组件
+     */
     private void addComponent(Renderable component) {
         renderables.add(component);
     }
 
+    /**
+     * 设置界面组件
+     */
     private void setupComponents() {
         int rightPanelContentX = getX();
         int rightPanelContentWidth = getWidth();
@@ -93,6 +114,7 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
         titleY = currentY;
         currentY += Minecraft.getInstance().font.lineHeight + 15;
 
+        // 创建搜索框
         searchBox = new EditBox(
                 Minecraft.getInstance().font,
                 rightPanelContentX,
@@ -107,6 +129,7 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
         this.addRenderableWidget(searchBox);
         currentY += searchBox.getHeight() + 10;
 
+        // 计算可用高度并创建角色列表
         int availableHeight = getHeight() - (currentY - getY()) - 15;
         int roleListHeight = Math.max(50, availableHeight / 2);
         roleListComponent = new ScrollableRoleListComponent(
@@ -117,6 +140,7 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
                 this::onRoleSelected
         );
 
+        // 准备角色数据并排序
         List<Role> roles = new ArrayList<>();
         Map<ResourceLocation, PlayerStatsComponent.RoleStats> roleStatsMap = stats.getRoleStats();
         for (Role role : TMMRoles.ROLES) {
@@ -129,6 +153,7 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
         this.addRenderableWidget(roleListComponent);
         currentY += roleListHeight + 15;
 
+        // 创建角色详情组件
         roleDetailsComponent = new RoleDetailsComponent(
                 rightPanelContentX,
                 currentY,
@@ -137,18 +162,28 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
         );
         this.addRenderableWidget(roleDetailsComponent);
 
+        // 如果有角色数据，则选择第一个角色
         if (!roles.isEmpty()) {
             onRoleSelected(roles.getFirst(), roleStatsMap.get(roles.getFirst().identifier()));
         }
         searchBox.setFocused(true);
     }
 
-    private int titleY;
+    private int titleY; // 标题Y坐标
 
+    /**
+     * 处理搜索文本变化
+     * @param searchText 搜索文本
+     */
     private void onSearchTextChanged(String searchText) {
         roleListComponent.filterRoles(searchText);
     }
 
+    /**
+     * 处理角色选择事件
+     * @param role 选中的角色
+     * @param roleStats 选中角色的统计数据
+     */
     private void onRoleSelected(Role role, PlayerStatsComponent.RoleStats roleStats) {
         selectedRole = role;
         selectedRoleStats = roleStats;
@@ -167,6 +202,10 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
         }
     }
 
+    /**
+     * 设置组件可见性
+     * @param visible 是否可见
+     */
     public void setVisible(boolean visible) {
         this.visible = visible;
     }
@@ -250,26 +289,45 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
     public void updateNarration(NarrationElementOutput narrationElementOutput) {
     }
 
+    /**
+     * 获取当前选中的角色
+     * @return 选中的角色
+     */
     public Role getSelectedRole() {
         return selectedRole;
     }
 
+    /**
+     * 获取当前选中角色的统计数据
+     * @return 角色统计数据
+     */
     public PlayerStatsComponent.RoleStats getSelectedRoleStats() {
         return selectedRoleStats;
     }
 
+    /**
+     * 滚动角色列表组件 - 用于显示可滚动的角色列表
+     */
     private static class ScrollableRoleListComponent extends AbstractWidget {
-        private final BiConsumer<Role, PlayerStatsComponent.RoleStats> onRoleSelected;
-        private List<Role> allRoles;
-        private Map<ResourceLocation, PlayerStatsComponent.RoleStats> roleStatsMap;
-        private List<Role> filteredRoles;
-        private double scrollAmount = 0.0; // Changed from int scrollOffset to double scrollAmount
-        private static final int SCROLLBAR_WIDTH = 6;
-        private final int itemHeight = 30;
-        private Role selectedRole;
-        private double initialMouseY = -1;
-        private double initialScrollAmount; // Renamed from initialScrollOffset
+        private final BiConsumer<Role, PlayerStatsComponent.RoleStats> onRoleSelected; // 角色选择回调
+        private List<Role> allRoles; // 所有角色列表
+        private Map<ResourceLocation, PlayerStatsComponent.RoleStats> roleStatsMap; // 角色统计数据映射
+        private List<Role> filteredRoles; // 过滤后的角色列表
+        private double scrollAmount = 0.0; // 滚动量
+        private static final int SCROLLBAR_WIDTH = 6; // 滚动条宽度
+        private final int itemHeight = 24; // 每个项目的高度
+        private Role selectedRole; // 选中的角色
+        private double initialMouseY = -1; // 初始鼠标Y坐标（用于拖拽滚动）
+        private double initialScrollAmount; // 初始滚动量
 
+        /**
+         * 构造函数
+         * @param x X坐标
+         * @param y Y坐标
+         * @param width 宽度
+         * @param height 高度
+         * @param onRoleSelected 角色选择回调
+         */
         public ScrollableRoleListComponent(int x, int y, int width, int height, BiConsumer<Role, PlayerStatsComponent.RoleStats> onRoleSelected) {
             super(x, y, width, height, Component.empty());
             this.onRoleSelected = onRoleSelected;
@@ -277,6 +335,11 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
             this.filteredRoles = new ArrayList<>();
         }
 
+        /**
+         * 设置角色列表
+         * @param roles 角色列表
+         * @param roleStatsMap 角色统计数据映射
+         */
         public void setRoles(List<Role> roles, Map<ResourceLocation, PlayerStatsComponent.RoleStats> roleStatsMap) {
             this.allRoles = roles;
             this.roleStatsMap = roleStatsMap;
@@ -286,6 +349,10 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
             }
         }
 
+        /**
+         * 根据搜索文本过滤角色
+         * @param searchText 搜索文本
+         */
         public void filterRoles(String searchText) {
             if (searchText == null || searchText.isEmpty()) {
                 filteredRoles = new ArrayList<>(allRoles);
@@ -294,7 +361,7 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
                         .filter(role -> ReplayDisplayUtils.getRoleDisplayName(role.identifier().toString()).getString().toLowerCase().contains(searchText.toLowerCase()))
                         .toList();
             }
-            setScrollAmount(0.0); // Use setScrollAmount
+            setScrollAmount(0.0);
             if (!filteredRoles.isEmpty() && (selectedRole == null || !filteredRoles.contains(selectedRole))) {
                 selectedRole = filteredRoles.getFirst();
                 onRoleSelected.accept(selectedRole, roleStatsMap.get(selectedRole.identifier()));
@@ -311,8 +378,9 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
 
             int visibleItemCount = getHeight() / itemHeight;
             int startIndex = (int) (getScrollAmount() / itemHeight);
-            int endIndex = Math.min(startIndex + visibleItemCount + 1, filteredRoles.size()); // +1 to ensure partial items are rendered
+            int endIndex = Math.min(startIndex + visibleItemCount + 1, filteredRoles.size()); // +1 确保部分项目被渲染
 
+            // 渲染可见的角色项
             for (int i = startIndex; i < endIndex; i++) {
                 Role role = filteredRoles.get(i);
                 PlayerStatsComponent.RoleStats stats = roleStatsMap.get(role.identifier());
@@ -331,7 +399,7 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
                 }
 
                 if (stats != null) {
-                    String briefStats = String.format("Played: %d, Wins: %d", stats.getTimesPlayed(), stats.getWinsAsRole());
+                    String briefStats = String.format("游玩：%d, 胜利：%d", stats.getTimesPlayed(), stats.getWinsAsRole());
                     int statsWidth = Minecraft.getInstance().font.width(briefStats);
                     int maxStatsWidth = getWidth() - 25;
                     if (statsWidth > maxStatsWidth) {
@@ -343,38 +411,59 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
                 }
             }
 
+            // 渲染滚动条
             if (scrollbarVisible()) {
                 int scrollbarX = getX() + getWidth() - SCROLLBAR_WIDTH;
                 int scrollbarHeight = (int) ((float) getHeight() * getHeight() / getMaxPosition());
-                scrollbarHeight = Math.max(32, scrollbarHeight); // Minimum scrollbar height
-                scrollbarHeight = Math.min(getHeight() - 8, scrollbarHeight); // Maximum scrollbar height
+                scrollbarHeight = Math.max(32, scrollbarHeight); // 最小滚动条高度
+                scrollbarHeight = Math.min(getHeight() - 8, scrollbarHeight); // 最大滚动条高度
 
                 int scrollbarY = getY() + (int) (getScrollAmount() * (getHeight() - scrollbarHeight) / getMaxScroll());
                 if (scrollbarY < getY()) {
                     scrollbarY = getY();
                 }
 
-                graphics.fill(scrollbarX, getY(), scrollbarX + SCROLLBAR_WIDTH, getY() + getHeight(), 0x80000000); // Scrollbar background
-                graphics.fill(scrollbarX, scrollbarY, scrollbarX + SCROLLBAR_WIDTH, scrollbarY + scrollbarHeight, 0xFFAAAAAA); // Scrollbar handle
+                graphics.fill(scrollbarX, getY(), scrollbarX + SCROLLBAR_WIDTH, getY() + getHeight(), 0x80000000); // 滚动条背景
+                graphics.fill(scrollbarX, scrollbarY, scrollbarX + SCROLLBAR_WIDTH, scrollbarY + scrollbarHeight, 0xFFAAAAAA); // 滚动条手柄
             }
         }
 
+        /**
+         * 检查滚动条是否可见
+         * @return 滚动条是否可见
+         */
         private boolean scrollbarVisible() {
             return getMaxScroll() > 0;
         }
 
+        /**
+         * 获取最大滚动值
+         * @return 最大滚动值
+         */
         private int getMaxScroll() {
             return Math.max(0, filteredRoles.size() * itemHeight - getHeight());
         }
 
+        /**
+         * 获取当前滚动量
+         * @return 当前滚动量
+         */
         private double getScrollAmount() {
             return scrollAmount;
         }
 
+        /**
+         * 设置滚动量
+         * @param amount 滚动量
+         */
         private void setScrollAmount(double amount) {
             scrollAmount = Math.max(0, Math.min(amount, getMaxScroll()));
         }
 
+        /**
+         * 获取最大位置
+         * @return 最大位置
+         */
         private int getMaxPosition() {
             return filteredRoles.size() * itemHeight;
         }
@@ -439,14 +528,29 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
         }
     }
 
+    /**
+     * 角色详情组件 - 显示选中角色的详细统计数据
+     */
     private static class RoleDetailsComponent extends AbstractWidget {
-        private Role role;
-        private PlayerStatsComponent.RoleStats roleStats;
+        private Role role; // 角色
+        private PlayerStatsComponent.RoleStats roleStats; // 角色统计数据
 
+        /**
+         * 构造函数
+         * @param x X坐标
+         * @param y Y坐标
+         * @param width 宽度
+         * @param height 高度
+         */
         public RoleDetailsComponent(int x, int y, int width, int height) {
             super(x, y, width, height, Component.empty());
         }
 
+        /**
+         * 设置要显示的角色和统计数据
+         * @param role 角色
+         * @param roleStats 角色统计数据
+         */
         public void setRole(Role role, PlayerStatsComponent.RoleStats roleStats) {
             this.role = role;
             this.roleStats = roleStats;
@@ -460,37 +564,49 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
                 return;
             }
 
-            graphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x80000000);
-            graphics.renderOutline(getX(), getY(), getWidth(), getHeight(), 0xFFAAAAAA);
+            graphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight() + 10, 0x80000000);
+            graphics.renderOutline(getX(), getY(), getWidth(), getHeight() + 10, 0xFFAAAAAA);
 
-            int currentY = getY() + 10;
+            int currentY = getY() + 5;
             Component roleName = ReplayDisplayUtils.getRoleDisplayName(role.identifier().toString());
             graphics.drawString(Minecraft.getInstance().font,
                     roleName.copy().withStyle(style -> style.withBold(true)),
                     getX() + 5, currentY, role.getColor());
             currentY += Minecraft.getInstance().font.lineHeight + 10;
 
+            // 渲染各种统计数据
             drawStatLine(graphics, currentY, "screen." + TMM.MOD_ID + ".player_stats.times_played", roleStats.getTimesPlayed());
             currentY += 10;
             drawStatLine(graphics, currentY, "screen." + TMM.MOD_ID + ".player_stats.wins", roleStats.getWinsAsRole());
             currentY += 10;
             drawStatLine(graphics, currentY, "screen." + TMM.MOD_ID + ".player_stats.kills", roleStats.getKillsAsRole());
             currentY += 10;
+            drawStatLine(graphics, currentY, "screen." + TMM.MOD_ID + ".player_stats.team_kills", roleStats.getTeamKillsAsRole());
+            currentY += 10;
             drawStatLine(graphics, currentY, "screen." + TMM.MOD_ID + ".player_stats.deaths", roleStats.getDeathsAsRole());
             currentY += 10;
-            
+
+            // 计算并显示胜率
             int gamesPlayed = roleStats.getTimesPlayed();
             int wins = roleStats.getWinsAsRole();
             double winRate = gamesPlayed > 0 ? (double) wins / gamesPlayed * 100 : 0.0;
             drawStatLine(graphics, currentY, "screen." + TMM.MOD_ID + ".player_stats.win_rate", String.format("%.2f%%", winRate));
             currentY += 10;
-            
+
+            // 计算并显示击杀死亡比
             int kills = roleStats.getKillsAsRole();
             int deaths = roleStats.getDeathsAsRole();
             double kdRatio = deaths > 0 ? (double) kills / deaths : kills;
             drawStatLine(graphics, currentY, "screen." + TMM.MOD_ID + ".player_stats.kd_ratio", String.format("%.2f", kdRatio));
         }
 
+        /**
+         * 绘制统计行
+         * @param graphics 图形上下文
+         * @param y Y坐标
+         * @param translationKey 翻译键
+         * @param value 值
+         */
         private void drawStatLine(GuiGraphics graphics, int y, String translationKey, Object value) {
             Component text = Component.translatable(translationKey, value);
             graphics.drawString(Minecraft.getInstance().font, text, getX() + 10, y, 0xFFCCCCCC);
@@ -498,7 +614,7 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
 
         @Override
         protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-            // 无需 narration
+            // 不需要叙述
         }
     }
 }

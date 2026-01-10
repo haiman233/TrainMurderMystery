@@ -27,6 +27,7 @@ public class PlayerStatsComponent implements AutoSyncedComponent, ServerTickingC
     private int totalDeaths = 0;
     private int totalWins = 0;
     private int totalLosses = 0;
+    private int totalTeamKills = 0;
     private final Map<ResourceLocation, RoleStats> roleStats = new HashMap<>();
 
     public PlayerStatsComponent(Player player) {
@@ -45,6 +46,9 @@ public class PlayerStatsComponent implements AutoSyncedComponent, ServerTickingC
         totalDeaths = tag.getInt("TotalDeaths");
         totalWins = tag.getInt("TotalWins");
         totalLosses = tag.getInt("TotalLosses");
+        if (tag.contains("TotalTeamKills")) {
+            totalTeamKills = tag.getInt("TotalTeamKills");
+        }
 
         ListTag roleStatsList = tag.getList("RoleStats", Tag.TAG_COMPOUND);
         roleStats.clear();
@@ -65,6 +69,7 @@ public class PlayerStatsComponent implements AutoSyncedComponent, ServerTickingC
         tag.putInt("TotalDeaths", totalDeaths);
         tag.putInt("TotalWins", totalWins);
         tag.putInt("TotalLosses", totalLosses);
+        tag.putInt("TotalTeamKills", totalTeamKills);
 
         ListTag roleStatsList = new ListTag();
         for (Map.Entry<ResourceLocation, RoleStats> entry : roleStats.entrySet()) {
@@ -130,6 +135,15 @@ public class PlayerStatsComponent implements AutoSyncedComponent, ServerTickingC
         this.sync();
     }
 
+    public int getTotalTeamKills() {
+        return totalTeamKills;
+    }
+
+    public void incrementTotalTeamKills() {
+        this.totalTeamKills++;
+        this.sync();
+    }
+
     public Map<ResourceLocation, RoleStats> getRoleStats() {
         return roleStats;
     }
@@ -154,6 +168,7 @@ public class PlayerStatsComponent implements AutoSyncedComponent, ServerTickingC
         private int deathsAsRole = 0;
         private int winsAsRole = 0;
         private int lossesAsRole = 0;
+        private int teamKillsAsRole = 0;
 
         public RoleStats() {
         }
@@ -164,6 +179,9 @@ public class PlayerStatsComponent implements AutoSyncedComponent, ServerTickingC
             deathsAsRole = tag.getInt("DeathsAsRole");
             winsAsRole = tag.getInt("WinsAsRole");
             lossesAsRole = tag.getInt("LossesAsRole");
+            if (tag.contains("TeamKillsAsRole")) {
+                teamKillsAsRole = tag.getInt("TeamKillsAsRole");
+            }
         }
 
         public void writeToNbt(CompoundTag tag, HolderLookup.Provider wrapperLookup) {
@@ -172,6 +190,7 @@ public class PlayerStatsComponent implements AutoSyncedComponent, ServerTickingC
             tag.putInt("DeathsAsRole", deathsAsRole);
             tag.putInt("WinsAsRole", winsAsRole);
             tag.putInt("LossesAsRole", lossesAsRole);
+            tag.putInt("TeamKillsAsRole", teamKillsAsRole);
         }
 
         public int getTimesPlayed() {
@@ -216,6 +235,15 @@ public class PlayerStatsComponent implements AutoSyncedComponent, ServerTickingC
 
         public void incrementLossesAsRole() {
             this.lossesAsRole++;
+            PlayerStatsComponent.this.sync();
+        }
+
+        public int getTeamKillsAsRole() {
+            return teamKillsAsRole;
+        }
+
+        public void incrementTeamKillsAsRole() {
+            this.teamKillsAsRole++;
             PlayerStatsComponent.this.sync();
         }
     }

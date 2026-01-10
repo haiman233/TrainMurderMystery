@@ -103,10 +103,8 @@ public class PlayerStatsScreen extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         // 渲染背景（半透明黑色）
         graphics.fillGradient(0, 0, this.width, this.height, 0xC0101010, 0xD0101010);
-
         // 渲染标题
         graphics.drawCenteredString(this.font, this.title, this.width / 2, (int)((this.height * 0.3) - 30), 0xFFFFFFFF);
-
         super.render(graphics, mouseX, mouseY, delta);
     }
 
@@ -129,5 +127,9 @@ public class PlayerStatsScreen extends Screen {
 
     public int getCurrentView() {
         return currentView;
+    }
+
+    public UUID getTargetPlayerUuid() {
+        return targetPlayerUuid;
     }
 }

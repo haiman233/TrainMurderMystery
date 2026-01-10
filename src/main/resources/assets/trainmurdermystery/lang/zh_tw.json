@@ -653,5 +653,7 @@
   "screen.trainmurdermystery.player_stats.wins": "勝利次數: %d",
   "screen.trainmurdermystery.player_stats.losses": "失敗次數: %d",
   "screen.trainmurdermystery.player_stats.kills": "擊殺次數: %d",
-  "screen.trainmurdermystery.player_stats.deaths": "死亡次數: %d"
+  "screen.trainmurdermystery.player_stats.deaths": "死亡次數: %d",
+  "screen.trainmurdermystery.player_stats.total_team_kills": "總队友擊殺次數: %d",
+  "screen.trainmurdermystery.player_stats.team_kills": "队友擊殺次數: %d"
 }

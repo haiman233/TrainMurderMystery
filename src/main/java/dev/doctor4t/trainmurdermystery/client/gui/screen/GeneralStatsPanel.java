@@ -156,6 +156,8 @@ public class GeneralStatsPanel extends AbstractWidget {
         columnStartY += 20;
         drawStatLabelCentered(graphics, leftColumnX, columnStartY, "screen." + TMM.MOD_ID + ".player_stats.total_kills", String.valueOf(stats.getTotalKills()), columnWidth);
         columnStartY += 20;
+        drawStatLabelCentered(graphics, leftColumnX, columnStartY, "screen." + TMM.MOD_ID + ".player_stats.total_team_kills", String.valueOf(stats.getTotalTeamKills()), columnWidth);
+        columnStartY += 20;
         drawStatLabelCentered(graphics, leftColumnX, columnStartY, "screen." + TMM.MOD_ID + ".player_stats.total_deaths", String.valueOf(stats.getTotalDeaths()), columnWidth);
         columnStartY += 20;
 
@@ -165,9 +167,9 @@ public class GeneralStatsPanel extends AbstractWidget {
         columnStartY += 20;
         drawStatLabelCentered(graphics, rightColumnX, columnStartY, "screen." + TMM.MOD_ID + ".player_stats.total_losses", String.valueOf(stats.getTotalLosses()), columnWidth);
         columnStartY += 20;
-        drawStatLabelCentered(graphics, rightColumnX, columnStartY, "screen." + TMM.MOD_ID + ".player_stats.kd_ratio", String.format("%.2f", getKdRatio(stats.getTotalKills(), stats.getTotalDeaths())), columnWidth);
-        columnStartY += 20;
         drawStatLabelCentered(graphics, rightColumnX, columnStartY, "screen." + TMM.MOD_ID + ".player_stats.win_rate", String.format("%.2f%%", getWinRate(stats.getTotalWins(), stats.getTotalGamesPlayed())), columnWidth);
+        columnStartY += 20;
+        drawStatLabelCentered(graphics, rightColumnX, columnStartY, "screen." + TMM.MOD_ID + ".player_stats.kd_ratio", String.format("%.2f", getKdRatio(stats.getTotalKills(), stats.getTotalDeaths())), columnWidth);
         columnStartY += 20;
 
         // 渲染子组件（头部和底部贴图）

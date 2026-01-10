@@ -115,7 +115,7 @@ public abstract class CanRightClickMixin extends LivingEntity implements DataSyn
         }
     }
 
-    public static List<String> cantClickItems = List.of(
+    private static final List<String> cantClickItems = List.of(
             "supplementaries:item_shelf",
             "supplementaries:notice_board",
             "supplementaries:pedestal"

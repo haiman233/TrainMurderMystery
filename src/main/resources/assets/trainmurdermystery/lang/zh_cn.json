@@ -405,17 +405,14 @@
   "lobby.players.count": "登车玩家数量：%s / %s",
   "subtitles.block.cargo_box.close": "货物箱关闭",
   "subtitles.block.cargo_box.open": "货物箱打开",
-
   "subtitles.block.door.toggle": "门操作",
   "subtitles.item.crowbar.pry": "撬棍撬动门",
-  "task.read_book": "读书",
   "task.dance": "跳舞 - ",
   "task.drink": "喝饮料",
   "task.eat": "吃零食",
   "task.exercise": "去做些锻炼 - 在锻炼室奔跑",
   "death_reason.trainmurdermystery.shot_innocent": "误杀平民而亡",
   "task.meditate": "冥想 - 必须蹲下且保持静止",
-
   "task.fake": "你可以假装去",
   "task.feel": "你感觉想去",
   "task.outside": "呼吸新鲜空气",
@@ -476,7 +473,6 @@
   "tmm.replay.civilians": "平民:",
   "tmm.replay.neutrals": "中立:",
   "tmm.replay.killers": "杀手:",
-
   "trainmurdermystery.midnightconfig.blackoutCooldown": "停电",
   "trainmurdermystery.midnightconfig.blackoutMaxDuration": "停电",
   "trainmurdermystery.midnightconfig.blackoutMinDuration": "停电",
@@ -519,7 +515,6 @@
   "trainmurdermystery.midnightconfig.title": "客户端",
   "trainmurdermystery.midnightconfig.ultraPerfMode": "极限性能模式",
   "trainmurdermystery.midnightconfig.ultraPerfMode.tooltip": "禁用场景以换取较差的视觉体验，但获得最佳性能。渲染距离降低至2",
-
   "gui.sanitydim.hint00": "这些是什么声音？",
   "gui.sanitydim.hint01": "我感到有些不安",
   "gui.sanitydim.hint02": "刚才那是什么？",
@@ -541,8 +536,6 @@
   "gui.sanitydim.hint16": "为什么他们还不消失？！",
   "gui.sanitydim.hint17": "太吵了太吵了太吵了",
   "gui.sanitydim.hint18": "那些声音……我无法……",
-
-
   "announcement.goals.jester": "找到杀手并与他们合作。",
   "announcement.role.jester": "小丑",
   "announcement.goals.morphling": "愚弄所有人。",
@@ -554,10 +547,8 @@
   "announcement.role.ghost": "小透明",
   "announcement.goals.ghost": "别人无法看到你的发光",
   "announcement.goals.attendant": "开启这里所有的门",
-
   "announcement.role.photographer": "摄影师",
   "announcement.role.attendant": "乘务员",
-  "announcement.role.ghost": "小透明",
   "announcement.goals.awesome_binglus": "你有超多便条，随便写吧",
   "announcement.role.awesome_binglus": "记者",
   "announcement.goals.conductor": "使用万能钥匙打开列车上的所有门！",
@@ -617,7 +608,6 @@
   "tip.recaller.not_enough_money": "传送需要 100\uE781。",
   "tip.noellesroles.cooldown": "能力将在 %ss 后可用",
   "message.noellesroles.engineer.nothing_to_remove": "这个门无道具可拆卸",
-
   "info.screen.roleid.avenger": "开局获得一个保护者的对象\n在对象死后，你变为义警，并且得知击杀者的名字。",
   "info.screen.roleid.vigilante": "开局获得一把左轮手枪\n如果杀死平民,你也会死亡",
   "info.screen.roleid.conspirator": "商店拥有一个死亡笔记，可以猜测他人的职业，猜中后会因为心脏衰竭而死\n商店部分物品价格改变，并且仅能购买笔记、刀、枪、开锁器。",
@@ -658,7 +648,6 @@
   "info.screen.roleid.the_insane_damned_paranoid_killer": "你能听见死者的声音",
   "info.screen.roleid.illusionist": "使用迷幻瓶扰乱敌人的视野,能够购买迷幻瓶，制造出一阵迷雾，修改周围人的视野",
   "info.screen.roleid.broadcaster": "花费一定金钱可以向全图播报一条消息",
-
   "screen.noellesroles.conspirator.title": "阴谋家",
   "screen.noellesroles.conspirator.select_player": "选择目标玩家",
   "screen.noellesroles.conspirator.select_role": "为 %s 选择角色",
@@ -676,7 +665,7 @@
   "screen.trainmurdermystery.player_stats.general_stats": "通用统计",
   "screen.trainmurdermystery.player_stats.total_play_time": "总游玩时长: %s",
   "screen.trainmurdermystery.player_stats.total_games_played": "总游玩局数: %d",
-  "screen.trainmurdermystery.player_stats.total_kills": "总击杀玩家次数: %d",
+  "screen.trainmurdermystery.player_stats.total_kills": "总玩家击杀次数: %d",
   "screen.trainmurdermystery.player_stats.total_deaths": "总死亡次数: %d",
   "screen.trainmurdermystery.player_stats.total_wins": "总胜利次数: %d",
   "screen.trainmurdermystery.player_stats.total_losses": "总失败次数: %d",
@@ -702,5 +691,7 @@
   "screen.trainmurdermystery.player_stats.wins": "胜利次数: %d",
   "screen.trainmurdermystery.player_stats.losses": "失败次数: %d",
   "screen.trainmurdermystery.player_stats.kills": "击杀次数: %d",
-  "screen.trainmurdermystery.player_stats.deaths": "死亡次数: %d"
+  "screen.trainmurdermystery.player_stats.deaths": "死亡次数: %d",
+  "screen.trainmurdermystery.player_stats.total_team_kills": "总队友击杀次数: %d",
+  "screen.trainmurdermystery.player_stats.team_kills": "队友击杀次数: %d"
 }
