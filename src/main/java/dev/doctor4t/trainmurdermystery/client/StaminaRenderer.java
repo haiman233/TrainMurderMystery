@@ -15,8 +15,11 @@ import org.jetbrains.annotations.NotNull;
 public class StaminaRenderer {
 	public static StaminaBarRenderer view = new StaminaBarRenderer();
 	public static float offsetDelta = 0f;
-
-
+	
+	// 添加刀蓄满力的视觉效果相关变量
+	private static boolean knifeFullyCharged = false;
+	private static int flashTimer = 0;
+	private static final int FLASH_DURATION = 10; // 闪光持续时间（ticks）
 
 	public interface StaminaProvider {
 		float getCurrentStamina(Player clientPlayerEntity);
@@ -79,6 +82,14 @@ public class StaminaRenderer {
 			final var itemUseTime = player.getTicksUsingItem();
 			staminaPercent = Math.min( (float) itemUseTime / 10,1f);
 			isChargingWeapon = true;
+			
+			// 检测刀是否完全蓄力
+			if (itemUseTime >= 10 && !knifeFullyCharged) {
+				knifeFullyCharged = true;
+				flashTimer = FLASH_DURATION; // 开始闪光效果
+			} else if (itemUseTime < 10) {
+				knifeFullyCharged = false;
+			}
 		}
 
 		if (maxStamina <= 0) return; // 无体力系统
@@ -103,7 +114,15 @@ public class StaminaRenderer {
 		
 		// 检查是否应该禁用平滑动画（特别是对于武器蓄力）
 		if ((TMMConfig.disableStaminaBarSmoothing && isChargingWeapon) || isChargingWeapon) {
-			view.renderWithoutSmoothing(context, colour, staminaPercent);
+			// 如果是刀且完全蓄力，则添加特殊效果
+			if (mainHandStack.getItem() == TMMItems.KNIFE && knifeFullyCharged && flashTimer > 0) {
+				// 创建闪烁效果
+				int flashColour = (flashTimer % 4 < 2) ? 0xFFFF0000 : 0xFFFFFFFF; // 红白交替闪烁
+				view.renderWithoutSmoothing(context, flashColour, staminaPercent);
+				flashTimer--; // 减少闪光计时器
+			} else {
+				view.renderWithoutSmoothing(context, colour, staminaPercent);
+			}
 		} else {
 			view.render(context, colour, delta);
 		}
@@ -122,6 +141,10 @@ public class StaminaRenderer {
 
 	public static void tick() {
 		view.update();
+		// 更新闪光计时器
+		if (flashTimer > 0) {
+			flashTimer--;
+		}
 	}
 
 	public static class StaminaBarRenderer {
