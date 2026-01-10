@@ -11,6 +11,7 @@ import dev.doctor4t.trainmurdermystery.command.argument.GameModeArgumentType;
 import dev.doctor4t.trainmurdermystery.command.argument.TimeOfDayArgumentType;
 import dev.doctor4t.trainmurdermystery.event.PlayerInteractionHandler;
 import dev.doctor4t.trainmurdermystery.event.EntityInteractionHandler;
+import dev.doctor4t.trainmurdermystery.event.AFKEventHandler;
 
 import dev.doctor4t.trainmurdermystery.game.*;
 import dev.doctor4t.trainmurdermystery.index.*;
@@ -32,6 +33,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -56,6 +58,7 @@ public class TMM implements ModInitializer {
     public static MurderGameMode GAME;
     public static TMMConfig CONFIG = new TMMConfig();
     public static GameReplayManager REPLAY_MANAGER;
+    public static final Networking NETWORKING = new Networking();
 
     public static @NotNull ResourceLocation id(String name) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
@@ -69,12 +72,16 @@ public class TMM implements ModInitializer {
         // Init constants
         GameConstants.init();
 
+        // Initialize waypoints
+        dev.doctor4t.trainmurdermystery.util.WaypointInitUtil.initialize();
+
         // Initialize Replay API serializers
         ReplayApiInitializer.init();
 
         // Register event handlers
         PlayerInteractionHandler.register();
         EntityInteractionHandler.register();
+        AFKEventHandler.register();
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             SERVER = server;
@@ -118,6 +125,9 @@ public class TMM implements ModInitializer {
             SwitchMapCommand.register(dispatcher);
             ReloadReadyAreaCommand.register(dispatcher);
             EntityDataCommand.register(dispatcher);
+            dev.doctor4t.trainmurdermystery.command.CreateWaypointCommand.register(dispatcher);
+            dev.doctor4t.trainmurdermystery.command.ToggleWaypointsCommand.register(dispatcher);
+            AFKCommand.register(dispatcher);
             ShowStatsCommand.register(dispatcher);
         }));
 
@@ -180,6 +190,9 @@ public class TMM implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(ReplayPayload.ID, ReplayPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(SecurityCameraModePayload.ID, SecurityCameraModePayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ShowStatsPayload.ID, ShowStatsPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointsPacket.ID, dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointsPacket.CODEC);
+        PayloadTypeRegistry.playS2C().register(dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointVisibilityPacket.ID, dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointVisibilityPacket.CODEC);
+        PayloadTypeRegistry.playS2C().register(dev.doctor4t.trainmurdermystery.network.packet.SyncSpecificWaypointVisibilityPacket.ID, dev.doctor4t.trainmurdermystery.network.packet.SyncSpecificWaypointVisibilityPacket.CODEC);
         PayloadTypeRegistry.playC2S().register(KnifeStabPayload.ID, KnifeStabPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(GunShootPayload.ID, GunShootPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(StoreBuyPayload.ID, StoreBuyPayload.CODEC);
@@ -237,5 +250,19 @@ public class TMM implements ModInitializer {
     public static @NotNull Boolean isSupporter(Player player) {
         Optional<Entitlements> entitlements = Entitlements.token().get(player.getUUID());
         return entitlements.map(value -> value.keys().stream().anyMatch(identifier -> identifier.equals(COMMAND_ACCESS))).orElse(false);
+    }
+
+    public static boolean isPlayerInGame(Player player) {
+        return GameFunctions.isPlayerAliveAndSurvival(player);
+    }
+
+    public static class Networking {
+        public void sendToAllPlayers(CustomPacketPayload packet) {
+            if (SERVER != null) {
+                for (ServerPlayer player : SERVER.getPlayerList().getPlayers()) {
+                    ServerPlayNetworking.send(player, packet);
+                }
+            }
+        }
     }
 }

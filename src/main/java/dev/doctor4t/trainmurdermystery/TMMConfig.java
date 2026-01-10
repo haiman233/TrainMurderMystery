@@ -157,6 +157,18 @@ public class TMMConfig extends MidnightConfig {
     public static boolean enableAutoTrainReset = true;
     @Entry(category = "game")
     public static boolean verboseTrainResetLogs = true;
+    
+    // AFK设置
+    @Comment(category = "afk", centered = true)
+    public static Comment afkConfigComment;
+    @Entry(category = "afk", min = 60, max = 12000, isSlider = true) // 3秒到10分钟
+    public static int afkThresholdSeconds = (int) (4.5 * 60); // 5分钟
+    //  @Entry(category = "afk", min = 60, max = 12000, isSlider = true) // 3秒到10分钟
+    public static int afkDeathSeconds = (int) (5 * 60); // 5分钟
+    @Entry(category = "afk", min = 30, max = 900, isSlider = true) // 1.5秒到45秒
+    public static int afkWarningSeconds = 4 * 60; // 4分钟时开始警告
+    @Entry(category = "afk", min = 20, max = 600, isSlider = true) // 1秒到30秒
+    public static int afkSleepySeconds =  3 *60; // 3分钟时开始困倦效果
 
     @Environment(EnvType.CLIENT)
     public static boolean isUltraPerfMode() {
@@ -177,7 +189,7 @@ public class TMMConfig extends MidnightConfig {
             try {
                 java.nio.file.Path configPath = net.fabricmc.loader.api.FabricLoader.getInstance()
                         .getConfigDir()
-                        .resolve(TMM.MOD_ID + ".json");
+                        .resolve(TMM.MOD_ID + "_server.json");
 
                 if (java.nio.file.Files.exists(configPath)) {
                     // 读取配置文件
@@ -190,6 +202,7 @@ public class TMMConfig extends MidnightConfig {
                 TMM.LOGGER.error("服务端加载配置失败", e);
             }
         }
+
     }
 
     /**
@@ -221,54 +234,57 @@ public class TMMConfig extends MidnightConfig {
 
     /**
      * 解析配置JSON字符串并设置字段值
+     * 仅处理服务端相关的配置项，客户端配置由MidnightConfig库自动处理
      */
     private static void parseConfig(String jsonContent) {
         try {
             // 使用Gson解析JSON
             com.google.gson.JsonObject json = com.google.gson.JsonParser.parseString(jsonContent).getAsJsonObject();
 
+            // 仅读取服务端相关配置
             // 读取shop配置
-            if (json.has("knifePrice")) knifePrice = json.get("knifePrice").getAsInt();
-            if (json.has("revolverPrice")) revolverPrice = json.get("revolverPrice").getAsInt();
-            if (json.has("grenadePrice")) grenadePrice = json.get("grenadePrice").getAsInt();
-            if (json.has("psychoModePrice")) psychoModePrice = json.get("psychoModePrice").getAsInt();
-            if (json.has("poisonVialPrice")) poisonVialPrice = json.get("poisonVialPrice").getAsInt();
-            if (json.has("scorpionPrice")) scorpionPrice = json.get("scorpionPrice").getAsInt();
-            if (json.has("firecrackerPrice")) firecrackerPrice = json.get("firecrackerPrice").getAsInt();
-            if (json.has("lockpickPrice")) lockpickPrice = json.get("lockpickPrice").getAsInt();
-            if (json.has("crowbarPrice")) crowbarPrice = json.get("crowbarPrice").getAsInt();
-            if (json.has("bodyBagPrice")) bodyBagPrice = json.get("bodyBagPrice").getAsInt();
-            if (json.has("blackoutPrice")) blackoutPrice = json.get("blackoutPrice").getAsInt();
-            if (json.has("notePrice")) notePrice = json.get("notePrice").getAsInt();
+            if (json.has("knifePrice") && json.get("knifePrice").isJsonPrimitive()) knifePrice = json.get("knifePrice").getAsInt();
+            if (json.has("revolverPrice") && json.get("revolverPrice").isJsonPrimitive()) revolverPrice = json.get("revolverPrice").getAsInt();
+            if (json.has("grenadePrice") && json.get("grenadePrice").isJsonPrimitive()) grenadePrice = json.get("grenadePrice").getAsInt();
+            if (json.has("psychoModePrice") && json.get("psychoModePrice").isJsonPrimitive()) psychoModePrice = json.get("psychoModePrice").getAsInt();
+            if (json.has("poisonVialPrice") && json.get("poisonVialPrice").isJsonPrimitive()) poisonVialPrice = json.get("poisonVialPrice").getAsInt();
+            if (json.has("scorpionPrice") && json.get("scorpionPrice").isJsonPrimitive()) scorpionPrice = json.get("scorpionPrice").getAsInt();
+            if (json.has("firecrackerPrice") && json.get("firecrackerPrice").isJsonPrimitive()) firecrackerPrice = json.get("firecrackerPrice").getAsInt();
+            if (json.has("lockpickPrice") && json.get("lockpickPrice").isJsonPrimitive()) lockpickPrice = json.get("lockpickPrice").getAsInt();
+            if (json.has("crowbarPrice") && json.get("crowbarPrice").isJsonPrimitive()) crowbarPrice = json.get("crowbarPrice").getAsInt();
+            if (json.has("bodyBagPrice") && json.get("bodyBagPrice").isJsonPrimitive()) bodyBagPrice = json.get("bodyBagPrice").getAsInt();
+            if (json.has("blackoutPrice") && json.get("blackoutPrice").isJsonPrimitive()) blackoutPrice = json.get("blackoutPrice").getAsInt();
+            if (json.has("notePrice") && json.get("notePrice").isJsonPrimitive()) notePrice = json.get("notePrice").getAsInt();
 
             // 读取cooldowns配置
-            if (json.has("knifeCooldown")) knifeCooldown = json.get("knifeCooldown").getAsInt();
-            if (json.has("revolverCooldown")) revolverCooldown = json.get("revolverCooldown").getAsInt();
-            if (json.has("derringerCooldown")) derringerCooldown = json.get("derringerCooldown").getAsInt();
-            if (json.has("grenadeCooldown")) grenadeCooldown = json.get("grenadeCooldown").getAsInt();
-            if (json.has("lockpickCooldown")) lockpickCooldown = json.get("lockpickCooldown").getAsInt();
-            if (json.has("crowbarCooldown")) crowbarCooldown = json.get("crowbarCooldown").getAsInt();
-            if (json.has("bodyBagCooldown")) bodyBagCooldown = json.get("bodyBagCooldown").getAsInt();
-            if (json.has("psychoModeCooldown")) psychoModeCooldown = json.get("psychoModeCooldown").getAsInt();
-            if (json.has("blackoutCooldown")) blackoutCooldown = json.get("blackoutCooldown").getAsInt();
+            if (json.has("knifeCooldown") && json.get("knifeCooldown").isJsonPrimitive()) knifeCooldown = json.get("knifeCooldown").getAsInt();
+            if (json.has("revolverCooldown") && json.get("revolverCooldown").isJsonPrimitive()) revolverCooldown = json.get("revolverCooldown").getAsInt();
+            if (json.has("derringerCooldown") && json.get("derringerCooldown").isJsonPrimitive()) derringerCooldown = json.get("derringerCooldown").getAsInt();
+            if (json.has("grenadeCooldown") && json.get("grenadeCooldown").isJsonPrimitive()) grenadeCooldown = json.get("grenadeCooldown").getAsInt();
+            if (json.has("lockpickCooldown") && json.get("lockpickCooldown").isJsonPrimitive()) lockpickCooldown = json.get("lockpickCooldown").getAsInt();
+            if (json.has("crowbarCooldown") && json.get("crowbarCooldown").isJsonPrimitive()) crowbarCooldown = json.get("crowbarCooldown").getAsInt();
+            if (json.has("bodyBagCooldown") && json.get("bodyBagCooldown").isJsonPrimitive()) bodyBagCooldown = json.get("bodyBagCooldown").getAsInt();
+            if (json.has("psychoModeCooldown") && json.get("psychoModeCooldown").isJsonPrimitive()) psychoModeCooldown = json.get("psychoModeCooldown").getAsInt();
+            if (json.has("blackoutCooldown") && json.get("blackoutCooldown").isJsonPrimitive()) blackoutCooldown = json.get("blackoutCooldown").getAsInt();
 
             // 读取game配置
-            if (json.has("startingMoney")) startingMoney = json.get("startingMoney").getAsInt();
-            if (json.has("passiveMoneyAmount")) passiveMoneyAmount = json.get("passiveMoneyAmount").getAsInt();
-            if (json.has("passiveMoneyInterval")) passiveMoneyInterval = json.get("passiveMoneyInterval").getAsInt();
-            if (json.has("moneyPerKill")) moneyPerKill = json.get("moneyPerKill").getAsInt();
-            if (json.has("psychoModeArmor")) psychoModeArmor = json.get("psychoModeArmor").getAsInt();
-            if (json.has("psychoModeDuration")) psychoModeDuration = json.get("psychoModeDuration").getAsInt();
-            if (json.has("firecrackerDuration")) firecrackerDuration = json.get("firecrackerDuration").getAsInt();
-            if (json.has("blackoutMinDuration")) blackoutMinDuration = json.get("blackoutMinDuration").getAsInt();
-            if (json.has("blackoutMaxDuration")) blackoutMaxDuration = json.get("blackoutMaxDuration").getAsInt();
-            if (json.has("enableAutoTrainReset")) enableAutoTrainReset = json.get("enableAutoTrainReset").getAsBoolean();
-            if (json.has("verboseTrainResetLogs")) verboseTrainResetLogs = json.get("verboseTrainResetLogs").getAsBoolean();
+            if (json.has("startingMoney") && json.get("startingMoney").isJsonPrimitive()) startingMoney = json.get("startingMoney").getAsInt();
+            if (json.has("passiveMoneyAmount") && json.get("passiveMoneyAmount").isJsonPrimitive()) passiveMoneyAmount = json.get("passiveMoneyAmount").getAsInt();
+            if (json.has("passiveMoneyInterval") && json.get("passiveMoneyInterval").isJsonPrimitive()) passiveMoneyInterval = json.get("passiveMoneyInterval").getAsInt();
+            if (json.has("moneyPerKill") && json.get("moneyPerKill").isJsonPrimitive()) moneyPerKill = json.get("moneyPerKill").getAsInt();
+            if (json.has("psychoModeArmor") && json.get("psychoModeArmor").isJsonPrimitive()) psychoModeArmor = json.get("psychoModeArmor").getAsInt();
+            if (json.has("psychoModeDuration") && json.get("psychoModeDuration").isJsonPrimitive()) psychoModeDuration = json.get("psychoModeDuration").getAsInt();
+            if (json.has("firecrackerDuration") && json.get("firecrackerDuration").isJsonPrimitive()) firecrackerDuration = json.get("firecrackerDuration").getAsInt();
+            if (json.has("blackoutMinDuration") && json.get("blackoutMinDuration").isJsonPrimitive()) blackoutMinDuration = json.get("blackoutMinDuration").getAsInt();
+            if (json.has("blackoutMaxDuration") && json.get("blackoutMaxDuration").isJsonPrimitive()) blackoutMaxDuration = json.get("blackoutMaxDuration").getAsInt();
+            if (json.has("enableAutoTrainReset") && json.get("enableAutoTrainReset").isJsonPrimitive()) enableAutoTrainReset = json.get("enableAutoTrainReset").getAsBoolean();
+            if (json.has("verboseTrainResetLogs") && json.get("verboseTrainResetLogs").isJsonPrimitive()) verboseTrainResetLogs = json.get("verboseTrainResetLogs").getAsBoolean();
 
-            // 读取客户端配置
-            if (json.has("ultraPerfMode")) ultraPerfMode = json.get("ultraPerfMode").getAsBoolean();
-            if (json.has("disableScreenShake")) disableScreenShake = json.get("disableScreenShake").getAsBoolean();
-            if (json.has("disableStaminaBarSmoothing")) disableStaminaBarSmoothing = json.get("disableStaminaBarSmoothing").getAsBoolean();
+            // 读取AFK设置
+            if (json.has("afkThresholdSeconds") && json.get("afkThresholdSeconds").isJsonPrimitive()) afkThresholdSeconds = json.get("afkThresholdSeconds").getAsInt();
+            if (json.has("afkDeathSeconds") && json.get("afkDeathSeconds").isJsonPrimitive()) afkDeathSeconds = json.get("afkDeathSeconds").getAsInt();
+            if (json.has("afkWarningSeconds") && json.get("afkWarningSeconds").isJsonPrimitive()) afkWarningSeconds = json.get("afkWarningSeconds").getAsInt();
+            if (json.has("afkSleepySeconds") && json.get("afkSleepySeconds").isJsonPrimitive()) afkSleepySeconds = json.get("afkSleepySeconds").getAsInt();
 
             TMM.LOGGER.debug("配置解析成功");
         } catch (Exception e) {

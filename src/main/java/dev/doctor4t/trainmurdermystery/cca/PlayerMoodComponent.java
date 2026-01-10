@@ -6,6 +6,7 @@ import dev.doctor4t.trainmurdermystery.client.TMMClient;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.TMMBlocks;
+import dev.doctor4t.trainmurdermystery.index.tag.TMMBlockTags;
 import dev.doctor4t.trainmurdermystery.index.tag.TMMItemTags;
 import dev.doctor4t.trainmurdermystery.util.TaskCompletePayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -177,6 +178,7 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
                     case DRINK -> new DrinkTask();
                     case EXERCISE -> new ExerciseTask(GameConstants.EXERCISE_TASK_DURATION);
                     case MEDITATE -> new MeditateTask(GameConstants.MEDITATE_TASK_DURATION); // 添加冥想任务生成
+                    case BATHE -> new BatheTask(GameConstants.BATHE_TASK_DURATION); // 添加洗澡任务生成
 
                 };
             }
@@ -269,7 +271,8 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
 	EAT(nbt -> new EatTask()),
 	DRINK(nbt -> new DrinkTask()),
 	EXERCISE(nbt -> new ExerciseTask(nbt.getInt("timer"))),
-	MEDITATE(nbt -> new MeditateTask(nbt.getInt("timer"))); // 添加冥想任务
+	MEDITATE(nbt -> new MeditateTask(nbt.getInt("timer"))), // 添加冥想任务
+	BATHE(nbt -> new BatheTask(nbt.getInt("timer"))); // 添加洗澡任务
 
 	public final @NotNull Function<CompoundTag, TrainTask> setFunction;
 
@@ -520,6 +523,58 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
         public CompoundTag toNbt() {
             CompoundTag nbt = new CompoundTag();
             nbt.putInt("type", Task.MEDITATE.ordinal());
+            nbt.putInt("timer", this.timer);
+            return nbt;
+        }
+    }
+
+    /**
+     * 洗澡任务类
+     * 玩家需要站在水中或雨中完成洗澡
+     */
+    public static class BatheTask implements TrainTask {
+        private int timer;
+
+        public BatheTask(int time) {
+            this.timer = time;
+        }
+
+
+        @Override
+        public void tick(@NotNull Player player) {
+            // 检查玩家是否在水中或头顶4格内有洒水器(SPRINKLERS)
+            if (player.isInWater() && this.timer > 0) {
+                this.timer--;
+            } else {
+                // 检查头顶4格范围内是否有洒水器
+                for (int y = 0; y < 4; y++) {
+                    if (player.level().getBlockState(player.blockPosition().above(y)).is(TMMBlockTags.SPRINKLERS) && this.timer > 0) {
+                        this.timer--;
+                        break;
+                    }
+                }
+            }
+        }
+
+        @Override
+        public boolean isFulfilled(@NotNull Player player) {
+            return this.timer <= 0;
+        }
+
+        @Override
+        public String getName() {
+            return "bathe";
+        }
+
+        @Override
+        public Task getType() {
+            return Task.BATHE;
+        }
+
+        @Override
+        public CompoundTag toNbt() {
+            CompoundTag nbt = new CompoundTag();
+            nbt.putInt("type", Task.BATHE.ordinal());
             nbt.putInt("timer", this.timer);
             return nbt;
         }

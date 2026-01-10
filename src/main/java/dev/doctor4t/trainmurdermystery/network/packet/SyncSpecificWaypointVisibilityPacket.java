@@ -1,0 +1,58 @@
+package dev.doctor4t.trainmurdermystery.network.packet;
+
+import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.client.gui.screen.WaypointHUD;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+
+public class SyncSpecificWaypointVisibilityPacket implements CustomPacketPayload {
+    public static final Type<SyncSpecificWaypointVisibilityPacket> ID = new Type<>(ResourceLocation.tryBuild(TMM.MOD_ID, "sync_specific_waypoint_visibility"));
+    public static final StreamCodec<FriendlyByteBuf, SyncSpecificWaypointVisibilityPacket> CODEC = StreamCodec.ofMember(
+            (packet, buf) -> {
+                buf.writeBoolean(packet.visible);
+                buf.writeUtf(packet.path);
+                buf.writeUtf(packet.name);
+            },
+            buf -> new SyncSpecificWaypointVisibilityPacket(buf.readBoolean(), buf.readUtf(), buf.readUtf())
+    );
+    private final boolean visible;
+    private final String path;
+    private final String name;
+
+    public SyncSpecificWaypointVisibilityPacket(boolean visible, String path, String name) {
+        this.visible = visible;
+        this.path = path;
+        this.name = name;
+    }
+
+    public static void handle(SyncSpecificWaypointVisibilityPacket packet, ClientPlayNetworking.Context context) {
+        context.client().execute(() -> {
+            if (packet.visible) {
+                WaypointHUD.showSpecificWaypoint(packet.path, packet.name);
+            } else {
+                WaypointHUD.hideSpecificWaypoint(packet.path, packet.name);
+            }
+        });
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return ID;
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public String getName() {
+        return name;
+    }
+}

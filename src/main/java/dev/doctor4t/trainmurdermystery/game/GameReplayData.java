@@ -144,7 +144,8 @@ public class GameReplayData {
         if (!stack.isEmpty()) {
             return stack.getDisplayName();
         }
-        return Component.literal(itemId.getPath());
+        // 返回本地化的死亡原因
+        return Component.translatable("death_reason.trainmurdermystery." + itemId.getPath());
     }
 
     public Component toText(GameReplayManager manager, GameReplayData replayData, dev.doctor4t.trainmurdermystery.api.replay.ReplayEvent event) {
@@ -199,14 +200,14 @@ public class GameReplayData {
             message = details.data();
         }
 
-        Component sourceName = sourcePlayer != null ? manager.getPlayerName(sourcePlayer) : Component.literal("未知玩家").withStyle(ChatFormatting.GRAY);
+        Component sourceName = sourcePlayer != null ? manager.getPlayerName(sourcePlayer) : null;
         Component targetName = targetPlayer != null ? manager.getPlayerName(targetPlayer) : Component.literal("未知玩家").withStyle(ChatFormatting.GRAY);
         
         // 获取角色信息并设置颜色
         String sourceRoleId = sourcePlayer != null ? replayData.getPlayerRoles().get(sourcePlayer) : null;
         String targetRoleId = targetPlayer != null ? replayData.getPlayerRoles().get(targetPlayer) : null;
         
-        if (sourceRoleId != null) {
+        if (sourceName != null && sourceRoleId != null) {
             Component sourceRoleName = ReplayDisplayUtils.getRoleDisplayName(sourceRoleId);
             ChatFormatting sourceColor = getRoleColor(sourceRoleId);
             sourceName = sourceName.copy().withStyle(sourceColor)
@@ -224,8 +225,22 @@ public class GameReplayData {
 
         return switch (event.eventType()) {
             // 主要事件
-            case PLAYER_KILL -> Component.translatable("tmm.replay.event.kill", sourceName, itemUsedText, targetName);
-            case PLAYER_POISONED -> Component.translatable("tmm.replay.event.poison", sourceName, itemUsedText, targetName);
+            case PLAYER_KILL -> {
+                if (sourceName != null) {
+                    yield Component.translatable("tmm.replay.event.kill", sourceName, itemUsedText, targetName);
+                } else {
+                    // 如果没有杀手（例如意外死亡），则使用不同的翻译键
+                    yield Component.translatable("tmm.replay.event.kill_no_killer", itemUsedText, targetName);
+                }
+            }
+            case PLAYER_POISONED -> {
+                if (sourceName != null) {
+                    yield Component.translatable("tmm.replay.event.poison", sourceName, itemUsedText, targetName);
+                } else {
+                    // 如果没有下毒者（例如意外中毒），则使用不同的翻译键
+                    yield Component.translatable("tmm.replay.event.poison_no_killer", itemUsedText, targetName);
+                }
+            }
             case GRENADE_THROWN -> Component.translatable("tmm.replay.event.grenade_thrown", sourceName);
             case ITEM_USED -> Component.translatable("tmm.replay.event.skill_used", sourceName, itemUsedText);
             case BLACKOUT_START -> Component.translatable("tmm.replay.event.blackout_start", Component.literal(message));

@@ -19,6 +19,10 @@ import dev.doctor4t.trainmurdermystery.index.TMMSounds;
 import dev.doctor4t.trainmurdermystery.util.AnnounceEndingPayload;
 import dev.doctor4t.trainmurdermystery.util.ReplayPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.loader.impl.util.log.Log;
+import net.fabricmc.loader.impl.util.log.LogCategory;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
@@ -94,6 +98,7 @@ public class GameFunctions {
     }
 
     public static void startGame(ServerLevel world, GameMode gameMode, int time) {
+        executeFunction(world.getServer().createCommandSourceStack(), "harpymodloader:early_start_game");
         GameWorldComponent game = GameWorldComponent.KEY.get(world);
         AreasWorldComponent areas = AreasWorldComponent.KEY.get(world);
         int playerCount = Math.toIntExact(world.players().stream().filter(serverPlayerEntity -> (areas.getReadyArea().contains(serverPlayerEntity.position()))).count());
@@ -117,7 +122,13 @@ public class GameFunctions {
         GameWorldComponent component = GameWorldComponent.KEY.get(world);
         component.setGameStatus(GameWorldComponent.GameStatus.STOPPING);
     }
-
+    private static void executeFunction(CommandSourceStack source, String function) {
+        try {
+            source.getServer().getCommands().performPrefixedCommand(source, "function " + function);
+        } catch (Exception e) {
+            Log.warn(LogCategory.GENERAL, "Failed to execute function: " + function + ", error: " + e.getMessage());
+        }
+    }
     public static void initializeGame(ServerLevel serverWorld) {
 
         GameWorldComponent gameComponent = GameWorldComponent.KEY.get(serverWorld);

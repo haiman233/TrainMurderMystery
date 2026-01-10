@@ -14,26 +14,26 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(DefaultShaderInterface.class)
-public class DefaultShaderInterfaceMixin implements SodiumShaderInterface {
+public abstract class DefaultShaderInterfaceMixin implements SodiumShaderInterface {
     @Unique
     private GlUniformBlock uniformOffsets;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void tmm$addUniform(ShaderBindingContext context, ChunkShaderOptions options,
-                                CallbackInfo ci) {
-        if (IrisHelper.isIrisShaderPackInUse()) {
-            return;
-        }
-
-        uniformOffsets = context.bindUniformBlock("ubo_SectionOffsets", 1);
-    }
-
-    @Override
-    public void tmm$set(GlMutableBuffer buffer) {
-        if (uniformOffsets == null) {
-            return;
-        }
-
-        uniformOffsets.bindBuffer(buffer);
-    }
+//    @Inject(method = "<init>", at = @At("RETURN"))
+//    private void tmm$addUniform(ShaderBindingContext context, ChunkShaderOptions options,
+//                                CallbackInfo ci) {
+//        if (IrisHelper.isIrisShaderPackInUse()) {
+//            return;
+//        }
+//
+//        uniformOffsets = context.bindUniformBlock("ubo_SectionOffsets", 1);
+//    }
+//
+//    @Override
+//    public void tmm$set(GlMutableBuffer buffer) {
+//        if (uniformOffsets == null) {
+//            return;
+//        }
+//
+//        uniformOffsets.bindBuffer(buffer);
+//    }
 }

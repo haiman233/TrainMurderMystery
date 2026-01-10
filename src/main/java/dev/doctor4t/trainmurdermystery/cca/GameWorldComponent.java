@@ -368,7 +368,8 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
                         // kill players who fell off the train
                         final var block = player.level().getBlockState(new BlockPos((int) player.getX(), (int) player.getY(), (int) player.getZ())).getBlock();
                         final var block1 = player.level().getBlockState(new BlockPos((int) player.getX(), (int) (player.getY()-1), (int) player.getZ())).getBlock();
-                        if (player.getY() < areas.playArea.minY || (block == Blocks.WATER && block1 == Blocks.WATER)) {
+                        final var block2 = player.level().getBlockState(new BlockPos((int) player.getX(), (int) (player.getY()-2), (int) player.getZ())).getBlock();
+                        if (player.getY() < areas.playArea.minY || (block == Blocks.WATER && block1 == Blocks.WATER && block2 == Blocks.WATER)) {
                             GameFunctions.killPlayer(player, false, player.getLastAttacker() instanceof Player killerPlayer ? killerPlayer : null, GameConstants.DeathReasons.FELL_OUT_OF_TRAIN);
                         }
 

@@ -19,21 +19,21 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @Mixin(SodiumShader.class)
-public class SodiumShaderMixin implements SodiumShaderInterface {
+public abstract class SodiumShaderMixin implements SodiumShaderInterface {
     @Unique
     private GlUniformBlock uniformOffsets;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void tmm$addUniform(IrisRenderingPipeline pipeline, SodiumPrograms.Pass pass, ShaderBindingContext context, int handle, BlendModeOverride blendModeOverride, List bufferBlendOverrides, CustomUniforms customUniforms, Supplier flipState, float alphaTest, boolean containsTessellation, CallbackInfo ci) {
-        uniformOffsets = context.bindUniformBlock("ubo_SectionOffsets", 1);
-    }
-
-    @Override
-    public void tmm$set(GlMutableBuffer buffer) {
-        if (uniformOffsets == null) {
-            return;
-        }
-
-        uniformOffsets.bindBuffer(buffer);
-    }
+//    @Inject(method = "<init>", at = @At("RETURN"))
+//    private void tmm$addUniform(IrisRenderingPipeline pipeline, SodiumPrograms.Pass pass, ShaderBindingContext context, int handle, BlendModeOverride blendModeOverride, List bufferBlendOverrides, CustomUniforms customUniforms, Supplier flipState, float alphaTest, boolean containsTessellation, CallbackInfo ci) {
+//        uniformOffsets = context.bindUniformBlock("ubo_SectionOffsets", 1);
+//    }
+//
+//    @Override
+//    public void tmm$set(GlMutableBuffer buffer) {
+//        if (uniformOffsets == null) {
+//            return;
+//        }
+//
+//        uniformOffsets.bindBuffer(buffer);
+//    }
 }

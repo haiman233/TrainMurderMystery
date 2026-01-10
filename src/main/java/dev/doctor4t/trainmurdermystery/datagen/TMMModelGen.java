@@ -359,6 +359,7 @@ public class TMMModelGen extends FabricModelProvider {
         generator.createNonTemplateHorizontalBlock(TMMBlocks.DRINK_TRAY);
         this.registerPanel(generator, TMMBlocks.BARRIER_PANEL, TextureMapping.getBlockTexture(TMMBlocks.BARRIER_PANEL));
 
+
         generator.createAirLikeBlock(TMMBlocks.LIGHT_BARRIER, TMMBlocks.LIGHT_BARRIER.asItem());
         generator.createSimpleFlatItemModel(TMMBlocks.LIGHT_BARRIER.asItem());
         generator.createNonTemplateHorizontalBlock(TMMBlocks.HORN);

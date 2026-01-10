@@ -15,6 +15,7 @@ import dev.doctor4t.trainmurdermystery.client.gui.RoundTextRenderer;
 import dev.doctor4t.trainmurdermystery.client.gui.StoreRenderer;
 import dev.doctor4t.trainmurdermystery.client.gui.TimeRenderer;
 import dev.doctor4t.trainmurdermystery.client.gui.screen.PlayerStatsScreen;
+import dev.doctor4t.trainmurdermystery.client.gui.screen.WaypointHUD;
 import dev.doctor4t.trainmurdermystery.client.model.TMMModelLayers;
 import dev.doctor4t.trainmurdermystery.client.render.block_entity.PlateBlockEntityRenderer;
 import dev.doctor4t.trainmurdermystery.client.render.block_entity.SmallDoorBlockEntityRenderer;
@@ -26,6 +27,7 @@ import dev.doctor4t.trainmurdermystery.client.util.TMMItemTooltips;
 import dev.doctor4t.trainmurdermystery.client.gui.SecurityCameraHUD;
 import dev.doctor4t.trainmurdermystery.command.ShowStatsCommand;
 import dev.doctor4t.trainmurdermystery.entity.FirecrackerEntity;
+import dev.doctor4t.trainmurdermystery.client.AFKRenderer;
 import dev.doctor4t.trainmurdermystery.entity.NoteEntity;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
@@ -34,6 +36,9 @@ import dev.doctor4t.trainmurdermystery.item.GrenadeItem;
 import dev.doctor4t.trainmurdermystery.item.KnifeItem;
 import dev.doctor4t.trainmurdermystery.mod_whitelist.client.ModWhitelistClient;
 import dev.doctor4t.trainmurdermystery.network.SecurityCameraModePayload;
+import dev.doctor4t.trainmurdermystery.network.packet.SyncSpecificWaypointVisibilityPacket;
+import dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointVisibilityPacket;
+import dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointsPacket;
 import dev.doctor4t.trainmurdermystery.network.ShowStatsPayload;
 import dev.doctor4t.trainmurdermystery.ui.TMMCommandUI;
 import dev.doctor4t.trainmurdermystery.ui.event.KeyPressHandler;
@@ -367,7 +372,12 @@ public class TMMClient implements ClientModInitializer {
         net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.register((guiGraphics, deltaTick) -> {
             SecurityCameraHUD.render(guiGraphics, Minecraft.getInstance().getWindow().getGuiScaledWidth(), Minecraft.getInstance().getWindow().getGuiScaledHeight());
             SecurityCameraHUD.renderCameraFeed(guiGraphics, Minecraft.getInstance().getWindow().getGuiScaledWidth(), Minecraft.getInstance().getWindow().getGuiScaledHeight());
+            WaypointHUD.renderHUD(guiGraphics,deltaTick.getRealtimeDeltaTicks());
+            AFKRenderer.renderAFKEffects(guiGraphics, deltaTick.getRealtimeDeltaTicks());
         });
+        ClientPlayNetworking.registerGlobalReceiver(SyncWaypointsPacket.ID, SyncWaypointsPacket::handle);
+        ClientPlayNetworking.registerGlobalReceiver(SyncWaypointVisibilityPacket.ID, SyncWaypointVisibilityPacket::handle);
+        ClientPlayNetworking.registerGlobalReceiver(SyncSpecificWaypointVisibilityPacket.ID, SyncSpecificWaypointVisibilityPacket::handle);
 
         // Register client tick event for stats keybind
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
