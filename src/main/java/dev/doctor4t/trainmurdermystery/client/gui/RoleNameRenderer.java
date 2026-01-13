@@ -63,11 +63,13 @@ public class RoleNameRenderer {
                 TrainRole playerRole = TrainRole.BYSTANDER;
                 if (component.canUseKillerFeatures(player)) playerRole = TrainRole.KILLER;
                 if (targetRole2 !=null){
-                    if (!targetRole2.isInnocent() && playerRole.equals(TrainRole.KILLER)){
-                        context.pose().translate(0, 20 + renderer.lineHeight, 0);
-                        MutableComponent roleText1 = Component.translatable("announcement.role."+targetRole2.identifier().getPath());
-                        int roleWidth1 = renderer.width(roleText1);
-                        context.drawString(renderer, roleText1, -roleWidth1 / 2, 0, Mth.color(1f, 0f, 0f) | ((int) (nametagAlpha * 255) << 24));
+                    if (!targetRole2.isInnocent() && playerRole.equals(TrainRole.KILLER)) {
+                        if (!targetRole2.getIdentifier().getNamespace().equals("stupid_express")) {
+                            context.pose().translate(0, 20 + renderer.lineHeight, 0);
+                            MutableComponent roleText1 = Component.translatable("announcement.role." + targetRole2.identifier().getPath());
+                            int roleWidth1 = renderer.width(roleText1);
+                            context.drawString(renderer, roleText1, -roleWidth1 / 2, 0, Mth.color(1f, 0f, 0f) | ((int) (nametagAlpha * 255) << 24));
+                        }
                     }
                 }
                 if (playerRole == TrainRole.KILLER && targetRole == TrainRole.KILLER) {

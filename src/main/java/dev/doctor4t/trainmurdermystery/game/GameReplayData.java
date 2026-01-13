@@ -248,8 +248,20 @@ public class GameReplayData {
             // 系统事件
             case GAME_START -> Component.translatable("tmm.replay.event.game_start").withStyle(ChatFormatting.GREEN);
             case GAME_END -> Component.translatable("tmm.replay.event.game_end", Component.literal(replayData.getWinningTeam()).withStyle(ChatFormatting.GOLD)).withStyle(ChatFormatting.GREEN);
-            case PLAYER_JOIN -> Component.translatable("tmm.replay.event.player_join", sourceName).withStyle(ChatFormatting.GRAY);
-            case PLAYER_LEAVE -> Component.translatable("tmm.replay.event.player_leave", sourceName).withStyle(ChatFormatting.GRAY);
+            case PLAYER_JOIN -> {
+                if (sourceName != null) {
+                    yield Component.translatable("tmm.replay.event.player_join", sourceName).withStyle(ChatFormatting.GRAY);
+                } else {
+                    yield Component.translatable("tmm.replay.event.player_join", Component.literal("未知玩家")).withStyle(ChatFormatting.GRAY);
+                }
+            }
+            case PLAYER_LEAVE -> {
+                if (sourceName != null) {
+                    yield Component.translatable("tmm.replay.event.player_leave", sourceName).withStyle(ChatFormatting.GRAY);
+                } else {
+                    yield Component.translatable("tmm.replay.event.player_leave", Component.literal("未知玩家")).withStyle(ChatFormatting.GRAY);
+                }
+            }
             // 次要事件
 
             /*case DOOR_OPEN -> Component.translatable("tmm.replay.event.door_open", sourceName);

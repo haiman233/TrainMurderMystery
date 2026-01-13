@@ -1,6 +1,8 @@
 
 package dev.doctor4t.trainmurdermystery.client.gui.screen;
 
+import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.systems.RenderSystem;
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.api.Role;
 import dev.doctor4t.trainmurdermystery.api.TMMRoles;
@@ -38,7 +40,15 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
     private boolean visible = true; // 组件是否可见
     private final List<GuiEventListener> children = new ArrayList<>(); // 子事件监听器列表
     private final List<Renderable> renderables = new ArrayList<>(); // 可渲染对象列表
-
+    private static void enableScissor(float x0, float y0, float x1, float y1) {
+        Window window = Minecraft.getInstance().getWindow();
+        int screenHeight = window.getScreenHeight();
+        int scissorX = (int) (x0 * window.getGuiScale());
+        int scissorY = (int) (screenHeight - (y1 * window.getGuiScale()));
+        int scissorWidth = (int) ((x1 - x0) * window.getGuiScale());
+        int scissorHeight = (int) ((y1 - y0) * window.getGuiScale());
+        RenderSystem.enableScissor(scissorX, scissorY, scissorWidth, scissorHeight);
+    }
     /**
      * 构造函数
      * @param x X坐标
@@ -373,6 +383,9 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
 
         @Override
         protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+            // 启用剪切矩形以限制渲染区域
+            enableScissor(getX(), getY(), getX() + getWidth(), getY() + getHeight());
+            
             graphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x80000000);
             graphics.renderOutline(getX(), getY(), getWidth(), getHeight(), 0xFFAAAAAA);
 
@@ -426,6 +439,9 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
                 graphics.fill(scrollbarX, getY(), scrollbarX + SCROLLBAR_WIDTH, getY() + getHeight(), 0x80000000); // 滚动条背景
                 graphics.fill(scrollbarX, scrollbarY, scrollbarX + SCROLLBAR_WIDTH, scrollbarY + scrollbarHeight, 0xFFAAAAAA); // 滚动条手柄
             }
+            
+            // 禁用剪切矩形
+            RenderSystem.disableScissor();
         }
 
         /**
