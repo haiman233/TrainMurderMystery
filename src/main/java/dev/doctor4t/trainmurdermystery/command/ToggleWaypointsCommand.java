@@ -9,6 +9,7 @@ import dev.doctor4t.trainmurdermystery.TMM;
 
 import dev.doctor4t.trainmurdermystery.data.WaypointManager;
 import dev.doctor4t.trainmurdermystery.data.WaypointVisibilityManager;
+import dev.doctor4t.trainmurdermystery.network.PacketTracker;
 import dev.doctor4t.trainmurdermystery.network.packet.SyncSpecificWaypointVisibilityPacket;
 import dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointVisibilityPacket;
 import net.minecraft.commands.CommandSourceStack;
@@ -144,7 +145,7 @@ public class ToggleWaypointsCommand {
         
         // 发送特定路径点的网络包到指定玩家
         for (ServerPlayer player : playersToSendTo) {
-            net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new SyncSpecificWaypointVisibilityPacket(newVisibilityState, path, name));
+            PacketTracker.sendToClient(player, new SyncSpecificWaypointVisibilityPacket(newVisibilityState, path, name));
         }
         
         // 发送反馈消息
@@ -193,7 +194,7 @@ public class ToggleWaypointsCommand {
         
         // 发送网络包到指定玩家
         for (ServerPlayer player : playersToSendTo) {
-            net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new SyncWaypointVisibilityPacket(newVisibilityState));
+            PacketTracker.sendToClient(player, new SyncWaypointVisibilityPacket(newVisibilityState));
         }
         
         // 发送反馈消息

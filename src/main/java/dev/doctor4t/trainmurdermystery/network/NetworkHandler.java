@@ -17,12 +17,12 @@ public class NetworkHandler {
 
             serverWorld.getServer().getPlayerList().getPlayers().stream()
                     .filter(p -> p.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) < NETWORK_RANGE_SQUARED)
-                    .forEach(p -> ServerPlayNetworking.send(p, toSend));
+                    .forEach(p -> PacketTracker.sendToClient(p, toSend));
         }
     }
 
     public static void sendToClientPlayer(CustomPacketPayload toSend, ServerPlayer player) {
-        ServerPlayNetworking.send(player, toSend);
+        PacketTracker.sendToClient(player, toSend);
     }
     public static void sendToServer(CustomPacketPayload toSend) {
         ClientPlayNetworking.send(toSend);

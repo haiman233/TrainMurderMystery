@@ -15,6 +15,9 @@ import dev.doctor4t.trainmurdermystery.event.AFKEventHandler;
 
 import dev.doctor4t.trainmurdermystery.game.*;
 import dev.doctor4t.trainmurdermystery.index.*;
+import dev.doctor4t.trainmurdermystery.network.NetworkStatistics;
+import dev.doctor4t.trainmurdermystery.network.NetworkStatistics;
+import dev.doctor4t.trainmurdermystery.network.PacketTracker;
 import dev.doctor4t.trainmurdermystery.network.SecurityCameraModePayload;
 import dev.doctor4t.trainmurdermystery.util.*;
 import dev.upcraft.datasync.api.DataSyncAPI;
@@ -100,6 +103,9 @@ public class TMM implements ModInitializer {
 
         TMMParticles.initialize();
 
+        // Initialize network statistics
+        NetworkStatistics.getInstance().initialize();
+
         // Register command argument types
         ArgumentTypeRegistry.registerArgumentType(id("timeofday"), TimeOfDayArgumentType.class, SingletonArgumentInfo.contextFree(TimeOfDayArgumentType::timeofday));
         ArgumentTypeRegistry.registerArgumentType(id("gamemode"), GameModeArgumentType.class, SingletonArgumentInfo.contextFree(GameModeArgumentType::gameMode));
@@ -129,6 +135,7 @@ public class TMM implements ModInitializer {
             dev.doctor4t.trainmurdermystery.command.ToggleWaypointsCommand.register(dispatcher);
             AFKCommand.register(dispatcher);
             ShowStatsCommand.register(dispatcher);
+            NetworkStatsCommand.register(dispatcher);
         }));
 
         // server lock to supporters
@@ -260,7 +267,7 @@ public class TMM implements ModInitializer {
         public void sendToAllPlayers(CustomPacketPayload packet) {
             if (SERVER != null) {
                 for (ServerPlayer player : SERVER.getPlayerList().getPlayers()) {
-                    ServerPlayNetworking.send(player, packet);
+                    PacketTracker.sendToClient(player, packet);
                 }
             }
         }

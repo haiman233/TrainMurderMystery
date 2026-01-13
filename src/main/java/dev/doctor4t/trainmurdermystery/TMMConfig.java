@@ -63,19 +63,19 @@ public class TMMConfig extends MidnightConfig {
     @Comment(category = "client", centered = true)
     public static Comment clientConfigComment;
 
-    @Environment(EnvType.CLIENT)
+    
     @Entry(category = "client")
     public static boolean ultraPerfMode = false;
 
-    @Environment(EnvType.CLIENT)
+    
     @Entry(category = "client")
     public static boolean disableScreenShake = false;
 
-    @Environment(EnvType.CLIENT)
+    
     @Entry(category = "client")
     public static boolean disableStaminaBarSmoothing = false;
 
-    @Environment(EnvType.CLIENT)
+    
     @Entry(category = "client")
     public static boolean enableSecurityCameraHUD = true; // 启用安全摄像头HUD显示
 
@@ -170,7 +170,7 @@ public class TMMConfig extends MidnightConfig {
     @Entry(category = "afk", min = 20, max = 600, isSlider = true) // 1秒到30秒
     public static int afkSleepySeconds =  3 *60; // 3分钟时开始困倦效果
 
-    @Environment(EnvType.CLIENT)
+    
     public static boolean isUltraPerfMode() {
         return ultraPerfMode;
     }
@@ -354,7 +354,7 @@ public class TMMConfig extends MidnightConfig {
      * 应用客户端专用配置
      * 仅在客户端环境调用
      */
-    @Environment(EnvType.CLIENT)
+    
     private static void applyClientConfig() {
         // 注释掉的代码保留供将来使用
         // int lockedRenderDistance = TMMClient.getLockedRenderDistance(ultraPerfMode);

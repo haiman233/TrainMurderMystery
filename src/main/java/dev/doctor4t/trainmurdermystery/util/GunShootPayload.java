@@ -8,6 +8,7 @@ import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.TMMDataComponentTypes;
 import dev.doctor4t.trainmurdermystery.index.TMMItems;
 import dev.doctor4t.trainmurdermystery.index.TMMSounds;
+import dev.doctor4t.trainmurdermystery.network.PacketTracker;
 import dev.doctor4t.trainmurdermystery.index.tag.TMMItemTags;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -76,7 +77,7 @@ public record GunShootPayload(int target) implements CustomPacketPayload {
                                 item.setPickUpDelay(10);
                                 item.setThrower(player);
                             }
-                            ServerPlayNetworking.send(player, new GunDropPayload());
+                            PacketTracker.sendToClient(player, new GunDropPayload());
                             PlayerMoodComponent.KEY.get(player).setMood(0);
                         }, 4);
                     }
@@ -90,8 +91,8 @@ public record GunShootPayload(int target) implements CustomPacketPayload {
             player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), TMMSounds.ITEM_REVOLVER_SHOOT, SoundSource.PLAYERS, 5f, 1f + player.getRandom().nextFloat() * .1f - .05f);
 
             for (ServerPlayer tracking : PlayerLookup.tracking(player))
-                ServerPlayNetworking.send(tracking, new ShootMuzzleS2CPayload(player.getId()));
-            ServerPlayNetworking.send(player, new ShootMuzzleS2CPayload(player.getId()));
+                PacketTracker.sendToClient(tracking, new ShootMuzzleS2CPayload(player.getId()));
+            PacketTracker.sendToClient(player, new ShootMuzzleS2CPayload(player.getId()));
             if (!player.isCreative())
                 player.getCooldowns().addCooldown(mainHandStack.getItem(), GameConstants.ITEM_COOLDOWNS.getOrDefault(mainHandStack.getItem(), 0));
         }

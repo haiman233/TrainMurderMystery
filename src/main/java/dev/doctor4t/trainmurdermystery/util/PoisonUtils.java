@@ -3,6 +3,7 @@ package dev.doctor4t.trainmurdermystery.util;
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.block_entity.TrimmedBedBlockEntity;
 import dev.doctor4t.trainmurdermystery.cca.PlayerPoisonComponent;
+import dev.doctor4t.trainmurdermystery.network.PacketTracker;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.Minecraft;
@@ -83,9 +84,7 @@ public class PoisonUtils {
                 );
             }
 
-            ServerPlayNetworking.send(
-                    player, new PoisonOverlayPayload()
-            );
+            PacketTracker.sendToClient(player, new PoisonOverlayPayload());
         }
     }
 

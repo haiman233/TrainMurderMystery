@@ -2,6 +2,7 @@ package dev.doctor4t.trainmurdermystery.block;
 
 import com.mojang.serialization.MapCodec;
 import dev.doctor4t.trainmurdermystery.block_entity.SecurityMonitorBlockEntity;
+import dev.doctor4t.trainmurdermystery.network.PacketTracker;
 import dev.doctor4t.trainmurdermystery.network.SecurityCameraModePayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
@@ -279,7 +280,7 @@ public class SecurityMonitorBlock extends BaseEntityBlock {
         player.displayClientMessage(Component.literal("已退出监控模式").withStyle(ChatFormatting.RED), true);
 
         // 发送网络包到客户端以更新视角
-        ServerPlayNetworking.send(player, new SecurityCameraModePayload(false, BlockPos.ZERO, currentYaw, currentPitch));
+        PacketTracker.sendToClient(player, new SecurityCameraModePayload(false, BlockPos.ZERO, currentYaw, currentPitch));
     }
 
     @Nullable

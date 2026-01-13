@@ -6,7 +6,6 @@
   "mixins": [
     "AbstractBlockInvoker",
     "AbstractBlockSettingsMixin",
-    "AbstractContainerMenuMixin",
     "CanRightClickMixin",
     "ChatMixin2",
     "ChunkSerializerMixin",
@@ -19,6 +18,9 @@
     "ItemStackMixin",
     "LivingEntityMixin",
     "MoonlightMessageMixin",
+    "NetworkReceiveStatisticsMixin",
+    "NetworkStatisticsMixin",
+
     "PlayerDiscord",
     "PlayerEntityMixin",
     "PlayerInventoryMixin",
