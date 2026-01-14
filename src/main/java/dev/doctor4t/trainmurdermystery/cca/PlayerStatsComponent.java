@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.ladysnake.cca.api.v3.component.Component;
@@ -35,6 +36,7 @@ public class PlayerStatsComponent implements AutoSyncedComponent, ServerTickingC
     }
 
     public void sync() {
+        KEY.sync(this.player);
 
     }
 
@@ -60,7 +62,10 @@ public class PlayerStatsComponent implements AutoSyncedComponent, ServerTickingC
             roleStats.put(roleId, stats);
         }
     }
-
+    @Override
+    public boolean shouldSyncWith(ServerPlayer player) {
+        return player == this.player;
+    }
     @Override
     public void writeToNbt(@NotNull CompoundTag tag, HolderLookup.Provider wrapperLookup) {
         tag.putLong("TotalPlayTime", totalPlayTime);

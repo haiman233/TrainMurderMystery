@@ -18,7 +18,7 @@ public class TrainWorldComponent implements AutoSyncedComponent, ServerTickingCo
     private final Level world;
     private int speed = 0; // im km/h
     private int time = 0;
-    private boolean snow = true;
+    private boolean snow = false;
     private boolean fog = true;
     private boolean hud = true;
     private TimeOfDay timeOfDay = TimeOfDay.NIGHT;
@@ -65,10 +65,8 @@ public class TrainWorldComponent implements AutoSyncedComponent, ServerTickingCo
     }
 
     public void setSnow(boolean snow) {
-        if (this.snow != snow) {
-            this.snow = snow;
+            this.snow = false;
             this.markDirty();
-        }
     }
 
     public boolean isFoggy() {

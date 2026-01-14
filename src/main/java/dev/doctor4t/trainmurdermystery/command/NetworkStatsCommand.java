@@ -57,6 +57,10 @@ public class NetworkStatsCommand {
                 .executes(context -> showClientRankings(context, 10))
                 .then(Commands.argument("limit", IntegerArgumentType.integer(1, 50))
                     .executes(context -> showClientRankings(context, IntegerArgumentType.getInteger(context, "limit")))))
+                .then(Commands.literal("export")
+                    .executes(context -> exportNetworkStatsToJson(context, 20)) // 默认导出前10个
+                    .then(Commands.argument("limit", IntegerArgumentType.integer(1, 200))
+                        .executes(context -> exportNetworkStatsToJson(context, IntegerArgumentType.getInteger(context, "limit")))))
         );
     }
 

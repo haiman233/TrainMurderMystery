@@ -36,6 +36,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Clearable;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -330,10 +331,17 @@ public class GameFunctions {
             }
             else {
                 Vec3 pos1 = player.position().add(areas.getPlayAreaOffset());
-                player.teleportTo(pos1.x(), pos1.y() + 1, pos1.z());
+                player.teleportTo(player.serverLevel(),pos1.x(), pos1.y() + 1, pos1.z(),Set.of(),0 ,0);
             }
         }
         // Don't set game status to ACTIVE here - it will be set after roles are assigned in initializeGame()
+        serverWorld.getAllEntities().forEach(
+                entity -> {
+                    if (entity instanceof ItemEntity){
+                        entity.discard();
+                    }
+                }
+        );
     }
 
     private static List<ServerPlayer> getReadyPlayerList(ServerLevel serverWorld) {

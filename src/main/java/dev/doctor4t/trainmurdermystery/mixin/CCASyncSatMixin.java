@@ -37,7 +37,7 @@ public abstract class CCASyncSatMixin<C extends Component>  {
                 // 记录网络统计信息
                 try {
                     long packetSize = buf.readableBytes();
-                    String packetId = "CCA_" + payload.type().id().toString();
+                    String packetId = "CCA_" + payload.type().id().toString() + key.toString();
                     dev.doctor4t.trainmurdermystery.network.NetworkStatistics.getInstance().recordPacketSend(
                         packetId, packetSize, net.minecraft.network.protocol.PacketFlow.CLIENTBOUND, player.getName().getString()
                     );

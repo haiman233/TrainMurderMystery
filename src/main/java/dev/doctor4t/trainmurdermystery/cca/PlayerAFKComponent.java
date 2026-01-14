@@ -5,6 +5,7 @@ import dev.doctor4t.trainmurdermystery.TMMConfig;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
@@ -25,7 +26,10 @@ public class PlayerAFKComponent implements AutoSyncedComponent, ServerTickingCom
         this.afkTime = 0;
         this.isAFK = false;
     }
-
+    @Override
+    public boolean shouldSyncWith(ServerPlayer player) {
+        return player == this.player;
+    }
     public void sync() {
         KEY.sync(this.player);
     }
@@ -83,8 +87,10 @@ public class PlayerAFKComponent implements AutoSyncedComponent, ServerTickingCom
         return (float) this.afkTime / afkThreshold;
     }
 
+    public static int tickR = 0;
     @Override
     public void serverTick() {
+        tickR++;
         if (!TMM.isPlayerInGame(this.player)) return;
 
         if (!GameWorldComponent.KEY.get(this.player.level()).isRunning())return;
@@ -102,27 +108,31 @@ public class PlayerAFKComponent implements AutoSyncedComponent, ServerTickingCom
             GameFunctions.killPlayer(this.player, true, null,TMM.id("death_afk"));
         } else if (this.lastActionTime >= afkThreshold && !this.isAFK) {
             this.isAFK = true;
-            this.sync();
+            if (tickR % 20 == 0) {
+                this.sync();
+            }
         } else if (this.lastActionTime >= warningThreshold && this.lastActionTime < afkThreshold && !this.isAFK) {
             // 接近挂机阈值但还未达到
-            this.sync(); // 确保客户端同步进度
+            if (tickR % 20 == 0) {
+                this.sync(); // 确保客户端同步进度
+            }
         } else if (this.lastActionTime >= sleepyThreshold && this.lastActionTime < warningThreshold && !this.isAFK) {
             // 开始显示困倦效果
-            this.sync(); // 确保客户端同步进度
+            if (tickR % 20 == 0) {
+                this.sync(); // 确保客户端同步进度
+            }
         }
     }
 
     @Override
     public void readFromNbt(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registryLookup) {
         this.afkTime = tag.getInt("afkTime");
-        this.lastActionTime = tag.getInt("lastActionTime");
         this.isAFK = tag.getBoolean("isAFK");
     }
 
     @Override
     public void writeToNbt(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registryLookup) {
         tag.putInt("afkTime", this.afkTime);
-        tag.putInt("lastActionTime", this.lastActionTime);
         tag.putBoolean("isAFK", this.isAFK);
     }
 }
