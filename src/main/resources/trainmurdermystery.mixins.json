@@ -7,6 +7,7 @@
     "AbstractBlockInvoker",
     "AbstractBlockSettingsMixin",
     "CanRightClickMixin",
+    "CCASyncSatMixin",
     "ChatMixin2",
     "ChunkSerializerMixin",
     "DecServerJoinPlayer",
@@ -20,7 +21,6 @@
     "MoonlightMessageMixin",
     "NetworkReceiveStatisticsMixin",
     "NetworkStatisticsMixin",
-
     "PlayerDiscord",
     "PlayerEntityMixin",
     "PlayerInventoryMixin",

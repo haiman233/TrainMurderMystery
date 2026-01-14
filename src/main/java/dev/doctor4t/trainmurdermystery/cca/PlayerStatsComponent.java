@@ -35,7 +35,7 @@ public class PlayerStatsComponent implements AutoSyncedComponent, ServerTickingC
     }
 
     public void sync() {
-        KEY.sync(this.player);
+
     }
 
     @Override
