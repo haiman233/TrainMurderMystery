@@ -29,7 +29,7 @@ public class GameReplayManager {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final String REPLAY_FILE_NAME = "game_replay.json";
 
-    private GameReplayData currentReplayData;
+    public GameReplayData currentReplayData;
     private final MinecraftServer server;
     public static final Map<UUID, String> playerNames= new HashMap<>();
     private GameReplay currentReplay;

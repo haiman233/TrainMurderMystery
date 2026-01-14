@@ -138,7 +138,7 @@ public class GameFunctions {
 
         List<ServerPlayer> readyPlayerList = getReadyPlayerList(serverWorld);
 
-        serverWorld.setWeatherParameters(0,-1, true, true);
+        //serverWorld.setWeatherParameters(0,-1, true, true);
         baseInitialize(serverWorld, gameComponent, readyPlayerList);
         TMM.REPLAY_MANAGER.initializeReplay(readyPlayerList, gameComponent.getRoles());
         // 记录游戏开始事件
@@ -220,10 +220,11 @@ public class GameFunctions {
 //        }
         return null;
     }
-    
+    public static long startTime  = 0;
     public static Map<UUID, Integer> roomToPlayer = new HashMap<>();
     private static void baseInitialize(ServerLevel serverWorld, GameWorldComponent gameComponent, List<ServerPlayer> players) {
         AreasWorldComponent areas = AreasWorldComponent.KEY.get(serverWorld);
+        startTime = System.currentTimeMillis();
 
         TrainWorldComponent.KEY.get(serverWorld).reset();
         WorldBlackoutComponent.KEY.get(serverWorld).reset();

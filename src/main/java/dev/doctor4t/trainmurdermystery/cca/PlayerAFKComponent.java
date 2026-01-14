@@ -90,7 +90,7 @@ public class PlayerAFKComponent implements AutoSyncedComponent, ServerTickingCom
     public static int tickR = 0;
     @Override
     public void serverTick() {
-        tickR++;
+        ++tickR;
         if (!TMM.isPlayerInGame(this.player)) return;
 
         if (!GameWorldComponent.KEY.get(this.player.level()).isRunning())return;
