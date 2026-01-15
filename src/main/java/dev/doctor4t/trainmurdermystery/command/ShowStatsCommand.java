@@ -10,7 +10,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-
 import java.util.Collection;
 import java.util.UUID;
 
@@ -19,7 +18,7 @@ public class ShowStatsCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
                 Commands.literal("tmm:showStats")
-                        .requires(source -> source.hasPermission(2)) // 假设需要操作员权限
+                        .requires(source -> source.hasPermission(2))
                         .executes(context -> execute(context.getSource(), null)) // 不指定玩家，默认自己
                         .then(Commands.argument("player", GameProfileArgument.gameProfile())
                                 .executes(context -> execute(context.getSource(), GameProfileArgument.getGameProfiles(context, "player")))

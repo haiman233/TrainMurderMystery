@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.UUID;
  
 public class PlayerStatsScreen extends Screen {
-    private final PlayerStatsComponent stats;
+    private PlayerStatsComponent stats;
     private final UUID targetPlayerUuid;
     private GeneralStatsPanel generalStatsPanel;
     private RoleStatsPanel roleStatsPanel;
@@ -27,14 +27,16 @@ public class PlayerStatsScreen extends Screen {
     private int currentView = GENERAL_STATS_VIEW;
  
     public static final @NotNull ResourceLocation ID = TMM.id("textures/gui/game.png");
- 
+    
     public PlayerStatsScreen(UUID targetPlayerUuid) {
         super(Component.translatable("screen." + TMM.MOD_ID + ".player_stats.title"));
         this.targetPlayerUuid = targetPlayerUuid;
         Player targetPlayer = Minecraft.getInstance().level.getPlayerByUUID(targetPlayerUuid);
-        this.stats = PlayerStatsComponent.KEY.get(targetPlayer);
+        if (targetPlayer != null) {
+            this.stats = PlayerStatsComponent.KEY.get(targetPlayer);
+        }
     }
- 
+
     @Override
     protected void init() {
         super.init();

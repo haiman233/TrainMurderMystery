@@ -28,7 +28,7 @@ public class ShopContent {
                     return PlayerShopComponent.usePsychoMode(player);
                 }
             });
-            defaultEntries.add(new ShopEntry(TMMItems.POISON_VIAL.getDefaultInstance(), TMMConfig.poisonVialPrice, ShopEntry.Type.POISON));
+            // defaultEntries.add(new ShopEntry(TMMItems.POISON_VIAL.getDefaultInstance(), TMMConfig.poisonVialPrice, ShopEntry.Type.POISON));
             defaultEntries.add(new ShopEntry(TMMItems.SCORPION.getDefaultInstance(), TMMConfig.scorpionPrice, ShopEntry.Type.POISON));
             defaultEntries.add(new ShopEntry(TMMItems.FIRECRACKER.getDefaultInstance(), TMMConfig.firecrackerPrice, ShopEntry.Type.TOOL));
             defaultEntries.add(new ShopEntry(TMMItems.LOCKPICK.getDefaultInstance(), TMMConfig.lockpickPrice, ShopEntry.Type.TOOL));
