@@ -34,6 +34,10 @@ public class GrenadeItem extends Item {
 	@Override
 	public void releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks) {
 		if (!world.isClientSide) {
+			if (user instanceof Player player && player.getCooldowns().isOnCooldown(stack.getItem()))return;
+			if (user instanceof Player player)	 {
+				player.getCooldowns().addCooldown(stack.getItem(), 25 * 20);
+			}
 			// 计算蓄力时间
 			int chargeTime = this.getUseDuration(stack, user) - remainingUseTicks;
 

@@ -1,4 +1,11 @@
 {
+  "gui.mapselector.title": "选择地图",
+  "gui.mapselector.select": "选择",
+  "gui.mapselector.cancel": "取消",
+  "gui.mapselector.confirm": "确认选择",
+
+
+
   "Edit Note": "编辑便条",
   "I should write something first": "我应该先写下一些东西",
   "Purchase Failed": "购买失败",

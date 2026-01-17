@@ -59,6 +59,11 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
         KEY.sync(this.player);
     }
 
+    @Override
+    public boolean shouldSyncWith(ServerPlayer player) {
+        return player == this.player;
+    }
+
     public void reset() {
         this.tasks.clear();
         this.timesGotten.clear();

@@ -5,28 +5,52 @@ import dev.doctor4t.trainmurdermystery.api.Role;
 import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.TMMItems;
+import dev.doctor4t.trainmurdermystery.index.TMMSounds;
 import dev.doctor4t.trainmurdermystery.util.PlayerStaminaGetter;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.NotNull;
+
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemCooldowns;
+import net.minecraft.client.gui.GuiGraphics;
+
 import org.jetbrains.annotations.NotNull;
 
 public class StaminaRenderer {
 	public static StaminaBarRenderer view = new StaminaBarRenderer();
 	public static float offsetDelta = 0f;
-	
+
 	// 添加刀蓄满力的视觉效果相关变量
 	private static boolean knifeFullyCharged = false;
 	private static int flashTimer = 0;
 	private static final int FLASH_DURATION = 10; // 闪光持续时间（ticks）
+
+	// 添加屏幕边缘红色效果相关变量
+	private static int screenRedEffectTimer = 0;
+	private static final int SCREEN_RED_EFFECT_DURATION = 20; // 屏幕红色效果持续时间（ticks）
+	private static final float MAX_RED_INTENSITY = 0.5f; // 最大红色强度（0-1）
+
+	// 主手物品冷却相关变量
+	private static float lastCooldown = 0f;
+	private static boolean playedCooldownSound = false;
 
 	public interface StaminaProvider {
 		float getCurrentStamina(Player clientPlayerEntity);
 		float getMaxStamina(Player clientPlayerEntity);
 		float getStaminaPercentage(Player clientPlayerEntity); // 0.0到1.0之间的值
 	}
-
 
 	// 默认的体力提供者（临时使用）
 	private static StaminaProvider staminaProvider = new StaminaProvider() {
@@ -45,8 +69,8 @@ public class StaminaRenderer {
 			if (GameFunctions.isPlayerAliveAndSurvival(clientPlayerEntity) && gameComponent != null ) {
 				Role role = gameComponent.getRole(clientPlayerEntity);
 				if (role == null) {
-                    return 0;
-                }
+					return 0;
+				}
 				return role.getMaxSprintTime();
 			}
 			return 0;
@@ -65,7 +89,6 @@ public class StaminaRenderer {
 	public static void renderHud(@NotNull LocalPlayer player, @NotNull GuiGraphics context, float delta) {
 		if (staminaProvider == null) return;
 
-		//float currentStamina = staminaProvider.getCurrentStamina();
 		float maxStamina = staminaProvider.getMaxStamina(player);
 		float staminaPercent = staminaProvider.getStaminaPercentage(player);
 
@@ -82,11 +105,12 @@ public class StaminaRenderer {
 			final var itemUseTime = player.getTicksUsingItem();
 			staminaPercent = Math.min( (float) itemUseTime / 10,1f);
 			isChargingWeapon = true;
-			
+
 			// 检测刀是否完全蓄力
 			if (itemUseTime >= 10 && !knifeFullyCharged) {
 				knifeFullyCharged = true;
 				flashTimer = FLASH_DURATION; // 开始闪光效果
+				screenRedEffectTimer = SCREEN_RED_EFFECT_DURATION; // 触发屏幕红色效果
 			} else if (itemUseTime < 10) {
 				knifeFullyCharged = false;
 			}
@@ -108,10 +132,13 @@ public class StaminaRenderer {
 		float b = 0.2f;
 		int colour = Mth.color(r, g, b) | 0xFF000000;
 
+		// 渲染主手物品冷却提示
+		renderMainHandCooldown(context, player, delta);
+
 		// 渲染体力条 - 移动到物品栏上方
 		context.pose().pushPose();
 		context.pose().translate(context.guiWidth() / 2f, context.guiHeight() - 35, 0); // 在物品栏上方显示
-		
+
 		// 检查是否应该禁用平滑动画（特别是对于武器蓄力）
 		if ((TMMConfig.disableStaminaBarSmoothing && isChargingWeapon) || isChargingWeapon) {
 			// 如果是刀且完全蓄力，则添加特殊效果
@@ -126,17 +153,139 @@ public class StaminaRenderer {
 		} else {
 			view.render(context, colour, delta);
 		}
-		
+
 		context.pose().popPose();
 
-		// 可选：显示体力数值
+		// 渲染屏幕边缘红色效果
+		renderScreenRedEffect(context, delta);
+	}
 
-//        if (MinecraftClient.getInstance().debugRenderer) {
-//            String staminaText = String.format("%.1f/%.1f", currentStamina, maxStamina);
-//            int textX = context.getScaledWindowWidth() / 2 - 20;
-//            int textY = 35;
-//            context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, staminaText, textX, textY, colour);
-//        }
+	/**
+	 * 渲染主手物品冷却提示
+	 */
+	private static void renderMainHandCooldown(@NotNull GuiGraphics context, @NotNull LocalPlayer player, float delta) {
+		ItemStack mainHandStack = player.getMainHandItem();
+		if (!mainHandStack.isEmpty()) {
+			ItemCooldowns cooldowns = player.getCooldowns();
+			float cooldown = cooldowns.getCooldownPercent(mainHandStack.getItem(), delta);
+
+			// 检查冷却是否刚结束
+			if (lastCooldown > 0 && cooldown == 0 && !playedCooldownSound) {
+				// 播放冷却结束音效
+				Minecraft.getInstance().getSoundManager().play(
+						SimpleSoundInstance.forUI(SoundEvents.EXPERIENCE_ORB_PICKUP, 0.7f, 1.0f)
+				);
+				playedCooldownSound = true;
+			} else if (cooldown > 0) {
+				playedCooldownSound = false;
+			}
+
+			// 更新上一次冷却值
+			lastCooldown = cooldown;
+
+			// 如果物品在冷却中，显示冷却百分比
+			if (cooldown > 0) {
+				int screenWidth = context.guiWidth();
+				int screenHeight = context.guiHeight();
+
+				// 在屏幕中心稍上方显示冷却文字
+				int x = screenWidth / 2;
+				int y = screenHeight - 48; // 物品栏上方
+
+				String cooldownText = String.format("%d%%", (int)(cooldown * 100));
+
+				// 根据冷却百分比改变颜色：红色->橙色->绿色
+				int textColor;
+				if (cooldown > 0.7f) {
+					textColor = 0xFFFF0000; // 红色
+				} else if (cooldown > 0.3f) {
+					textColor = 0xFFFFA500; // 橙色
+				} else {
+					textColor = 0xFF00FF00; // 绿色
+				}
+
+				// 绘制文字背景（半透明黑色）
+//				int textWidth = Minecraft.getInstance().font.width(cooldownText);
+//				int padding = 4;
+//				context.fill(
+//						x - textWidth / 2 - padding,
+//						y - padding,
+//						x + textWidth / 2 + padding,
+//						y + 9 + padding,
+//						0x80000000
+//				);
+
+				// 绘制冷却文字
+				context.drawCenteredString(
+						Minecraft.getInstance().font,
+						cooldownText,
+						x,
+						y,
+						textColor
+				);
+			}
+		}
+	}
+
+	/**
+	 * 渲染屏幕边缘红色效果（刀蓄力完毕时）
+	 */
+	private static void renderScreenRedEffect(@NotNull GuiGraphics context, float delta) {
+		if (screenRedEffectTimer > 0) {
+			int screenWidth = context.guiWidth();
+			int screenHeight = context.guiHeight();
+
+			// 计算红色效果的强度（随时间递减）
+			float progress = (float) screenRedEffectTimer / SCREEN_RED_EFFECT_DURATION;
+			float intensity = MAX_RED_INTENSITY * progress;
+
+			// 设置红色颜色（带透明度）
+			int redColor = (int)(intensity * 255) << 24 | 0xFF0000; // ARGB格式
+
+			// 保存当前的混合状态
+			PoseStack poseStack = context.pose();
+			poseStack.pushPose();
+			RenderSystem.enableBlend();
+			RenderSystem.defaultBlendFunc();
+
+			// 渲染四个边缘的红色渐变
+			int edgeWidth = (int)(screenWidth * 0.1f); // 边缘宽度为屏幕宽度的10%
+			int edgeHeight = (int)(screenHeight * 0.1f); // 边缘高度为屏幕高度的10%
+
+			// 顶部边缘（从上到下的渐变）
+			for (int i = 0; i < edgeHeight; i++) {
+				float alpha = (1f - (float)i / edgeHeight) * intensity;
+				int color = (int)(alpha * 255) << 24 | 0xFF0000;
+				context.fill(0, i, screenWidth, i + 1, color);
+			}
+
+			// 底部边缘（从下到上的渐变）
+			for (int i = 0; i < edgeHeight; i++) {
+				float alpha = (1f - (float)i / edgeHeight) * intensity;
+				int color = (int)(alpha * 255) << 24 | 0xFF0000;
+				context.fill(0, screenHeight - i - 1, screenWidth, screenHeight - i, color);
+			}
+
+			// 左侧边缘（从左到右的渐变）
+			for (int i = 0; i < edgeWidth; i++) {
+				float alpha = (1f - (float)i / edgeWidth) * intensity;
+				int color = (int)(alpha * 255) << 24 | 0xFF0000;
+				context.fill(i, edgeHeight, i + 1, screenHeight - edgeHeight, color);
+			}
+
+			// 右侧边缘（从右到左的渐变）
+			for (int i = 0; i < edgeWidth; i++) {
+				float alpha = (1f - (float)i / edgeWidth) * intensity;
+				int color = (int)(alpha * 255) << 24 | 0xFF0000;
+				context.fill(screenWidth - i - 1, edgeHeight, screenWidth - i, screenHeight - edgeHeight, color);
+			}
+
+			RenderSystem.disableBlend();
+			poseStack.popPose();
+
+			// 减少计时器
+			screenRedEffectTimer--;
+		}
 	}
 
 	public static void tick() {
@@ -144,6 +293,16 @@ public class StaminaRenderer {
 		// 更新闪光计时器
 		if (flashTimer > 0) {
 			flashTimer--;
+		}
+
+		// 如果不在使用刀，重置蓄力状态
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft.player != null) {
+			ItemStack mainHandStack = minecraft.player.getMainHandItem();
+			if (mainHandStack.getItem() != TMMItems.KNIFE) {
+				knifeFullyCharged = false;
+				flashTimer = 0;
+			}
 		}
 	}
 

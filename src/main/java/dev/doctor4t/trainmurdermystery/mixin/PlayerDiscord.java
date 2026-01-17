@@ -19,7 +19,7 @@ public class PlayerDiscord {
         final var gameWorldComponent = GameWorldComponent.KEY.get(serverPlayer.level());
         if (gameWorldComponent != null && gameWorldComponent.isRunning() && GameFunctions.isPlayerAliveAndSurvival( serverPlayer)) {
 
-            if (System.currentTimeMillis() - GameFunctions.startTime < 45000) {
+            if (System.currentTimeMillis() - GameFunctions.startTime > 45000) {
                 GameFunctions.killPlayer(serverPlayer, true, null, TMM.id("disconnected"));
             }
         }

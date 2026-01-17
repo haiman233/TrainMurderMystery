@@ -83,16 +83,18 @@ public class WorldBlackoutComponent implements AutoSyncedComponent, ServerTickin
                 }
             }
         }
-        if (this.world instanceof ServerLevel serverWorld) for (ServerPlayer player : serverWorld.players()) {
-            if (GameFunctions.isPlayerAliveAndSurvival(player)) {
-                final var role = GameWorldComponent.KEY.get(world).getRole(player);
-                if (role != null) {
-                    if ((!role.canUseKiller())) {
-                        player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 200, 0, false, false, false));
-                        player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 200, 0, false, false, false));
+        if (this.world instanceof ServerLevel serverWorld) {
+            for (ServerPlayer player : serverWorld.players()) {
+                if (GameFunctions.isPlayerAliveAndSurvival(player)) {
+                    final var role = GameWorldComponent.KEY.get(world).getRole(player);
+                    if (role != null) {
+                        if ((!role.canUseKiller())) {
+                            player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 200, 0, false, false, false));
+                            player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 200, 0, false, false, false));
+                        }
                     }
+                    player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(TMMSounds.AMBIENT_BLACKOUT), SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 100f, 1f, player.getRandom().nextLong()));
                 }
-                player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(TMMSounds.AMBIENT_BLACKOUT), SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 100f, 1f, player.getRandom().nextLong()));
             }
         }
         return true;

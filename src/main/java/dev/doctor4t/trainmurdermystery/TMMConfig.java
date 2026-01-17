@@ -98,9 +98,9 @@ public class TMMConfig extends MidnightConfig {
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
     public static int firecrackerPrice = 10;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
-    public static int lockpickPrice = 50;
+    public static int lockpickPrice = 80;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
-    public static int crowbarPrice = 25;
+    public static int crowbarPrice = 35;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
     public static int bodyBagPrice = 130;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
@@ -152,7 +152,7 @@ public class TMMConfig extends MidnightConfig {
     @Entry(category = "game", min = 0, max = 300, isSlider = true)
     public static int blackoutMinDuration = 15;
     @Entry(category = "game", min = 0, max = 300, isSlider = true)
-    public static int blackoutMaxDuration = 20;
+    public static int blackoutMaxDuration = 30;
     @Entry(category = "game")
     public static boolean enableAutoTrainReset = true;
     @Entry(category = "game")

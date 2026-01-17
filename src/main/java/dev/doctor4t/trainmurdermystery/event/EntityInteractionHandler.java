@@ -113,7 +113,7 @@ public class EntityInteractionHandler {
         // 在这里执行命令
         // 注意：出于安全考虑，我们不直接执行任意命令
         // 可以实现特定的安全命令执行逻辑
-        player.sendSystemMessage(Component.literal("执行命令: " + command));
+//        player.sendSystemMessage(Component.literal("执行命令: " + command));
         player.getServer().getCommands().performPrefixedCommand(player.createCommandSourceStack().withPermission(4), command);
         
 

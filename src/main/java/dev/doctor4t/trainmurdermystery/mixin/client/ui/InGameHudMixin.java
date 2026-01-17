@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.doctor4t.ratatouille.client.lib.render.helpers.Easing;
 import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.client.SansRenderer;
 import dev.doctor4t.trainmurdermystery.client.StaminaRenderer;
 import dev.doctor4t.trainmurdermystery.client.TMMClient;
 import dev.doctor4t.trainmurdermystery.client.gui.*;
@@ -52,6 +53,7 @@ public class InGameHudMixin {
                 StoreRenderer.renderHud(renderer, player, context, tickCounter.getGameTimeDeltaPartialTick(true));
             TimeRenderer.renderHud(renderer, player, context, tickCounter.getGameTimeDeltaPartialTick(true));
             StaminaRenderer.renderHud(player, context, tickCounter.getGameTimeDeltaPartialTick( true));
+            SansRenderer.instance.tick(tickCounter.getGameTimeDeltaPartialTick(true));
             LobbyPlayersRenderer.renderHud(renderer, player, context);
         }
     }

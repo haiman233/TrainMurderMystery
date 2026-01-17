@@ -14,6 +14,7 @@ import dev.doctor4t.trainmurdermystery.cca.TrainWorldComponent;
 import dev.doctor4t.trainmurdermystery.client.gui.RoundTextRenderer;
 import dev.doctor4t.trainmurdermystery.client.gui.StoreRenderer;
 import dev.doctor4t.trainmurdermystery.client.gui.TimeRenderer;
+import dev.doctor4t.trainmurdermystery.client.gui.screen.MapSelectorScreen;
 import dev.doctor4t.trainmurdermystery.client.gui.screen.PlayerStatsScreen;
 import dev.doctor4t.trainmurdermystery.client.gui.screen.WaypointHUD;
 import dev.doctor4t.trainmurdermystery.client.model.TMMModelLayers;
@@ -36,6 +37,7 @@ import dev.doctor4t.trainmurdermystery.item.GrenadeItem;
 import dev.doctor4t.trainmurdermystery.item.KnifeItem;
 import dev.doctor4t.trainmurdermystery.mod_whitelist.client.ModWhitelistClient;
 import dev.doctor4t.trainmurdermystery.network.SecurityCameraModePayload;
+import dev.doctor4t.trainmurdermystery.network.ShowSelectedMapUIPayload;
 import dev.doctor4t.trainmurdermystery.network.packet.SyncSpecificWaypointVisibilityPacket;
 import dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointVisibilityPacket;
 import dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointsPacket;
@@ -301,6 +303,7 @@ public class TMMClient implements ClientModInitializer {
                 StoreRenderer.tick();
                 TimeRenderer.tick();
                 StaminaRenderer.tick();
+
             }
 
             // TODO: Remove LMAO
@@ -343,6 +346,12 @@ public class TMMClient implements ClientModInitializer {
             UUID targetPlayerUuid = payload.targetPlayerUuid();
             context.client().execute(() -> {
                 context.client().setScreen(new PlayerStatsScreen(targetPlayerUuid));
+            });
+        });
+        ClientPlayNetworking.registerGlobalReceiver(ShowSelectedMapUIPayload.ID, (payload, context) -> {
+
+            context.client().execute(() -> {
+                context.client().setScreen(new MapSelectorScreen());
             });
         });
 

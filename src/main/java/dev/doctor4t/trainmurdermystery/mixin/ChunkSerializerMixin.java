@@ -36,7 +36,6 @@ public class ChunkSerializerMixin {
 
         var blockStates = instance.getCompound("block_states");
         
-        // 处理palette数组，替换其中的ID
         if (blockStates.contains("palette")) {
             var paletteList = blockStates.getList("palette", Tag.TAG_COMPOUND);
             for (int i = 0; i < paletteList.size(); i++) {

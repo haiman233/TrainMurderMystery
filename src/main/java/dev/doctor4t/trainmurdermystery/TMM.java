@@ -15,10 +15,8 @@ import dev.doctor4t.trainmurdermystery.event.AFKEventHandler;
 
 import dev.doctor4t.trainmurdermystery.game.*;
 import dev.doctor4t.trainmurdermystery.index.*;
+import dev.doctor4t.trainmurdermystery.network.*;
 import dev.doctor4t.trainmurdermystery.network.NetworkStatistics;
-import dev.doctor4t.trainmurdermystery.network.NetworkStatistics;
-import dev.doctor4t.trainmurdermystery.network.PacketTracker;
-import dev.doctor4t.trainmurdermystery.network.SecurityCameraModePayload;
 import dev.doctor4t.trainmurdermystery.util.*;
 import dev.upcraft.datasync.api.DataSyncAPI;
 import dev.upcraft.datasync.api.util.Entitlements;
@@ -49,7 +47,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayApiInitializer;
-import dev.doctor4t.trainmurdermystery.network.ShowStatsPayload;
 
 import java.util.Optional;
 import java.util.Set;
@@ -131,51 +128,53 @@ public class TMM implements ModInitializer {
             SwitchMapCommand.register(dispatcher);
             ReloadReadyAreaCommand.register(dispatcher);
             EntityDataCommand.register(dispatcher);
+            MoodChangeCommand.register(dispatcher);
             dev.doctor4t.trainmurdermystery.command.CreateWaypointCommand.register(dispatcher);
             dev.doctor4t.trainmurdermystery.command.ToggleWaypointsCommand.register(dispatcher);
             AFKCommand.register(dispatcher);
             ShowStatsCommand.register(dispatcher);
+            ShowSelectedMapUICommand.register(dispatcher);
             NetworkStatsCommand.register(dispatcher);
         }));
 
-        // server lock to supporters
-        ServerPlayerEvents.JOIN.register(player -> {
-            GameWorldComponent gameWorldComponent = GameWorldComponent.KEY.get(player.level());
-
-            // 优化：提前检查是否启用锁定，避免不必要的API调用
-            if (!gameWorldComponent.isLockedToSupporters()) {
-                if (REPLAY_MANAGER != null) {
-                    REPLAY_MANAGER.recordPlayerName(player);
-                    REPLAY_MANAGER.addEvent(GameReplayData.EventType.PLAYER_JOIN, null, player.getUUID(), null, null);
-                }
-                return;
-            }
-
-            // 服务器已锁定，需要验证支持者身份
-            DataSyncAPI.refreshAllPlayerData(player.getUUID()).thenRunAsync(() -> {
-                try {
-                    // 再次检查锁定状态（可能在异步期间已更改）
-                    if (GameWorldComponent.KEY.get(player.level()).isLockedToSupporters()) {
-                        // 检查玩家是否为支持者
-                        if (!isSupporter(player)) {
-                            LOGGER.info("Player {} attempted to join locked server (supporters only)", player.getName().getString());
-                            player.connection.disconnect(Component.translatable("Server is reserved to doctor4t supporters."));
-                            return;
-                        }
-                    }
-
-                    // 支持者或锁定已解除，允许加入
-                    if (REPLAY_MANAGER != null) {
-                        REPLAY_MANAGER.recordPlayerName(player);
-                        REPLAY_MANAGER.addEvent(GameReplayData.EventType.PLAYER_JOIN, null, player.getUUID(), null, null);
-                    }
-                } catch (Exception e) {
-                    LOGGER.error("Error checking supporter status for player {}", player.getName().getString(), e);
-                }
-            }, player.level().getServer());
-
-            // gameWorldComponent.addPlayer(player); // Removed as method does not exist
-        });
+//        // server lock to supporters
+//        ServerPlayerEvents.JOIN.register(player -> {
+//            GameWorldComponent gameWorldComponent = GameWorldComponent.KEY.get(player.level());
+//
+//            // 优化：提前检查是否启用锁定，避免不必要的API调用
+//            if (!gameWorldComponent.isLockedToSupporters()) {
+//                if (REPLAY_MANAGER != null) {
+//                    REPLAY_MANAGER.recordPlayerName(player);
+//                    REPLAY_MANAGER.addEvent(GameReplayData.EventType.PLAYER_JOIN, null, player.getUUID(), null, null);
+//                }
+//                return;
+//            }
+//
+//            // 服务器已锁定，需要验证支持者身份
+//            DataSyncAPI.refreshAllPlayerData(player.getUUID()).thenRunAsync(() -> {
+//                try {
+//                    // 再次检查锁定状态（可能在异步期间已更改）
+//                    if (GameWorldComponent.KEY.get(player.level()).isLockedToSupporters()) {
+//                        // 检查玩家是否为支持者
+//                        if (!isSupporter(player)) {
+//                            LOGGER.info("Player {} attempted to join locked server (supporters only)", player.getName().getString());
+//                            player.connection.disconnect(Component.translatable("Server is reserved to doctor4t supporters."));
+//                            return;
+//                        }
+//                    }
+//
+//                    // 支持者或锁定已解除，允许加入
+//                    if (REPLAY_MANAGER != null) {
+//                        REPLAY_MANAGER.recordPlayerName(player);
+//                        REPLAY_MANAGER.addEvent(GameReplayData.EventType.PLAYER_JOIN, null, player.getUUID(), null, null);
+//                    }
+//                } catch (Exception e) {
+//                    LOGGER.error("Error checking supporter status for player {}", player.getName().getString(), e);
+//                }
+//            }, player.level().getServer());
+//
+//            // gameWorldComponent.addPlayer(player); // Removed as method does not exist
+//        });
 
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             GameWorldComponent gameWorldComponent = GameWorldComponent.KEY.get(handler.player.level());
@@ -197,6 +196,7 @@ public class TMM implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(ReplayPayload.ID, ReplayPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(SecurityCameraModePayload.ID, SecurityCameraModePayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ShowStatsPayload.ID, ShowStatsPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(ShowSelectedMapUIPayload.ID, ShowSelectedMapUIPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointsPacket.ID, dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointsPacket.CODEC);
         PayloadTypeRegistry.playS2C().register(dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointVisibilityPacket.ID, dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointVisibilityPacket.CODEC);
         PayloadTypeRegistry.playS2C().register(dev.doctor4t.trainmurdermystery.network.packet.SyncSpecificWaypointVisibilityPacket.ID, dev.doctor4t.trainmurdermystery.network.packet.SyncSpecificWaypointVisibilityPacket.CODEC);

@@ -149,8 +149,9 @@ public class GameFunctions {
         
         // Set game status to ACTIVE after roles are assigned
         gameComponent.setGameStatus(GameWorldComponent.GameStatus.ACTIVE);
+
         gameComponent.sync();
-        
+
         // 初始化计分板组件
         GameScoreboardComponent scoreboardComponent = GameScoreboardComponent.KEY.get(serverWorld.getServer().getScoreboard());
         scoreboardComponent.reset();

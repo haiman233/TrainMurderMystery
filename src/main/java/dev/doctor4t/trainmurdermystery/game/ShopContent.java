@@ -29,8 +29,8 @@ public class ShopContent {
                 }
             });
             // defaultEntries.add(new ShopEntry(TMMItems.POISON_VIAL.getDefaultInstance(), TMMConfig.poisonVialPrice, ShopEntry.Type.POISON));
-            defaultEntries.add(new ShopEntry(TMMItems.SCORPION.getDefaultInstance(), TMMConfig.scorpionPrice, ShopEntry.Type.POISON));
-            defaultEntries.add(new ShopEntry(TMMItems.FIRECRACKER.getDefaultInstance(), TMMConfig.firecrackerPrice, ShopEntry.Type.TOOL));
+//            defaultEntries.add(new ShopEntry(TMMItems.SCORPION.getDefaultInstance(), TMMConfig.scorpionPrice, ShopEntry.Type.POISON));
+//            defaultEntries.add(new ShopEntry(TMMItems.FIRECRACKER.getDefaultInstance(), TMMConfig.firecrackerPrice, ShopEntry.Type.TOOL));
             defaultEntries.add(new ShopEntry(TMMItems.LOCKPICK.getDefaultInstance(), TMMConfig.lockpickPrice, ShopEntry.Type.TOOL));
             defaultEntries.add(new ShopEntry(TMMItems.CROWBAR.getDefaultInstance(), TMMConfig.crowbarPrice, ShopEntry.Type.TOOL));
             defaultEntries.add(new ShopEntry(TMMItems.BODY_BAG.getDefaultInstance(), TMMConfig.bodyBagPrice, ShopEntry.Type.TOOL));

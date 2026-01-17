@@ -249,6 +249,8 @@ public class TMMLangGen extends FabricLanguageProvider {
         builder.add("commands.tmm.resetweights", "All weights have been reset");
         builder.add("commands.tmm.setmoney", "Set %s's money to $%s");
         builder.add("commands.tmm.setmoney.multiple", "Set money to $%s for %s players");
+        builder.add("commands.tmm.setmood", "Set %s's mood to %.2f");
+        builder.add("commands.tmm.setmood.multiple", "Set mood to %.2f for %s players");
         builder.add("commands.tmm.settimer", "Game timer set to %s minutes");
         builder.add("commands.tmm.givekey", "Gave key for room %s to %s");
         builder.add("commands.tmm.givekey.multiple", "Gave key for room %s to %s players");
