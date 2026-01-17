@@ -3,16 +3,21 @@ package dev.doctor4t.trainmurdermystery.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.cca.PlayerMoodComponent;
+import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.util.MathHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 
 import java.util.Random;
@@ -51,8 +56,31 @@ public class SansRenderer {
     private float m_btAlpha;
     private double m_btTimer;
 
-    private MutableComponent m_hint;
 
+    private MutableComponent m_hint;
+    private void renderHint(Gui gui, PoseStack poseStack, float partialTicks, int scw, int sch,GuiGraphics graphics)
+    {
+        if (m_mc.player == null || m_mc.player.isCreative() || m_mc.player.isSpectator() || m_hint == null || m_cap == null || m_cap.getMood() > .36f)
+            return;
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        poseStack.pushPose();
+        poseStack.translate(scw / 2d, sch / 2d, 0d);
+        poseStack.scale(2f, 2f, 1f);
+
+        float o = ((int) m_showingHintTimer % 10) / 10f;
+        o = ((int) m_showingHintTimer / 10) % 2 == 0 ? o : 1 - o;
+        int opacity = Mth.clamp((int)(Mth.lerp(o, (m_showingHintTimer >= m_maxShowingHintTimer - 9f) || m_showingHintTimer < 10f ? 0f : .5f, 1f) * 0xFF), 0x10, 0xEF) << 24;
+
+        float pX = -gui.getFont().width(m_hint) / 2f;
+        float pY = -gui.getFont().lineHeight / 2f;
+
+
+        graphics.drawString(gui.getFont(),  m_hint, (int) pX, (int) pY, 0xFFFFFF | opacity ,true);
+        poseStack.popPose();
+        RenderSystem.disableBlend();
+    }
     public SansRenderer()
     {
         m_mc = Minecraft.getInstance();
@@ -128,9 +156,8 @@ public class SansRenderer {
             renderFullscreen(poseStack, scw, sch, 100, 58, 0, 0, 100, 58, m_btAlpha);
     }
 
-    public void tick(float dt)
-    {
-        if (m_mc.player == null || m_mc.isPaused() || m_mc.player.isCreative() || m_mc.player.isSpectator())
+    public void tick(@NotNull LocalPlayer player, @NotNull GuiGraphics context, float dt) {
+        if (m_mc.player == null || m_mc.isPaused() || m_mc.player.isCreative() || m_mc.player.isSpectator() || !GameWorldComponent.KEY.get(player.level()).isRunning())
             return;
 
         m_cap = PlayerMoodComponent.KEY.get(m_mc.player);
@@ -148,19 +175,14 @@ public class SansRenderer {
         m_flashSanityGain = m_flashTimer <= 0 ? 0 : m_flashSanityGain + m_sanityGain;
 
 
-            if (m_arrowTimer <= 0)
-                m_arrowTimer = 23.99f;
+        if (m_arrowTimer <= 0)
+            m_arrowTimer = 23.99f;
 
-        
-
-        if (m_cap.getMood() >= .7f)
-        {
+        if (m_cap.getMood() <= .3f) {
             m_indicatorOffset = m_random.nextInt(3) - 1;
             m_hintOffsetX = m_random.nextInt(3) - 1;
             m_hintOffsetY = m_random.nextInt(3) - 1;
-        }
-        else
-        {
+        } else {
             m_indicatorOffset = 0;
             m_hintOffsetX = 0;
             m_hintOffsetY = 0;
@@ -168,8 +190,14 @@ public class SansRenderer {
 
         tickHint(dt);
         tickBt(dt);
+        // 修复renderHint调用，传入正确的参数
+        if (m_mc.player != null && m_hint != null && m_cap != null) {
+            renderHint(new Gui(m_mc), context.pose(), dt, m_mc.getWindow().getGuiScaledWidth(), m_mc.getWindow().getGuiScaledHeight(), context);
 
-        m_prevSanity = m_cap.getMood();
+        }
+        if (m_cap.getMood() < .36f){
+            renderBloodTendrilsOverlay(new Gui(m_mc), context.pose(), dt, m_mc.getWindow().getGuiScaledWidth(), m_mc.getWindow().getGuiScaledHeight());
+    }
     }
 
     private void tickHint(float dt)

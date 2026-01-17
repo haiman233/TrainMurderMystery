@@ -36,6 +36,7 @@ import dev.doctor4t.trainmurdermystery.index.*;
 import dev.doctor4t.trainmurdermystery.item.GrenadeItem;
 import dev.doctor4t.trainmurdermystery.item.KnifeItem;
 import dev.doctor4t.trainmurdermystery.mod_whitelist.client.ModWhitelistClient;
+import dev.doctor4t.trainmurdermystery.network.CloseUiPayload;
 import dev.doctor4t.trainmurdermystery.network.SecurityCameraModePayload;
 import dev.doctor4t.trainmurdermystery.network.ShowSelectedMapUIPayload;
 import dev.doctor4t.trainmurdermystery.network.packet.SyncSpecificWaypointVisibilityPacket;
@@ -354,6 +355,12 @@ public class TMMClient implements ClientModInitializer {
                 context.client().setScreen(new MapSelectorScreen());
             });
         });
+        ClientPlayNetworking.registerGlobalReceiver(CloseUiPayload.ID, (payload, context) -> {
+
+            context.client().execute(() -> {
+                context.client().setScreen(null);
+            });
+        });
 
         // Instinct keybind
         instinctKeybind = KeyBindingHelper.registerKeyBinding(new KeyMapping(
@@ -374,6 +381,7 @@ public class TMMClient implements ClientModInitializer {
         // Initialize Command UI system
         TMMCommandUI.init();
         KeyPressHandler.register();
+        InputHandler.initialize();
         
 
         

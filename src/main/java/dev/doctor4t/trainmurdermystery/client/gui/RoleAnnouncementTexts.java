@@ -55,6 +55,9 @@ public class RoleAnnouncementTexts {
                 case KILLERS -> this == KILLER ? this.winText : this.getLoseText();
                 case GAMBLER ->
                         Component.translatable("announcement.win.gambler" , winner).withColor(new Color(128, 0, 128).getRGB());
+                case RECORDER ->
+                        Component.translatable("announcement.win.recorder" , winner).withColor(new Color(128, 128, 128).getRGB());
+
                 case LOOSE_END ->
                         Component.translatable("announcement.win." + LOOSE_END.name.toLowerCase(), winner).withColor(LOOSE_END.colour);
             };

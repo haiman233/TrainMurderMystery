@@ -16,6 +16,7 @@ import dev.doctor4t.trainmurdermystery.index.TMMDataComponentTypes;
 import dev.doctor4t.trainmurdermystery.index.TMMEntities;
 import dev.doctor4t.trainmurdermystery.index.TMMItems;
 import dev.doctor4t.trainmurdermystery.index.TMMSounds;
+import dev.doctor4t.trainmurdermystery.network.CloseUiPayload;
 import dev.doctor4t.trainmurdermystery.util.AnnounceEndingPayload;
 import dev.doctor4t.trainmurdermystery.util.ReplayPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -100,6 +101,9 @@ public class GameFunctions {
 
     public static void startGame(ServerLevel world, GameMode gameMode, int time) {
         executeFunction(world.getServer().createCommandSourceStack(), "harpymodloader:early_start_game");
+        for (ServerPlayer player : world.players()) {
+            ServerPlayNetworking.send(player, new CloseUiPayload());
+        }
         GameWorldComponent game = GameWorldComponent.KEY.get(world);
         AreasWorldComponent areas = AreasWorldComponent.KEY.get(world);
         int playerCount = Math.toIntExact(world.players().stream().filter(serverPlayerEntity -> (areas.getReadyArea().contains(serverPlayerEntity.position()))).count());
@@ -165,6 +169,7 @@ public class GameFunctions {
 
         // --- 新增统计数据更新逻辑 ---
         for (ServerPlayer player : readyPlayerList) {
+
             PlayerStatsComponent stats = PlayerStatsComponent.KEY.get(player);
             stats.incrementTotalGamesPlayed();
             Role playerRole = gameComponent.getRole(player);
@@ -783,6 +788,6 @@ public class GameFunctions {
     }
 
     public enum WinStatus {
-        NONE, KILLERS, PASSENGERS, TIME, LOOSE_END,GAMBLER
+        NONE, KILLERS, PASSENGERS, TIME, LOOSE_END,GAMBLER,RECORDER
     }
 }

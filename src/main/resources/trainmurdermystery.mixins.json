@@ -38,9 +38,10 @@
   },
   "client": [
     "CameraPositionMixin",
-    "LayeredDrawMixin",
     "KeyboardHandlerMixin",
+    "LayeredDrawMixin",
     "LocalPlayerMixin",
+    "MixinGameRenderer",
     "MouseHandlerMixin",
     "ScreenDrawableGetMixin",
     "client.AbstractClientPlayerEntityMixin",

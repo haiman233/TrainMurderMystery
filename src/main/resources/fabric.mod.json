@@ -58,6 +58,7 @@
 			"trainmurdermystery:autostart",
 			"trainmurdermystery:roundend",
 			"trainmurdermystery:gamescoreboard",
+			"trainmurdermystery:map_voting",
 			"trainmurdermystery:player_stats"
 		],
 		"loom:injected_interfaces": {

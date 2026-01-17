@@ -24,6 +24,7 @@ public class TMMComponents implements WorldComponentInitializer, EntityComponent
         registry.register(GameTimeComponent.KEY, GameTimeComponent::new);
         registry.register(AutoStartComponent.KEY, AutoStartComponent::new);
         registry.register(GameRoundEndComponent.KEY, GameRoundEndComponent::new);
+        registry.register(MapVotingComponent.KEY, MapVotingComponent::new);
     }
 
     @Override

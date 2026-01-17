@@ -32,11 +32,11 @@ public class ShowSelectedMapUICommand {
         ServerPlayer sender = source.getPlayerOrException();
 
         if (profiles == null || profiles.isEmpty()) {
-            // 未指定玩家，打开自己的统计界面
+            // 未指定玩家，打开选择地图的页面
             openStatsScreen(sender, sender.getUUID());
             source.sendSuccess(() -> Component.translatable("commands.tmm.showstats.self"), false);
         } else {
-            // 指定玩家，打开指定玩家的统计界面
+            // 指定玩家，打开指定玩家的选择地图的页面
             for (GameProfile profile : profiles) {
                 UUID targetUuid = profile.getId();
                 ServerPlayer targetPlayer = source.getServer().getPlayerList().getPlayer(targetUuid);
@@ -52,6 +52,6 @@ public class ShowSelectedMapUICommand {
     }
 
     private static void openStatsScreen(ServerPlayer player, UUID targetPlayerUuid) {
-        ServerPlayNetworking.send(player, new ShowSelectedMapUIPayload(targetPlayerUuid));
+        ServerPlayNetworking.send(player, new ShowSelectedMapUIPayload());
     }
 }

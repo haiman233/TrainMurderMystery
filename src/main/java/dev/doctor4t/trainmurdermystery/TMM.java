@@ -26,6 +26,7 @@ import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -86,6 +87,11 @@ public class TMM implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             SERVER = server;
             GAME = new MurderGameMode(TMM.id("murder"));
+            
+            // 注册服务器tick事件以处理投票计时
+            ServerTickEvents.START_SERVER_TICK.register(serv -> {
+                dev.doctor4t.trainmurdermystery.voting.MapVotingManager.getInstance().tick();
+            });
             REPLAY_MANAGER = new GameReplayManager(server);
         });
 
@@ -129,6 +135,7 @@ public class TMM implements ModInitializer {
             ReloadReadyAreaCommand.register(dispatcher);
             EntityDataCommand.register(dispatcher);
             MoodChangeCommand.register(dispatcher);
+            dev.doctor4t.trainmurdermystery.command.MapVoteCommand.register(dispatcher);
             dev.doctor4t.trainmurdermystery.command.CreateWaypointCommand.register(dispatcher);
             dev.doctor4t.trainmurdermystery.command.ToggleWaypointsCommand.register(dispatcher);
             AFKCommand.register(dispatcher);
@@ -197,6 +204,7 @@ public class TMM implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(SecurityCameraModePayload.ID, SecurityCameraModePayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ShowStatsPayload.ID, ShowStatsPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ShowSelectedMapUIPayload.ID, ShowSelectedMapUIPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(CloseUiPayload.ID, CloseUiPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointsPacket.ID, dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointsPacket.CODEC);
         PayloadTypeRegistry.playS2C().register(dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointVisibilityPacket.ID, dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointVisibilityPacket.CODEC);
         PayloadTypeRegistry.playS2C().register(dev.doctor4t.trainmurdermystery.network.packet.SyncSpecificWaypointVisibilityPacket.ID, dev.doctor4t.trainmurdermystery.network.packet.SyncSpecificWaypointVisibilityPacket.CODEC);
@@ -204,10 +212,14 @@ public class TMM implements ModInitializer {
         PayloadTypeRegistry.playC2S().register(GunShootPayload.ID, GunShootPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(StoreBuyPayload.ID, StoreBuyPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(NoteEditPayload.ID, NoteEditPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(dev.doctor4t.trainmurdermystery.network.VoteForMapPayload.ID, dev.doctor4t.trainmurdermystery.network.VoteForMapPayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(KnifeStabPayload.ID, new KnifeStabPayload.Receiver());
         ServerPlayNetworking.registerGlobalReceiver(GunShootPayload.ID, new GunShootPayload.Receiver());
         ServerPlayNetworking.registerGlobalReceiver(StoreBuyPayload.ID, new StoreBuyPayload.Receiver());
         ServerPlayNetworking.registerGlobalReceiver(NoteEditPayload.ID, new NoteEditPayload.Receiver());
+        ServerPlayNetworking.registerGlobalReceiver(dev.doctor4t.trainmurdermystery.network.VoteForMapPayload.ID, (payload, context) -> {
+            dev.doctor4t.trainmurdermystery.network.VoteForMapPayload.Handler.handle(payload, context.player());
+        });
 
 
         Scheduler.init();

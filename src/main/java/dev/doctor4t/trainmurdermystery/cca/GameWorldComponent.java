@@ -271,7 +271,7 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
         //this.enableWeights = nbtCompound.getBoolean("EnableWeights");
 
         this.syncRole = nbtCompound.getBoolean("SyncRole");
-        if (!syncRole) {
+//        if (!syncRole) {
             this.gameMode = TMMGameModes.GAME_MODES.get(ResourceLocation.parse(nbtCompound.getString("GameMode")));
             this.gameStatus = GameStatus.valueOf(nbtCompound.getString("GameStatus"));
 
@@ -290,10 +290,10 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
             } else {
                 this.lastWinStatus = GameFunctions.WinStatus.NONE;
             }
-        }else {
+//        }else {
             for (Role role : TMMRoles.ROLES) {
                 this.setRoles(uuidListFromNbt(nbtCompound, role.identifier().toString()), role);
-            }
+//            }
             this.setSyncRole(false);
         }
 
@@ -313,7 +313,7 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
 //        nbtCompound.putBoolean("LockedToSupporters", lockedToSupporters);
         //nbtCompound.putBoolean("EnableWeights", enableWeights);
         nbtCompound.putBoolean("SyncRole", syncRole);
-        if (!this.syncRole) {
+ //       if (!this.syncRole) {
             nbtCompound.putString("GameMode", this.gameMode != null ? this.gameMode.identifier.toString() : "");
             nbtCompound.putString("GameStatus", this.gameStatus.toString());
 
@@ -324,13 +324,13 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
 
             nbtCompound.putString("LastWinStatus", this.lastWinStatus.toString());
             //nbtCompound.putFloat("BackfireChance", backfireChance);
-        }
-        else  {
+//        }
+//        else  {
             for (Role role : TMMRoles.ROLES) {
                 nbtCompound.put(role.identifier().toString(), nbtFromUuidList(getAllWithRole(role)));
             }
             this.setSyncRole(false);
-        }
+//        }
 
     }
 

@@ -90,7 +90,7 @@ public class TMMConfig extends MidnightConfig {
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
     public static int grenadePrice = 330;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
-    public static int psychoModePrice = 300;
+    public static int psychoModePrice = 325;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
     public static int poisonVialPrice = 80;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
@@ -102,7 +102,7 @@ public class TMMConfig extends MidnightConfig {
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
     public static int crowbarPrice = 35;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
-    public static int bodyBagPrice = 130;
+    public static int bodyBagPrice = 100;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)
     public static int blackoutPrice = 100;
     @Entry(category = "shop", min = 0, max = 1000, isSlider = true)

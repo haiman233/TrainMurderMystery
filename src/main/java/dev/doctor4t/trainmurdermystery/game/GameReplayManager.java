@@ -79,30 +79,53 @@ public class GameReplayManager {
     }
 
     private ReplayEvent convertReplayEvent(GameReplayData.ReplayEvent dataEvent) {
+        if (dataEvent == null) {
+            return new ReplayEvent(ReplayEventTypes.EventType.GAME_START, 0, new ReplayEventTypes.EventDetails() {});
+        }
+        
         ReplayEventTypes.EventType eventType = mapEventType(dataEvent.getType());
         ReplayEventTypes.EventDetails details = switch (dataEvent.getType()) {
             // 主要事件
-            case PLAYER_KILL ->
-                    new ReplayEventTypes.PlayerKillDetails(dataEvent.getSourcePlayer(), dataEvent.getTargetPlayer(), ResourceLocation.parse(dataEvent.getItemUsed()));
+            case PLAYER_KILL -> {
+                String itemUsed = dataEvent.getItemUsed();
+                if (itemUsed == null) itemUsed = "minecraft:air";
+                yield new ReplayEventTypes.PlayerKillDetails(dataEvent.getSourcePlayer(), dataEvent.getTargetPlayer(), ResourceLocation.parse(itemUsed));
+            }
             case PLAYER_POISONED ->
                     new ReplayEventTypes.PlayerPoisonedDetails(dataEvent.getSourcePlayer(), dataEvent.getTargetPlayer());
             case GRENADE_THROWN -> {
-                BlockPos pos = BlockPos.of(Long.parseLong(dataEvent.getItemUsed()));
+                String itemUsed = dataEvent.getItemUsed();
+                if (itemUsed == null) itemUsed = "0";
+                BlockPos pos = BlockPos.of(Long.parseLong(itemUsed));
                 yield new ReplayEventTypes.GrenadeThrownDetails(dataEvent.getSourcePlayer(), pos);
             }
-            case SKILL_USED ->
-                    new ReplayEventTypes.ItemUsedDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(dataEvent.getItemUsed()));
-            case ITEM_USED ->
-                    new ReplayEventTypes.ItemUsedDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(dataEvent.getItemUsed()));
+            case SKILL_USED -> {
+                String itemUsed = dataEvent.getItemUsed();
+                if (itemUsed == null) itemUsed = "minecraft:air";
+                yield new ReplayEventTypes.ItemUsedDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(itemUsed));
+            }
+            case ITEM_USED -> {
+                String itemUsed = dataEvent.getItemUsed();
+                if (itemUsed == null) itemUsed = "minecraft:air";
+                yield new ReplayEventTypes.ItemUsedDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(itemUsed));
+            }
             // 次要事件
             case LOCKPICK_ATTEMPT -> {
-                BlockPos pos = BlockPos.of(Long.parseLong(dataEvent.getItemUsed()));
-                yield new ReplayEventTypes.LockpickAttemptDetails(dataEvent.getSourcePlayer(), pos, Boolean.parseBoolean(dataEvent.getMessage()));
+                String itemUsed = dataEvent.getItemUsed();
+                if (itemUsed == null) itemUsed = "0";
+                BlockPos pos = BlockPos.of(Long.parseLong(itemUsed));
+                String message = dataEvent.getMessage();
+                boolean success = message != null ? Boolean.parseBoolean(message) : false;
+                yield new ReplayEventTypes.LockpickAttemptDetails(dataEvent.getSourcePlayer(), pos, success);
             }
-            case TASK_COMPLETE ->
-                    new ReplayEventTypes.TaskCompleteDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(dataEvent.getItemUsed()));
+            case TASK_COMPLETE -> {
+                String itemUsed = dataEvent.getItemUsed();
+                if (itemUsed == null) itemUsed = "minecraft:air";
+                yield new ReplayEventTypes.TaskCompleteDetails(dataEvent.getSourcePlayer(), ResourceLocation.parse(itemUsed));
+            }
             case STORE_BUY -> {
                 String itemUsed = dataEvent.getItemUsed();
+                if (itemUsed == null) itemUsed = "minecraft:air:1";
                 int lastColon = itemUsed.lastIndexOf(':');
                 if (lastColon == -1) {
                     // 如果没有冒号，假设数量为1
@@ -120,19 +143,28 @@ public class GameReplayManager {
                 }
             }
             case MOOD_CHANGE -> {
-                String[] parts = dataEvent.getMessage().split(":");
+                String message = dataEvent.getMessage();
+                if (message == null) message = "0:0";
+                String[] parts = message.split(":");
+                if (parts.length < 2) parts = new String[]{"0", "0"};
                 yield new ReplayEventTypes.MoodChangeDetails(dataEvent.getSourcePlayer(), Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
             }
             case DOOR_LOCK, DOOR_UNLOCK -> {
-                BlockPos pos = BlockPos.of(Long.parseLong(dataEvent.getItemUsed()));
+                String itemUsed = dataEvent.getItemUsed();
+                if (itemUsed == null) itemUsed = "0";
+                BlockPos pos = BlockPos.of(Long.parseLong(itemUsed));
                 yield new ReplayEventTypes.DoorActionDetails(dataEvent.getSourcePlayer(), pos, true);
             }
             case PSYCHO_STATE_CHANGE -> {
-                String[] parts = dataEvent.getMessage().split(":");
+                String message = dataEvent.getMessage();
+                if (message == null) message = "0:0";
+                String[] parts = message.split(":");
+                if (parts.length < 2) parts = new String[]{"0", "0"};
                 yield new ReplayEventTypes.PsychoStateChangeDetails(dataEvent.getSourcePlayer(), Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
             }
             case BLACKOUT_START, BLACKOUT_END -> {
-                long duration = Long.parseLong(dataEvent.getMessage());
+                String message = dataEvent.getMessage();
+                long duration = message != null ? Long.parseLong(message) : 0L;
                 yield new ReplayEventTypes.BlackoutEventDetails(duration);
             }
             // 默认空详情
@@ -231,23 +263,30 @@ public class GameReplayManager {
     }
 
     public void addEvent(GameReplayData.EventType type, UUID sourcePlayer, UUID targetPlayer, String itemUsed, String message) {
-        currentReplayData.addEvent(new GameReplayData.ReplayEvent(type, sourcePlayer, targetPlayer, itemUsed, message));
+        // 对可能为null的字符串参数进行处理
+        String safeItemUsed = itemUsed != null ? itemUsed : "minecraft:air";
+        String safeMessage = message != null ? message : "";
+        currentReplayData.addEvent(new GameReplayData.ReplayEvent(type, sourcePlayer, targetPlayer, safeItemUsed, safeMessage));
     }
 
     public void recordPlayerKill(UUID killerUuid, UUID victimUuid, ResourceLocation deathReason) {
-        addEvent(GameReplayData.EventType.PLAYER_KILL, killerUuid, victimUuid, deathReason.toString(), null);
+        String deathReasonStr = deathReason != null ? deathReason.toString() : "unknown";
+        addEvent(GameReplayData.EventType.PLAYER_KILL, killerUuid, victimUuid, deathReasonStr, null);
     }
 
     public void recordStoreBuy(UUID playerUuid, ResourceLocation itemBought, int amount, int price) {
-        addEvent(GameReplayData.EventType.STORE_BUY, playerUuid, null, itemBought.toString() + ":" + amount, String.valueOf(price));
+        String itemBoughtStr = itemBought != null ? itemBought.toString() : "unknown";
+        addEvent(GameReplayData.EventType.STORE_BUY, playerUuid, null, itemBoughtStr + ":" + amount, String.valueOf(price));
     }
 
     public void recordItemUse(UUID playerUuid, ResourceLocation itemUsed) {
-        addEvent(GameReplayData.EventType.ITEM_USED, playerUuid, null, itemUsed.toString(), null);
+        String itemUsedStr = itemUsed != null ? itemUsed.toString() : "unknown";
+        addEvent(GameReplayData.EventType.ITEM_USED, playerUuid, null, itemUsedStr, null);
     }
 
     public void recordSkillUsed(UUID playerUuid, ResourceLocation skillUsed) {
-        addEvent(GameReplayData.EventType.SKILL_USED, playerUuid, null, skillUsed.toString(), null);
+        String skillUsedStr = skillUsed != null ? skillUsed.toString() : "unknown";
+        addEvent(GameReplayData.EventType.SKILL_USED, playerUuid, null, skillUsedStr, null);
     }
 
     public void setPlayerCount(int count) {
@@ -307,24 +346,35 @@ public class GameReplayManager {
             return null;
         }
     }
+    public static void sendSystemMessage(ServerPlayer player, Component message){
+        if (player != null && message != null) {
+            try {
+                player.sendSystemMessage(message);
+            } catch (Exception e) {
+                TMM.LOGGER.error("Error sending system message: ", e);
+            }
+        }
+    }
     public void showReplayToPlayer(ServerPlayer player) {
+        if (player == null) return;
         GameReplayData replayData = currentReplayData;
         if (replayData == null) {
             replayData = loadReplay();
         }
         if (replayData == null) {
-            player.sendSystemMessage(Component.translatable("tmm.replay.error.no_data").withStyle(ChatFormatting.RED));
+            sendSystemMessage(player,Component.translatable("tmm.replay.error.no_data").withStyle(ChatFormatting.RED));
             return;
         }
         // Clear previous messages
         for (int i = 0; i < 50; i++) {
-            player.sendSystemMessage(Component.literal(""));
+            sendSystemMessage(player,Component.literal(""));
         }
         // Send game statistics
-        player.sendSystemMessage(Component.translatable("tmm.replay.header").withStyle(ChatFormatting.BOLD, ChatFormatting.GOLD));
-        player.sendSystemMessage(Component.translatable("tmm.replay.player_count", replayData.getPlayerCount()).withStyle(ChatFormatting.WHITE));
+        sendSystemMessage(player,Component.translatable("tmm.replay.header").withStyle(ChatFormatting.BOLD, ChatFormatting.GOLD));
+        Integer playerCount = replayData.getPlayerCount();
+        sendSystemMessage(player,Component.translatable("tmm.replay.player_count", playerCount != null ? playerCount : 0).withStyle(ChatFormatting.WHITE));
 
-        player.sendSystemMessage(Component.literal("---").withStyle(ChatFormatting.GRAY));
+        sendSystemMessage(player,Component.literal("---").withStyle(ChatFormatting.GRAY));
 
         Map<UUID, String> playerRoles = replayData.getPlayerRoles();
         if (playerRoles != null && !playerRoles.isEmpty()) {
@@ -341,6 +391,7 @@ public class GameReplayManager {
             for (Map.Entry<UUID, String> entry : playerRoles.entrySet()) {
                 UUID uuid = entry.getKey();
                 String roleId = entry.getValue();
+                if (roleId == null) continue; // 跳过空的角色ID
                 boolean isDead = deadPlayers.contains(uuid);
                 final var first = TMMRoles.ROLES.stream().filter(role -> role.identifier().toString().equals(roleId)).findFirst();
                 // 根据角色ID分类
@@ -374,79 +425,93 @@ public class GameReplayManager {
 
             // 显示平民
             if (!aliveCivilians.isEmpty() || !deadCivilians.isEmpty()) {
-                player.sendSystemMessage(Component.translatable("tmm.replay.civilians").withStyle(ChatFormatting.BLUE));
+                sendSystemMessage(player,Component.translatable("tmm.replay.civilians").withStyle(ChatFormatting.BLUE));
                 if (!aliveCivilians.isEmpty()) {
                     MutableComponent aliveCivText = ReplayDisplayUtils.buildTeamPlayerRolesWithDeathStatus(this, aliveCivilians, playerRoles, "", true);
                     if (aliveCivText != null) {
-                        player.sendSystemMessage(aliveCivText);
+                        sendSystemMessage(player,aliveCivText);
                     }
                 }
                 if (!deadCivilians.isEmpty()) {
                     MutableComponent deadCivText = ReplayDisplayUtils.buildTeamPlayerRolesWithDeathStatus(this, deadCivilians, playerRoles, "", false);
                     if (deadCivText != null) {
-                        player.sendSystemMessage(deadCivText);
+                        sendSystemMessage(player,deadCivText);
                     }
                 }
             }
 
             // 显示中立
             if (!aliveNeutrals.isEmpty() || !deadNeutrals.isEmpty()) {
-                player.sendSystemMessage(Component.translatable("tmm.replay.neutrals").withStyle(ChatFormatting.YELLOW));
+                sendSystemMessage(player,Component.translatable("tmm.replay.neutrals").withStyle(ChatFormatting.YELLOW));
                 if (!aliveNeutrals.isEmpty()) {
                     MutableComponent aliveNeutText = ReplayDisplayUtils.buildTeamPlayerRolesWithDeathStatus(this, aliveNeutrals, playerRoles, "", true);
                     if (aliveNeutText != null) {
-                        player.sendSystemMessage(aliveNeutText);
+                        sendSystemMessage(player,aliveNeutText);
                     }
                 }
                 if (!deadNeutrals.isEmpty()) {
                     MutableComponent deadNeutText = ReplayDisplayUtils.buildTeamPlayerRolesWithDeathStatus(this, deadNeutrals, playerRoles, "", false);
                     if (deadNeutText != null) {
-                        player.sendSystemMessage(deadNeutText);
+                        sendSystemMessage(player,deadNeutText);
                     }
                 }
             }
 
             // 显示杀手
             if (!aliveKillers.isEmpty() || !deadKillers.isEmpty()) {
-                player.sendSystemMessage(Component.translatable("tmm.replay.killers").withStyle(ChatFormatting.DARK_RED));
+                sendSystemMessage(player,Component.translatable("tmm.replay.killers").withStyle(ChatFormatting.DARK_RED));
                 if (!aliveKillers.isEmpty()) {
                     MutableComponent aliveKillText = ReplayDisplayUtils.buildTeamPlayerRolesWithDeathStatus(this, aliveKillers, playerRoles, "", true);
                     if (aliveKillText != null) {
-                        player.sendSystemMessage(aliveKillText);
+                        sendSystemMessage(player,aliveKillText);
                     }
                 }
                 if (!deadKillers.isEmpty()) {
                     MutableComponent deadKillText = ReplayDisplayUtils.buildTeamPlayerRolesWithDeathStatus(this, deadKillers, playerRoles, "", false);
                     if (deadKillText != null) {
-                        player.sendSystemMessage(deadKillText);
+                        sendSystemMessage(player,deadKillText);
                     }
                 }
             }
         }
 
-        player.sendSystemMessage(Component.literal("---").withStyle(ChatFormatting.GRAY));
+        sendSystemMessage(player,Component.literal("---").withStyle(ChatFormatting.GRAY));
 
         // Send winning information
-        if (replayData.getWinningTeam() != null) {
-            player.sendSystemMessage(Component.translatable("tmm.replay.winning_team", Component.literal(replayData.getWinningTeam()).withStyle(ChatFormatting.GOLD)).withStyle(ChatFormatting.WHITE));
+        String winningTeam = replayData.getWinningTeam();
+        if (winningTeam != null) {
+            sendSystemMessage(player,Component.translatable("tmm.replay.winning_team", Component.literal(winningTeam).withStyle(ChatFormatting.GOLD)).withStyle(ChatFormatting.WHITE));
         }
 
-        player.sendSystemMessage(Component.literal("---").withStyle(ChatFormatting.GRAY));
+        sendSystemMessage(player,Component.literal("---").withStyle(ChatFormatting.GRAY));
 
         // Send timeline
-        player.sendSystemMessage(Component.translatable("tmm.replay.timeline").withStyle(ChatFormatting.BOLD, ChatFormatting.WHITE));
+        sendSystemMessage(player,Component.translatable("tmm.replay.timeline").withStyle(ChatFormatting.BOLD, ChatFormatting.WHITE));
 
         long gameStartTime = ReplayDisplayUtils.findGameStartTime(replayData);
-        for (GameReplayData.ReplayEvent dataEvent : replayData.getTimeline()) {
-            long relativeTime = dataEvent.getTimestamp() - gameStartTime;
-            String timePrefix = ReplayDisplayUtils.formatTime(relativeTime) + " ";
-            ReplayEvent event = convertReplayEvent(dataEvent);
-            Component eventText = replayData.toText(this, replayData, event);
-            player.sendSystemMessage(Component.literal(timePrefix).append(eventText));
+        List<GameReplayData.ReplayEvent> timeline = replayData.getTimeline();
+        if (timeline != null) {
+            for (GameReplayData.ReplayEvent dataEvent : timeline) {
+                if (dataEvent == null) continue; // 跳过空事件
+                long relativeTime = dataEvent.getTimestamp() - gameStartTime;
+                String timePrefix = ReplayDisplayUtils.formatTime(relativeTime) + " ";
+                ReplayEvent event = convertReplayEvent(dataEvent);
+                Component eventText = null;
+                try {
+                    eventText = replayData.toText(this, replayData, event);
+                } catch (Exception e) {
+                    TMM.LOGGER.error("Error converting replay event to text: ", e);
+                }
+                if (eventText != null) {
+                    sendSystemMessage(player,Component.literal(timePrefix).append(eventText));
+                } else {
+                    sendSystemMessage(player,Component.literal(timePrefix + "[事件无法显示]"));
+                }
+            }
         }
 
-        player.sendSystemMessage(Component.literal("---").withStyle(ChatFormatting.GRAY));
-        player.sendSystemMessage(Component.translatable("tmm.replay.footer").withStyle(ChatFormatting.GRAY));
+        sendSystemMessage(player,Component.literal("---").withStyle(ChatFormatting.GRAY));
+        sendSystemMessage(player,Component.translatable("tmm.replay.footer").withStyle(ChatFormatting.GRAY));
     }
 
     private List<UUID> getDeadPlayers(GameReplayData replayData) {

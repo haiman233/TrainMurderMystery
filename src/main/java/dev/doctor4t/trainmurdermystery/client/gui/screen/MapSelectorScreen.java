@@ -4,7 +4,9 @@ package dev.doctor4t.trainmurdermystery.client.gui.screen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.cca.MapVotingComponent;
 import dev.doctor4t.trainmurdermystery.client.TMMClient;
+import dev.doctor4t.trainmurdermystery.voting.MapVotingManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -51,7 +53,7 @@ public class MapSelectorScreen extends Screen {
     private final java.util.Map<String, Integer> voteCounts = new java.util.HashMap<>();
     
     public MapSelectorScreen() {
-        super(Component.literal("选择地图"));
+        super(Component.translatable("gui.tmm.map_selector.title"));
         initMapOptions();
         initParticles();
     }
@@ -59,13 +61,13 @@ public class MapSelectorScreen extends Screen {
     private void initMapOptions() {
         mapOptions.clear();
 
-        mapOptions.add(new MapOption("random", "随机", "随机选择地图", 0xFF4CC9F0));
-        mapOptions.add(new MapOption("areas1", "飞艇", "空中战斗平台", 0xFF9D0208));
-        mapOptions.add(new MapOption("areas2", "星穹列车V2", "科幻未来列车", 0xFF70E000));
-        mapOptions.add(new MapOption("areas3", "海盗船", "海上冒险之旅", 0xFFF72585));
-        mapOptions.add(new MapOption("areas4", "星穹列车放大化", "扩大版科幻列车", 0xFF7209B7));
-        mapOptions.add(new MapOption("areas5", "原版", "经典游戏体验", 0xFF00B4D8));
-        mapOptions.add(new MapOption("areas6", "加宽列车", "更好的列车体验", 0xFFF72585));
+        mapOptions.add(new MapOption("random", Component.translatable("gui.tmm.map_selector.random").getString(), Component.translatable("gui.tmm.map_selector.random.desc").getString(), 0xFF4CC9F0));
+        mapOptions.add(new MapOption("areas1", Component.translatable("gui.tmm.map_selector.zeppelin").getString(), Component.translatable("gui.tmm.map_selector.zeppelin.desc").getString(), 0xFF9D0208));
+        mapOptions.add(new MapOption("areas2", Component.translatable("gui.tmm.map_selector.star_train_v2").getString(), Component.translatable("gui.tmm.map_selector.star_train_v2.desc").getString(), 0xFF70E000));
+        mapOptions.add(new MapOption("areas3", Component.translatable("gui.tmm.map_selector.pirate_ship").getString(), Component.translatable("gui.tmm.map_selector.pirate_ship.desc").getString(), 0xFFF72585));
+        mapOptions.add(new MapOption("areas4", Component.translatable("gui.tmm.map_selector.star_train_expanded").getString(), Component.translatable("gui.tmm.map_selector.star_train_expanded.desc").getString(), 0xFF7209B7));
+        mapOptions.add(new MapOption("areas5", Component.translatable("gui.tmm.map_selector.original").getString(), Component.translatable("gui.tmm.map_selector.original.desc").getString(), 0xFF00B4D8));
+        mapOptions.add(new MapOption("areas6", Component.translatable("gui.tmm.map_selector.wider_train").getString(), Component.translatable("gui.tmm.map_selector.wider_train.desc").getString(), 0xFFF72585));
     }
     
     private void initParticles() {
@@ -138,17 +140,17 @@ public class MapSelectorScreen extends Screen {
         // 绘制标题
         float titleAlpha = Mth.clamp((animationProgress - 0.2f) * 5, 0, 1);
         int titleColor = (int)(titleAlpha * 255) << 24 | textColor;
-        guiGraphics.drawCenteredString(font, Component.literal("选择地图").withStyle(net.minecraft.ChatFormatting.BOLD),
+        guiGraphics.drawCenteredString(font, Component.translatable("gui.tmm.map_selector.title").withStyle(net.minecraft.ChatFormatting.BOLD),
                 width / 2, 30, titleColor);
         
         // 绘制副标题
-        float subtitleAlpha = Mth.clamp((animationProgress - 0.4f) * 5, 0, 1);
-        int subtitleColor = (int)(subtitleAlpha * 255) << 24 | secondaryTextColor;
-        guiGraphics.drawCenteredString(font, Component.literal("选择您想游玩的场景"),
-                width / 2, 55, subtitleColor);
+
         
         // 绘制地图选项
         renderMapOptions(guiGraphics, mouseX, mouseY, partialTicks);
+        
+        // 绘制投票倒计时
+        renderVotingTimer(guiGraphics);
         
         // 绘制底部信息
         if (selectedMap != null) {
@@ -395,7 +397,7 @@ public class MapSelectorScreen extends Screen {
         // 绘制投票数量（居中，位于底部）
         int voteCount = getVoteCount(map.id);
         if (voteCount > 0) {
-            String voteText = "Votes: " + voteCount;
+            String voteText = Component.translatable("gui.tmm.map_selector.vote_count", voteCount).getString();
             int voteAlpha = (int)(cardAlpha * 0.9f);
             int voteColor = (voteAlpha << 24) | accentColor;
             guiGraphics.drawCenteredString(font, voteText, 
@@ -411,11 +413,60 @@ public class MapSelectorScreen extends Screen {
     }
 
     private void drawMapPreviewImage(GuiGraphics guiGraphics, String id, int imageX, int imageY, int imageSize, int imageSize1) {
-
+        // 尝试绘制地图预览图片
+        try {
+            // 为每个地图ID创建特定的纹理位置
+            ResourceLocation textureLocation = ResourceLocation.tryBuild(TMM.MOD_ID, "textures/gui/maps/" + id + ".png");
+            
+            // 检查资源是否存在
+            if (textureExists(textureLocation)) {
+                // 绑定纹理并绘制
+                RenderSystem.setShaderTexture(0, textureLocation);
+                
+                // 绘制纹理
+                guiGraphics.blit(textureLocation, imageX + 2, imageY + 2, 0, 0, 
+                        imageSize - 4, imageSize1 - 4, imageSize - 4, imageSize1 - 4);
+            } else {
+                // 如果没有找到特定地图图片，绘制占位符
+                drawPlaceholderImage(guiGraphics, id, imageX, imageY, imageSize, imageSize1);
+            }
+        } catch (Exception e) {
+            // 发生错误时绘制占位符
+            drawPlaceholderImage(guiGraphics, id, imageX, imageY, imageSize, imageSize1);
+        }
+    }
+    
+    private boolean textureExists(ResourceLocation resourceLocation) {
+        try {
+            return Minecraft.getInstance().getResourceManager().getResource(resourceLocation).isPresent();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    private void drawPlaceholderImage(GuiGraphics guiGraphics, String id, int imageX, int imageY, int imageSize, int imageSize1) {
+        // 绘制占位符背景
+        int placeholderColor = 0x40888888;
+        guiGraphics.fill(imageX + 2, imageY + 2, imageX + imageSize - 2, imageY + imageSize - 2, placeholderColor);
+        
+        // 绘制地图首字母
+        String initial = id.isEmpty() ? "?" : String.valueOf(Character.toUpperCase(id.charAt(0)));
+        int initialColor = 0x80FFFFFF;
+        int textWidth = font.width(initial);
+        int textX = imageX + (imageSize - textWidth) / 2;
+        int textY = imageY + (imageSize - font.lineHeight) / 2;
+        guiGraphics.drawString(font, initial, textX, textY, initialColor, false);
     }
 
     // 获取投票数量的方法（接口，具体实现由您完成）
     private int getVoteCount(String mapId) {
+        // 如果投票系统激活，优先返回CCA组件中的数据
+        if (minecraft != null && minecraft.level != null) {
+            dev.doctor4t.trainmurdermystery.cca.MapVotingComponent votingComponent = dev.doctor4t.trainmurdermystery.cca.MapVotingComponent.KEY.get(minecraft.level);
+            if (votingComponent.isVotingActive()) {
+                return votingComponent.getVoteCount(mapId);
+            }
+        }
         // 返回存储的投票数量，默认为0
         return voteCounts.getOrDefault(mapId, 0);
     }
@@ -432,14 +483,72 @@ public class MapSelectorScreen extends Screen {
     }
     
     private void drawSelectionIndicator(GuiGraphics guiGraphics, int x, int y, int alpha) {
-        // 绘制选中动画
-        float pulse = (float) (Math.sin(System.currentTimeMillis() * 0.003) * 0.5 + 0.5);
+        // 绘制选中动画 - 边框发光效果
+        float pulse = (float) (Math.sin(System.currentTimeMillis() * 0.005) * 0.3 + 0.7); // 更快的脉冲效果
         int pulseAlpha = (int)(100 + pulse * 155);
         
-        // 绘制选中光晕
-        guiGraphics.fill(x - 2, y - 2, 
-                x + MAP_BOX_WIDTH + 2, y + MAP_BOX_HEIGHT + 2, 
-                (pulseAlpha << 24) | accentColor);
+        // 绘制顶部边框
+        int borderWidth = 4; // 增加边框宽度
+        int animatedTopColor = (pulseAlpha << 24) | accentColor;
+        guiGraphics.fill(x - borderWidth, y - borderWidth, 
+                x + MAP_BOX_WIDTH + borderWidth, y, 
+                animatedTopColor);
+        
+        // 绘制右侧边框
+        guiGraphics.fill(x + MAP_BOX_WIDTH, y - borderWidth, 
+                x + MAP_BOX_WIDTH + borderWidth, y + MAP_BOX_HEIGHT + borderWidth, 
+                animatedTopColor);
+        
+        // 绘制底部边框
+        guiGraphics.fill(x - borderWidth, y + MAP_BOX_HEIGHT, 
+                x + MAP_BOX_WIDTH + borderWidth, y + MAP_BOX_HEIGHT + borderWidth, 
+                animatedTopColor);
+        
+        // 绘制左侧边框
+        guiGraphics.fill(x - borderWidth, y - borderWidth, 
+                x, y + MAP_BOX_HEIGHT + borderWidth, 
+                animatedTopColor);
+        
+        // 绘制移动的“灯带”效果
+        long time = System.currentTimeMillis();
+        float waveOffset = (time * 0.01f) % (2 * MAP_BOX_WIDTH + 2 * MAP_BOX_HEIGHT);
+        
+        // 绘制移动亮点
+        int highlightSize = 6;
+        int highlightAlpha = (int)(255 * (0.8 + 0.2 * Math.sin(time * 0.01))); // 额外亮度脉冲
+        int highlightColor = (highlightAlpha << 24) | 0xFFFFFFFF;
+        
+        // 计算亮点位置（沿边框循环移动）
+        if (waveOffset < MAP_BOX_WIDTH) {
+            // 顶部边框
+            int highlightX = (int)(x + waveOffset);
+            guiGraphics.fill(highlightX, y - borderWidth, 
+                    highlightX + highlightSize, y, 
+                    highlightColor);
+        } else if (waveOffset < MAP_BOX_WIDTH + MAP_BOX_HEIGHT) {
+            // 右侧边框
+            int highlightX = x + MAP_BOX_WIDTH;
+            int highlightY = (int)(y + waveOffset - MAP_BOX_WIDTH);
+            guiGraphics.fill(highlightX, highlightY, 
+                    highlightX + borderWidth, highlightY + highlightSize, 
+                    highlightColor);
+        } else if (waveOffset < 2 * MAP_BOX_WIDTH + MAP_BOX_HEIGHT) {
+            // 底部边框
+            int highlightX = (int)(x + MAP_BOX_WIDTH - (waveOffset - MAP_BOX_WIDTH - MAP_BOX_HEIGHT));
+            int highlightY = y + MAP_BOX_HEIGHT;
+            guiGraphics.fill(highlightX, highlightY, 
+                    highlightX + highlightSize, highlightY + borderWidth, 
+                    highlightColor);
+        } else {
+            // 左侧边框
+            int highlightX = x - borderWidth;
+            int highlightY = (int)(y + MAP_BOX_HEIGHT - (waveOffset - 2 * MAP_BOX_WIDTH - MAP_BOX_HEIGHT));
+            if (highlightY > y - borderWidth) {
+                guiGraphics.fill(highlightX, highlightY, 
+                        highlightX + borderWidth, highlightY + highlightSize, 
+                        highlightColor);
+            }
+        }
         
         // 绘制选中图标
         float iconPulse = (float) (Math.sin(System.currentTimeMillis() * 0.005) * 0.3 + 0.7);
@@ -474,22 +583,41 @@ public class MapSelectorScreen extends Screen {
         
         // 绘制选中地图信息
         guiGraphics.drawCenteredString(font, 
-                Component.literal("已选择: ").append(selectedMap.displayName)
+                Component.translatable("gui.tmm.map_selector.selected", selectedMap.displayName)
                         .withStyle(net.minecraft.ChatFormatting.BOLD),
                 width / 2, infoY + 15, accentColor);
         
         guiGraphics.drawCenteredString(font, 
-                Component.literal("地图ID: " + selectedMap.id),
+                Component.translatable("gui.tmm.map_selector.map_id", selectedMap.id),
                 width / 2, infoY + 35, secondaryTextColor);
         
         guiGraphics.drawCenteredString(font, 
-                Component.literal("按 ESC 取消 | 按 Enter 确认"),
+                Component.translatable("gui.tmm.map_selector.confirm_prompt"),
                 width / 2, infoY + 55, 0xFF8888AA);
     }
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (hoveredMap != null && button == 0) {
+            // 如果投票活跃，记录投票
+            if (minecraft.level != null) {
+                dev.doctor4t.trainmurdermystery.cca.MapVotingComponent votingComponent = dev.doctor4t.trainmurdermystery.cca.MapVotingComponent.KEY.get(minecraft.level);
+                if (votingComponent.isVotingActive()) {
+                    if (minecraft.player != null) {
+                        // 通过网络包发送投票信息到服务器
+                        net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new dev.doctor4t.trainmurdermystery.network.VoteForMapPayload(hoveredMap.id));
+                        // 显示投票成功的提示
+                        if (minecraft.player != null) {
+                            minecraft.player.displayClientMessage(
+                                Component.translatable("gui.tmm.map_selector.selected", hoveredMap.displayName)
+                                    .withStyle(net.minecraft.ChatFormatting.GREEN),
+                                false
+                            );
+                        }
+                    }
+                }
+            }
+            
             // 如果点击的是已选择的地图，则取消选择
             if (selectedMap == hoveredMap) {
                 selectedMap = null;
@@ -542,13 +670,59 @@ public class MapSelectorScreen extends Screen {
                         0.5f, 1.0f);
             }
             
-            // 这里可以添加确认选择后的逻辑
-            minecraft.player.displayClientMessage(
-                    Component.literal("已选择地图: " + selectedMap.displayName)
-                            .withStyle(net.minecraft.ChatFormatting.GREEN),
-                    false
-            );
+            // 如果投票活跃，玩家不能直接确认选择，只能投票
+            if (minecraft.level != null) {
+                dev.doctor4t.trainmurdermystery.cca.MapVotingComponent votingComponent = dev.doctor4t.trainmurdermystery.cca.MapVotingComponent.KEY.get(minecraft.level);
+                if (votingComponent.isVotingActive()) {
+                    // 在投票期间，点击地图会增加投票
+                    if (minecraft.player != null) {
+                        // 通过网络包发送投票信息到服务器
+                        net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new dev.doctor4t.trainmurdermystery.network.VoteForMapPayload(selectedMap.id));
+                        minecraft.player.displayClientMessage(
+                            Component.translatable("gui.tmm.map_selector.voted_for", selectedMap.displayName)
+                                .withStyle(net.minecraft.ChatFormatting.GREEN),
+                            false
+                        );
+                    }
+                } else {
+                    // 如果不在投票期间，显示普通消息
+                    minecraft.player.displayClientMessage(
+                            Component.translatable("gui.tmm.map_selector.selected", selectedMap.displayName)
+                                    .withStyle(net.minecraft.ChatFormatting.GREEN),
+                            false
+                    );
+                }
+            }
+            
             onClose();
+        }
+    }
+    
+    private void renderVotingTimer(GuiGraphics guiGraphics) {
+        MapVotingComponent votingManager = dev.doctor4t.trainmurdermystery.cca.MapVotingComponent.KEY.get(minecraft.level);
+        if (votingManager.isVotingActive()) {
+            int timeLeft = votingManager.getVotingTimeLeft() /20;
+            String timerText = Component.translatable("gui.tmm.map_selector.voting_timer", timeLeft).getString();
+            
+            // 计算文本位置 - 屏幕顶部中央，与标题保持相同间隔
+            int textWidth = font.width(timerText);
+            int textX = (width - textWidth) / 2;
+            int textY = 50; // 与标题保持相同间隔
+            
+            // 绘制背景矩形
+            int bgColor = 0x80000000; // 半透明黑色背景
+            guiGraphics.fill(textX - 10, textY - 5, textX + textWidth + 10, textY + font.lineHeight + 5, bgColor);
+            
+            // 绘制倒计时文本
+            guiGraphics.drawString(font, timerText, textX, textY, 0xFFFFFF);
+            
+            // 绘制提示文本
+            String hintText = Component.translatable("gui.tmm.map_selector.voting_active").getString();
+            int hintWidth = font.width(hintText);
+            int hintX = (width - hintWidth) / 2;
+            int hintY = textY + font.lineHeight + 5; // 减少与计时器的间隔
+            
+            guiGraphics.drawString(font, hintText, hintX, hintY, 0xFFFF00); // 黄色提示
         }
     }
     

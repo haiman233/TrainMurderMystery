@@ -53,7 +53,7 @@ public class InGameHudMixin {
                 StoreRenderer.renderHud(renderer, player, context, tickCounter.getGameTimeDeltaPartialTick(true));
             TimeRenderer.renderHud(renderer, player, context, tickCounter.getGameTimeDeltaPartialTick(true));
             StaminaRenderer.renderHud(player, context, tickCounter.getGameTimeDeltaPartialTick( true));
-            SansRenderer.instance.tick(tickCounter.getGameTimeDeltaPartialTick(true));
+            SansRenderer.instance.tick(player, context, tickCounter.getGameTimeDeltaPartialTick( true));
             LobbyPlayersRenderer.renderHud(renderer, player, context);
         }
     }

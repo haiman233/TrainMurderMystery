@@ -7,16 +7,20 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.UUID;
 
-public record ShowSelectedMapUIPayload(UUID targetPlayerUuid) implements CustomPacketPayload {
+public class ShowSelectedMapUIPayload implements CustomPacketPayload {
     public static final Type<ShowSelectedMapUIPayload> ID = new Type<>(TMM.id("show_selected_map_ui"));
     public static final StreamCodec<FriendlyByteBuf, ShowSelectedMapUIPayload> CODEC = CustomPacketPayload.codec(ShowSelectedMapUIPayload::write, ShowSelectedMapUIPayload::new);
 
-    public ShowSelectedMapUIPayload(FriendlyByteBuf buf) {
-        this(buf.readUUID());
+    public ShowSelectedMapUIPayload(FriendlyByteBuf friendlyByteBuf) {
+
     }
- 
+    public ShowSelectedMapUIPayload() {
+
+    }
+
+
     public void write(FriendlyByteBuf buf) {
-        buf.writeUUID(targetPlayerUuid);
+
     }
  
     @Override
