@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.cca.AreasWorldComponent;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.AABB;
 
@@ -33,7 +34,7 @@ public class MapManager {
             AreasWorldComponent areas = AreasWorldComponent.KEY.get(serverWorld);
 
             // 创建地图目录
-            Path mapsDirPath = Paths.get(serverWorld.getServer().getServerDirectory().toString(), "world", "maps");
+            Path mapsDirPath = Paths.get(serverWorld.getServer().getWorldPath(LevelResource.ROOT).toString(), "world", "maps");
             File mapsDir = mapsDirPath.toFile();
             if (!mapsDir.exists()) {
                 mapsDir.mkdirs();
