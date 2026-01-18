@@ -518,10 +518,8 @@ public class GameFunctions {
             return;
         }
 
-        if (killer != null && GameWorldComponent.KEY.get(killer.level()).canUseKillerFeatures(killer)) {
-            PlayerShopComponent.KEY.get(killer).addToBalance(GameConstants.getMoneyPerKill());
-
-            // replenish derringer
+        if (killer != null) {
+            // 任何击杀者都可以补充弹药
             for (List<ItemStack> list : killer.getInventory().compartments) {
                 for (ItemStack stack : list) {
                     Boolean used = stack.get(TMMDataComponentTypes.USED);
@@ -531,6 +529,11 @@ public class GameFunctions {
                     }
                 }
             }
+        }
+
+        // 杀手击杀获得金钱奖励
+        if (killer != null && GameWorldComponent.KEY.get(killer.level()).canUseKillerFeatures(killer)) {
+            PlayerShopComponent.KEY.get(killer).addToBalance(GameConstants.getMoneyPerKill());
         }
 
         PlayerMoodComponent.KEY.get(victim).reset();
