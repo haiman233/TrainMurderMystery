@@ -2,6 +2,7 @@ package dev.doctor4t.trainmurdermystery;
 
 import com.google.common.reflect.Reflection;
 import dev.doctor4t.trainmurdermystery.TMMConfig;
+import dev.doctor4t.trainmurdermystery.api.Role;
 import dev.doctor4t.trainmurdermystery.block.DoorPartBlock;
 import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.command.*;
@@ -49,8 +50,11 @@ import org.slf4j.LoggerFactory;
 
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayApiInitializer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 public class TMM implements ModInitializer {
     public static final String MOD_ID = "trainmurdermystery";
@@ -60,6 +64,9 @@ public class TMM implements ModInitializer {
     public static TMMConfig CONFIG = new TMMConfig();
     public static GameReplayManager REPLAY_MANAGER;
     public static final Networking NETWORKING = new Networking();
+
+    public static List<Predicate<Role>> canUseOtherPerson = new ArrayList<>();
+    public static List<Predicate<Role>> canUseChatHud= new ArrayList<>();
 
     public static @NotNull ResourceLocation id(String name) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);

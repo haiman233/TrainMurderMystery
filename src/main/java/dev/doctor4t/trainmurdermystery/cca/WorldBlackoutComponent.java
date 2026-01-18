@@ -67,7 +67,7 @@ public class WorldBlackoutComponent implements AutoSyncedComponent, ServerTickin
     public boolean triggerBlackout() {
         AreasWorldComponent areas = AreasWorldComponent.KEY.get(world);
 
-        AABB area = areas.getResetTemplateArea();
+        AABB area = areas.getPlayArea();
         if (this.ticks > 0) return false;
         for (int x = (int) area.minX; x <= (int) area.maxX; x++) {
             for (int y = (int) area.minY; y <= (int) area.maxY; y++) {

@@ -222,7 +222,7 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
     }
 
     public GameMode getGameMode() {
-        return gameMode;
+        return gameMode ==null ? TMMGameModes.MURDER : gameMode;
     }
 
     public void setGameMode(GameMode gameMode) {
@@ -347,6 +347,7 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
         tickCommon();
 
         if (this.isRunning()) {
+            if (gameMode==null)return;
             gameMode.tickClientGameLoop();
         }
     }
@@ -416,9 +417,13 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
                         PlayerStatsComponent.KEY.get(player).addPlayTime(1);
                     }
                 }
+                if (gameMode==null){
+                    gameStatus = GameStatus.STOPPING;
+                    return;}
 
                 // run game loop logic
                 gameMode.tickServerGameLoop(serverWorld, this);
+
             }
 
 //            if (serverWorld.getGameTime() % 40 == 0) {
@@ -445,6 +450,10 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
         }
 
         if (this.isRunning()) {
+            if (gameMode==null){
+
+                return;
+            }
             gameMode.tickCommonGameLoop();
         }
     }
