@@ -727,7 +727,7 @@
   "screen.trainmurdermystery.player_stats.total_wins": "总胜利次数: %s",
   "screen.trainmurdermystery.player_stats.total_losses": "总失败次数: %s",
   "screen.trainmurdermystery.player_stats.kd_ratio": "击杀/死亡比: %s",
-  "screen.trainmurdermystery.player_stats.win_rate": "总胜率: %s%",
+  "screen.trainmurdermystery.player_stats.win_rate": "总胜率: %s",
   "screen.trainmurdermystery.player_stats.role_stats": "角色特定统计",
   "screen.trainmurdermystery.player_stats.role_name": "角色: %s",
   "screen.trainmurdermystery.player_stats.role_times_played": "使用次数: %s",

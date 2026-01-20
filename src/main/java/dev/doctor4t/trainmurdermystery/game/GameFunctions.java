@@ -342,13 +342,16 @@ public class GameFunctions {
             }
         }
         // Don't set game status to ACTIVE here - it will be set after roles are assigned in initializeGame()
-        serverWorld.getAllEntities().forEach(
-                entity -> {
-                    if (entity instanceof ItemEntity){
-                        entity.discard();
-                    }
-                }
-        );
+        // 更安全的物品实体清理方法，避免遍历过程中修改集合导致的异常
+        List<ItemEntity> itemsToRemove = new ArrayList<>();
+        for (net.minecraft.world.entity.Entity entity : serverWorld.getAllEntities()) {
+            if (entity instanceof ItemEntity) {
+                itemsToRemove.add((ItemEntity) entity);
+            }
+        }
+        for (ItemEntity item : itemsToRemove) {
+            item.discard();
+        }
     }
 
     private static List<ServerPlayer> getReadyPlayerList(ServerLevel serverWorld) {
