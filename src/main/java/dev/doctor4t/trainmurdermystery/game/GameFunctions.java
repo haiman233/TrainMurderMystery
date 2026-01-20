@@ -144,13 +144,18 @@ public class GameFunctions {
 
         //serverWorld.setWeatherParameters(0,-1, true, true);
         baseInitialize(serverWorld, gameComponent, readyPlayerList);
+
+        // 先分配角色,然后再初始化回放管理器
+        gameComponent.getGameMode().initializeGame(serverWorld, gameComponent, readyPlayerList);
+
+        // 初始化回放管理器,此时角色已经分配完成
         TMM.REPLAY_MANAGER.initializeReplay(readyPlayerList, gameComponent.getRoles());
         // 记录游戏开始事件
         TMM.REPLAY_MANAGER.addEvent(GameReplayData.EventType.GAME_START, null, null, null, null);
-        gameComponent.getGameMode().initializeGame(serverWorld, gameComponent, readyPlayerList);
+
         // Update replay with actual roles after assignment
         TMM.REPLAY_MANAGER.updateRolesFromComponent(gameComponent);
-        
+
         // Set game status to ACTIVE after roles are assigned
         gameComponent.setGameStatus(GameWorldComponent.GameStatus.ACTIVE);
 
@@ -159,11 +164,11 @@ public class GameFunctions {
         // 初始化计分板组件
         GameScoreboardComponent scoreboardComponent = GameScoreboardComponent.KEY.get(serverWorld.getServer().getScoreboard());
         scoreboardComponent.reset();
-        
+
         // 设置平民获胜所需的总任务数 (这里可以根据玩家数量动态计算)
         int totalRequiredTasks = readyPlayerList.size() * 5; // 每个玩家需要完成5个任务
         scoreboardComponent.setTotalRequiredTasks(totalRequiredTasks);
-        
+
         // 更新所有玩家的计分板显示
         scoreboardComponent.updateAllPlayerScores();
 
