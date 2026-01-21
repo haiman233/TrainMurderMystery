@@ -145,6 +145,11 @@ public class GameFunctions {
         //serverWorld.setWeatherParameters(0,-1, true, true);
         baseInitialize(serverWorld, gameComponent, readyPlayerList);
 
+        // 在分配角色前将所有玩家设置为冒险模式
+        for (ServerPlayer player : serverWorld.players()) {
+            player.setGameMode(net.minecraft.world.level.GameType.ADVENTURE);
+        }
+
         // 先分配角色,然后再初始化回放管理器
         gameComponent.getGameMode().initializeGame(serverWorld, gameComponent, readyPlayerList);
 
