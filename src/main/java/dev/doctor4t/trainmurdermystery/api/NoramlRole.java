@@ -2,7 +2,7 @@ package dev.doctor4t.trainmurdermystery.api;
 
 import net.minecraft.resources.ResourceLocation;
 
-public class NoramlRole extends  Role{
+public class NoramlRole extends Role{
     /**
      * @param identifier    the mod id and name of the role
      * @param color         the role announcement color
