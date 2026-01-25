@@ -17,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class SwitchMapCommand {
+    //todo 随机炸了 修一下
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
                 Commands.literal("tmm:switchmap")

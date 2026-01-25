@@ -1,6 +1,7 @@
 package dev.doctor4t.trainmurdermystery.api;
 
 import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.client.gui.RoleAnnouncementTexts;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
 import net.minecraft.resources.ResourceLocation;
 

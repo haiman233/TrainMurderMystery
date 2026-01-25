@@ -45,13 +45,13 @@ public class GameRoundEndComponent implements AutoSyncedComponent {
                 role = RoleAnnouncementTexts.getRoleAnnouncementText(TMMRoles.VIGILANTE.identifier());
             } else {
                 // 尝试获取玩家的实际角色
-                dev.doctor4t.trainmurdermystery.api.Role actualRole = game.getRole(player);
-                if (actualRole != null) {
-                    role = RoleAnnouncementTexts.getRoleAnnouncementText(actualRole.identifier());
-                } else {
+//                dev.doctor4t.trainmurdermystery.api.Role actualRole = game.getRole(player);
+//                if (actualRole != null) {
+//                    role = RoleAnnouncementTexts.getRoleAnnouncementText(actualRole.identifier());
+//                } else {
                     // 默认为平民
-                    role = RoleAnnouncementTexts.getRoleAnnouncementText(TMMRoles.CIVILIAN.identifier());
-                }
+                    role = RoleAnnouncementTexts.CIVILIAN;
+//                }
             }
             this.players.add(new RoundEndData(player.getGameProfile(), role, !dev.doctor4t.trainmurdermystery.game.GameFunctions.isPlayerAliveAndSurvival(player)));
         }
@@ -98,7 +98,7 @@ public class GameRoundEndComponent implements AutoSyncedComponent {
     public record RoundEndData(GameProfile player, RoleAnnouncementTexts.RoleAnnouncementText role, boolean wasDead) {
         public RoundEndData(@NotNull CompoundTag tag) {
             this(new GameProfile(tag.getUUID("uuid"), tag.getString("name")),
-                 RoleAnnouncementTexts.getRoleAnnouncementText(ResourceLocation.parse(tag.getString("role"))), 
+                 RoleAnnouncementTexts.getFromName((tag.getString("role"))),
                  tag.getBoolean("wasDead"));
         }
 

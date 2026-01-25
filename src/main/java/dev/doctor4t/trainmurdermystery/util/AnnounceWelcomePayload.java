@@ -23,9 +23,9 @@ public record AnnounceWelcomePayload(String role, int killers, int targets) impl
     public static class Receiver implements ClientPlayNetworking.PlayPayloadHandler<AnnounceWelcomePayload> {
         @Override
         public void receive(@NotNull AnnounceWelcomePayload payload, ClientPlayNetworking.@NotNull Context context) {
-            var roleId = ResourceLocation.tryParse(payload.role());
-            if (roleId == null) return;
-            var announcementText = RoleAnnouncementTexts.getRoleAnnouncementText(roleId);
+
+            if (payload.role == null) return;
+            var announcementText = RoleAnnouncementTexts.getFromName(payload.role);
             if (announcementText == null) return;
             RoundTextRenderer.startWelcome(announcementText, payload.killers(), payload.targets());
         }
