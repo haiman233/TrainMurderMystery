@@ -94,13 +94,13 @@ public class TMMClient implements ClientModInitializer {
         handParticleManager = new HandParticleManager();
         particleMap = Maps.newHashMap();
 
-        instinctKeybind = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-                "key.trainmurdermystery.instinct",
-                GLFW.GLFW_KEY_LEFT_ALT,
-                "category.trainmurdermystery.keys"
-        ));
+        // instinctKeybind = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+        //         "key.trainmurdermystery.instinct",
+        //         GLFW.GLFW_KEY_LEFT_ALT,
+        //         "category.trainmurdermystery.keys"
+        // ));
 
-        PayloadTypeRegistry.playS2C().register(SyncMapConfigPayload.ID, SyncMapConfigPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(SyncMapConfigPayload.ID, SyncMapConfigPayload.CODEC);
         SyncMapConfigPayload.registerReceiver();
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
