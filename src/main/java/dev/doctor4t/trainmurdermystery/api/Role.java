@@ -137,6 +137,9 @@ public abstract class Role {
     public boolean onUseKnife(Player player) {
         return true;
     }
+    public boolean onUseKnifeHit(Player player, Player victim) {
+        return true;
+    }
 
     /*
      * 在HarpyModLoader中使用

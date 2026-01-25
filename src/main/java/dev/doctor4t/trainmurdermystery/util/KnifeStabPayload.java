@@ -32,6 +32,13 @@ public record KnifeStabPayload(int target) implements CustomPacketPayload {
             ServerPlayer player = context.player();
             if (!(player.serverLevel().getEntity(payload.target()) instanceof Player target)) return;
             if (target.distanceTo(player) > 3.0) return;
+            GameWorldComponent game = GameWorldComponent.KEY.get(player.level());
+            final var role = game.getRole(player);
+            if (role != null){
+                if (!role.onUseKnifeHit(player, target)) {
+                    return;
+                }
+            }
             GameFunctions.killPlayer(target, true, player, GameConstants.DeathReasons.KNIFE);
             target.playSound(TMMSounds.ITEM_KNIFE_STAB, 1.0f, 1.0f);
             player.swing(InteractionHand.MAIN_HAND);
