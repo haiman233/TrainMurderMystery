@@ -131,7 +131,7 @@ public abstract class Role {
     public List<ItemStack> getDefaultItems() {
         return new ArrayList<>();
     }
-    public static void onInit(MinecraftServer server,ServerPlayer serverPlayer){
+    public  void onInit(MinecraftServer server,ServerPlayer serverPlayer){
 
     }
 
