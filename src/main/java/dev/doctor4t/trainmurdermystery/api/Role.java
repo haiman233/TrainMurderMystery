@@ -19,7 +19,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
-import org.ladysnake.cca.api.v3.component.Component;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
 
 public abstract class Role {
@@ -64,6 +63,7 @@ public abstract class Role {
     private boolean isInnocent;
     private boolean canUseKiller;
     private MoodType moodType;
+    private boolean ableToPickUpRevolver;
 
     public ResourceLocation getIdentifier() {
         return identifier;
@@ -108,19 +108,19 @@ public abstract class Role {
         return a -> false;
     }
 
-//    public boolean onPickupItem(Player player, Item item) {
-//        return true;
-//    }
+    // public boolean onPickupItem(Player player, Item item) {
+    // return true;
+    // }
 
     public void serverTick(ServerPlayer player) {
     }
-    
+
     public void clientTick(Player player) {
     }
-    
+
     public void rightClickEntity(Player player, Entity victim) {
     }
-    
+
     public void leftClickEntity(Player player, Entity victim) {
     }
 
@@ -129,20 +129,21 @@ public abstract class Role {
     }
 
     /*
-        在HarpyModLoader中使用
-    */
+     * 在HarpyModLoader中使用
+     */
     public List<ItemStack> getDefaultItems() {
         return new ArrayList<>();
     }
+
     /*
-    在HarpyModLoader中使用
-    */
-    public  void onInit(MinecraftServer server,ServerPlayer serverPlayer){
+     * 在HarpyModLoader中使用
+     */
+    public void onInit(MinecraftServer server, ServerPlayer serverPlayer) {
 
     }
 
-    public static AbilityPlayerComponent getCooldownComponent(Player player){
-         return AbilityPlayerComponent.KEY.get(player);
+    public static AbilityPlayerComponent getCooldownComponent(Player player) {
+        return AbilityPlayerComponent.KEY.get(player);
     }
 
     public void onAbilityUse(Player player) {
@@ -162,20 +163,22 @@ public abstract class Role {
         NONE, REAL, FAKE
     }
 
-
     /**
      * @param identifier    the mod id and name of the role
      * @param color         the role announcement color
-     * @param isInnocent    whether the gun drops when a person with this role is shot and is considered a civilian to the win conditions
+     * @param isInnocent    whether the gun drops when a person with this role is
+     *                      shot and is considered a civilian to the win conditions
      * @param canUseKiller  can see and use the killer features
      * @param moodType      the mood type a role has
      * @param maxSprintTime the maximum sprint time in ticks
      * @param canSeeTime    if the role can see the game timer
      */
-    public Role(ResourceLocation identifier, int color, boolean isInnocent, boolean canUseKiller, MoodType moodType, int maxSprintTime, boolean canSeeTime) {
+    public Role(ResourceLocation identifier, int color, boolean isInnocent, boolean canUseKiller, MoodType moodType,
+            int maxSprintTime, boolean canSeeTime) {
         this.identifier = identifier;
         this.color = color;
         this.isInnocent = isInnocent;
+        this.ableToPickUpRevolver = isInnocent;
         this.canUseKiller = canUseKiller;
         this.moodType = moodType;
         this.maxSprintTime = maxSprintTime;
@@ -213,6 +216,14 @@ public abstract class Role {
 
     public boolean canSeeTime() {
         return canSeeTime;
+    }
+
+    public boolean canPickUpRevolver() {
+        return this.ableToPickUpRevolver;
+    }
+
+    public void setCanPickUpRevolver(boolean able) {
+        this.ableToPickUpRevolver = able;
     }
 
     public boolean isGambler() {

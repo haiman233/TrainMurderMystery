@@ -121,6 +121,9 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
         return gameStatus;
     }
 
+    public boolean canPickUpRevolver(@NotNull Player player){
+        return getRole(player) != null && getRole(player).canPickUpRevolver();
+    }
     public boolean isRunning() {
         return this.gameStatus == GameStatus.ACTIVE || this.gameStatus == GameStatus.STOPPING;
     }
