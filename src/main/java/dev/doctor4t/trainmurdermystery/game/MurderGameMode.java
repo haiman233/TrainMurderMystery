@@ -85,7 +85,7 @@ public class MurderGameMode extends GameMode {
         // 检查场上是否存在亡命徒
         if (winStatus != GameFunctions.WinStatus.NONE) {
             boolean hasLooseEndAlive = false;
-            Player lastLooseEnd = null;
+            ServerPlayer lastLooseEnd = null;
             int looseEndCount = 0;
 
             for (ServerPlayer player : serverWorld.players()) {
