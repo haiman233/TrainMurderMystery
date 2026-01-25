@@ -128,6 +128,16 @@ public abstract class Role {
         return new ArrayList<>();
     }
 
+    public boolean onUseGun(Player player) {
+        return true;
+    }
+    public boolean onGunHit(Player killer, Player victim) {
+        return true;
+    }
+    public boolean onUseKnife(Player player) {
+        return true;
+    }
+
     /*
      * 在HarpyModLoader中使用
      */

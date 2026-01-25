@@ -1,6 +1,7 @@
 package dev.doctor4t.trainmurdermystery.util;
 
 import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.api.Role;
 import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.cca.PlayerMoodComponent;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
@@ -62,7 +63,14 @@ public record GunShootPayload(int target) implements CustomPacketPayload {
                 Item revolver = TMMItems.REVOLVER;
 
                 boolean backfire = false;
+                final var role = game.getRole(player);
+                if (role!=null) {
 
+                 if(!role.onGunHit(player, target)){
+                     return;
+                 }
+
+                }
                 if (game.isInnocent(target) && !player.isCreative() && mainHandStack.is(revolver)) {
                     // backfire: if you kill an innocent you have a chance of shooting yourself instead
                     if (game.isInnocent(player) && player.getRandom().nextFloat() <= game.getBackfireChance()) {

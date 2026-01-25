@@ -1,6 +1,8 @@
 package dev.doctor4t.trainmurdermystery.item;
 
 import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.api.Role;
+import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.TMMSounds;
 import dev.doctor4t.trainmurdermystery.util.KnifeStabPayload;
@@ -41,6 +43,13 @@ public class KnifeItem extends Item {
         }
         if (remainingUseTicks >= this.getUseDuration(stack, user) - 7 || !(user instanceof Player attacker) || !world.isClientSide)
             return;
+        GameWorldComponent game = GameWorldComponent.KEY.get(world);
+        final var role = game.getRole(attacker);
+        if (role != null){
+            if (!role.onUseKnife(attacker)) {
+                return;
+            }
+        }
         HitResult collision = getKnifeTarget(attacker);
         if (collision instanceof EntityHitResult entityHitResult) {
             Entity target = entityHitResult.getEntity();

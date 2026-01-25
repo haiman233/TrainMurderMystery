@@ -10,6 +10,48 @@ base {
 	archivesName = project.archives_base_name
 }
 
+// Task to increment version number
+task incrementVersion {
+    doLast {
+        def propertiesFile = file('gradle.properties')
+        def properties = new Properties()
+        properties.load(propertiesFile.newInputStream())
+        def currentVersion = properties.getProperty('mod_version')
+
+        // Parse version format like "1.3.1-1.21.1" and increment the first part
+        def versionParts = currentVersion.split('-')
+        def numericPart = versionParts[0].split('\\.')
+        def major = numericPart[0] as int
+        def minor = numericPart[1] as int
+        def patch = numericPart[2] as int
+
+        // Increment patch version (you can modify this logic as needed)
+        patch++
+
+        def newNumericVersion = "${major}.${minor}.${patch}"
+        def newVersion = "${newNumericVersion}-${versionParts[1]}"
+
+        properties.setProperty('mod_version', newVersion)
+        properties.store(propertiesFile.newWriter(), null)
+
+        println "Version incremented from ${currentVersion} to ${newVersion}"
+        
+        // Update the project version for this build
+        project.version = newVersion
+        project.ext.mod_version = newVersion
+    }
+}
+
+// Hook incrementVersion to run before build if auto-increment flag is set
+if (project.hasProperty('incrementOnBuild')) {
+    build.dependsOn incrementVersion
+}
+
+// Alternative task that increments and builds
+task incrementAndBuild {
+    dependsOn incrementVersion, build
+}
+
 chenille {
 	configurePublishing {
 		withLadysnakeMaven()

@@ -1,6 +1,8 @@
 package dev.doctor4t.trainmurdermystery.item;
 
 import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.api.Role;
+import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.client.TMMClient;
 import dev.doctor4t.trainmurdermystery.client.particle.HandParticle;
 import dev.doctor4t.trainmurdermystery.client.render.TMMRenderLayers;
@@ -34,8 +36,17 @@ public class RevolverItem extends Item {
 //        if (stack.getDamage() >= stack.getMaxDamage()-1) {
 //            return TypedActionResult.fail(stack);
 //        }
-        
+
         if (world.isClientSide) {
+            final var gameComponent = TMMClient.gameComponent;
+            if (gameComponent != null) {
+                final var role = gameComponent.getRole(user);
+                if (role != null) {
+                    if (!role.onUseGun(user)) {
+                        return InteractionResultHolder.fail(stack);
+                    }
+                }
+            }
             HitResult collision = getGunTarget(user);
             if (collision instanceof EntityHitResult entityHitResult) {
                 Entity target = entityHitResult.getEntity();
@@ -48,6 +59,14 @@ public class RevolverItem extends Item {
         } else {
             // 在服务端消耗耐久度
 //            stack.setDamage(stack.getDamage() + 1);
+            GameWorldComponent gameWorldComponent = GameWorldComponent.KEY.get(world);
+            final var role = gameWorldComponent.getRole(user);
+            if (role!=null) {
+                if (!role.onUseGun(user)) {
+                    return InteractionResultHolder.fail(stack);
+                }
+            }
+
         }
         return InteractionResultHolder.consume(stack);
     }
