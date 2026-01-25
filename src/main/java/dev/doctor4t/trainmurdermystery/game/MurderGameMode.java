@@ -41,7 +41,10 @@ public class MurderGameMode extends GameMode {
         int killerCount = assignRolesAndGetKillerCount(serverWorld, players, gameWorldComponent);
 
         for (ServerPlayer player : players) {
-            ServerPlayNetworking.send(player, new AnnounceWelcomePayload(RoleAnnouncementTexts.ROLE_ANNOUNCEMENT_TEXTS.indexOf(gameWorldComponent.isRole(player, TMMRoles.KILLER) ? RoleAnnouncementTexts.KILLER : gameWorldComponent.isRole(player, TMMRoles.VIGILANTE) ? RoleAnnouncementTexts.VIGILANTE : RoleAnnouncementTexts.CIVILIAN), killerCount, players.size() - killerCount));
+            String roleId = gameWorldComponent.isRole(player, TMMRoles.KILLER) ? TMMRoles.KILLER.identifier().toString() :
+                       gameWorldComponent.isRole(player, TMMRoles.VIGILANTE) ? TMMRoles.VIGILANTE.identifier().toString() :
+                       TMMRoles.CIVILIAN.identifier().toString();
+            ServerPlayNetworking.send(player, new AnnounceWelcomePayload(roleId, killerCount, players.size() - killerCount));
         }
     }
 

@@ -1,6 +1,8 @@
 package dev.doctor4t.trainmurdermystery.api;
 
 import dev.doctor4t.trainmurdermystery.cca.AbilityPlayerComponent;
+import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
+import dev.doctor4t.trainmurdermystery.cca.PlayerShopComponent;
 import dev.doctor4t.trainmurdermystery.client.gui.screen.ingame.LimitedInventoryScreen;
 
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ import java.util.function.Predicate;
 
 import dev.doctor4t.trainmurdermystery.util.ShopEntry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -98,6 +101,7 @@ public abstract class Role {
     }
 
     public void onFinishQuest(Player player, String quest) {
+
     }
 
     public Predicate<Item> cantPickupItem(Player player) {
@@ -126,6 +130,9 @@ public abstract class Role {
 
     public List<ItemStack> getDefaultItems() {
         return new ArrayList<>();
+    }
+    public static void onInit(MinecraftServer server,ServerPlayer serverPlayer){
+
     }
 
     public static AbilityPlayerComponent getCooldownComponent(Player player){

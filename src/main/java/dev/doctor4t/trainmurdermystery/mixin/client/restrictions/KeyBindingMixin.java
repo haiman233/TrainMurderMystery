@@ -16,11 +16,14 @@ public abstract class KeyBindingMixin {
 
     @Unique
     private boolean shouldSuppressKey() {
+        if (!TMMClient.isPlayerCreative() && this.same(Minecraft.getInstance().options.keyDrop) ){
+            return true;
+        }
         if (TMMClient.gameComponent != null && TMMClient.gameComponent.isRunning() && TMMClient.isPlayerAliveAndInSurvival()) {
             return this.same(Minecraft.getInstance().options.keySwapOffhand) ||
                     this.same(Minecraft.getInstance().options.keyJump) ||
                     this.same(Minecraft.getInstance().options.keyTogglePerspective) ||
-                    this.same(Minecraft.getInstance().options.keyDrop) ||
+
                     this.same(Minecraft.getInstance().options.keyAdvancements);
         }
         return false;

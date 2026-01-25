@@ -148,7 +148,7 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
             }
         }
         for (TrainTask task : removals) {
-            this.tasks.remove(task);
+            this.tasks.remove(task.getType());
             // 更新计分板上的任务计数
             if (this.player instanceof ServerPlayer serverPlayer) {
                 GameScoreboardComponent scoreboardComponent = GameScoreboardComponent.KEY.get(serverPlayer.getServer().getScoreboard());

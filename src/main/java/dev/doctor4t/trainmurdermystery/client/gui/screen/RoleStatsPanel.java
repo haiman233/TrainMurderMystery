@@ -153,7 +153,7 @@ public class RoleStatsPanel implements Renderable, GuiEventListener, NarratableE
         // 准备角色数据并排序
         List<Role> roles = new ArrayList<>();
         Map<ResourceLocation, PlayerStatsComponent.RoleStats> roleStatsMap = stats.getRoleStats();
-        for (Role role : TMMRoles.ROLES) {
+        for (Role role : TMMRoles.ROLES.values()) {
             if (roleStatsMap.containsKey(role.identifier())) {
                 roles.add(role);
             }

@@ -293,7 +293,7 @@ public class GameReplayData {
         if (roleId == null) {
             return ChatFormatting.WHITE; // 默认颜色
         }
-        final var first = TMMRoles.ROLES.stream().filter(role -> role.identifier().toString().equals(roleId)).findFirst();
+        final var first = TMMRoles.ROLES.values().stream().filter(role -> role.identifier().toString().equals(roleId)).findFirst();
         // 根据角色ID分类
         if (first.isPresent()&& first.get().isInnocent()) {
             return ChatFormatting.GREEN;

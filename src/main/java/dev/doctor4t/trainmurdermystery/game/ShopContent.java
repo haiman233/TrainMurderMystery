@@ -1,6 +1,7 @@
 package dev.doctor4t.trainmurdermystery.game;
 
 import dev.doctor4t.trainmurdermystery.TMMConfig;
+import dev.doctor4t.trainmurdermystery.api.TMMRoles;
 import dev.doctor4t.trainmurdermystery.cca.PlayerShopComponent;
 import dev.doctor4t.trainmurdermystery.index.TMMItems;
 import dev.doctor4t.trainmurdermystery.util.ShopEntry;
@@ -45,6 +46,10 @@ public class ShopContent {
     }
     public static Map<ResourceLocation, List<ShopEntry>> customEntries = new HashMap<>();
     public static List<ShopEntry> getShopEntries(ResourceLocation role) {
+        final var shopEntries = TMMRoles.ROLES.get(role).getShopEntries();
+        if (shopEntries != null && !shopEntries.isEmpty()){
+            return shopEntries;
+        }
         if (customEntries.containsKey(role)) {
             return customEntries.get(role);
         }

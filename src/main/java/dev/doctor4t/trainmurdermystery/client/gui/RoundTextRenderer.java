@@ -94,7 +94,7 @@ public class RoundTextRenderer {
             if (isLooseEnds) {
                 context.drawString(renderer, RoleAnnouncementTexts.LOOSE_END.titleText, -renderer.width(RoleAnnouncementTexts.LOOSE_END.titleText) / 2, 14, 0xFFFFFF);
                 int looseEnds = 0;
-                for (GameRoundEndComponent.RoundEndData entry : roundEnd.getPlayers()) {
+                for (GameRoundEndComponent.RoundEndData entry : roundEnd.players) {
                     context.pose().pushPose();
                     context.pose().scale(2f, 2f, 1f);
                     context.pose().translate(((looseEnds % 6) - 3.5) * 12, 14 + (looseEnds / 6) * 12, 0);
@@ -125,7 +125,7 @@ public class RoundTextRenderer {
                 context.pose().popPose();
             } else {
                 int vigilanteTotal = 1;
-                for (GameRoundEndComponent.RoundEndData entry : roundEnd.getPlayers())
+                for (GameRoundEndComponent.RoundEndData entry : roundEnd.players)
                     if (entry.role() == RoleAnnouncementTexts.VIGILANTE) vigilanteTotal += 1;
                 context.drawString(renderer, RoleAnnouncementTexts.CIVILIAN.titleText, -renderer.width(RoleAnnouncementTexts.CIVILIAN.titleText) / 2 - 60, 14, 0xFFFFFF);
                 context.drawString(renderer, RoleAnnouncementTexts.VIGILANTE.titleText, -renderer.width(RoleAnnouncementTexts.VIGILANTE.titleText) / 2 + 50, 14, 0xFFFFFF);
@@ -133,7 +133,7 @@ public class RoundTextRenderer {
                 int civilians = 0;
                 int vigilantes = 0;
                 int killers = 0;
-                for (GameRoundEndComponent.RoundEndData entry : roundEnd.getPlayers()) {
+                for (GameRoundEndComponent.RoundEndData entry : roundEnd.players) {
                     context.pose().pushPose();
                     context.pose().scale(2f, 2f, 1f);
 

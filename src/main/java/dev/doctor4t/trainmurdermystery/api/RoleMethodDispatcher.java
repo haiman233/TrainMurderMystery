@@ -1,5 +1,7 @@
 package dev.doctor4t.trainmurdermystery.api;
 
+import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
+import dev.doctor4t.trainmurdermystery.cca.PlayerShopComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -39,7 +41,16 @@ public class RoleMethodDispatcher {
     public static void callOnFinishQuest(Player player, String quest) {
         Role role = getCurrentRole(player);
         if (role != null) {
+            GameWorldComponent gameWorldComponent = (GameWorldComponent)GameWorldComponent.KEY.get(player.level());
+            if (gameWorldComponent.getRole(player) != null) {
+                if (gameWorldComponent.getRole(player).getMoodType().equals(Role.MoodType.REAL)) {
+                    PlayerShopComponent shopComponent = PlayerShopComponent.KEY.get(player);
+                    shopComponent.addToBalance(50);
+                }
+
+            }
             role.onFinishQuest(player, quest);
+
         }
     }
     
