@@ -222,7 +222,7 @@ public abstract class Role {
         return this.ableToPickUpRevolver;
     }
 
-    public void setCanPickUpRevolver(boolean able) {
+    public Role setCanPickUpRevolver(boolean able) {
         this.ableToPickUpRevolver = able;
         return this;
     }
