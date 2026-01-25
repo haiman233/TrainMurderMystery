@@ -10,15 +10,32 @@ import dev.doctor4t.trainmurdermystery.client.gui.RoleAnnouncementTexts;
 import dev.doctor4t.trainmurdermystery.index.TMMItems;
 import dev.doctor4t.trainmurdermystery.util.AnnounceWelcomePayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class LooseEndsGameMode extends GameMode {
+    public static final List<Supplier<ItemStack>> looseEndsItems = new ArrayList<>();
+
+    static {
+        // 防御试剂
+        looseEndsItems.add(() -> {
+            final var defenseVial = BuiltInRegistries.ITEM.get(ResourceLocation.tryParse("noellesroles:defense_vial"));
+            if (defenseVial != Item.byBlock(net.minecraft.world.level.block.Blocks.AIR)) {
+                return defenseVial.getDefaultInstance();
+            }
+            return null;
+        });
+    }
+
     public LooseEndsGameMode(ResourceLocation identifier) {
         super(identifier, 60, 2);
     }
@@ -33,7 +50,7 @@ public class LooseEndsGameMode extends GameMode {
             ItemStack derringer = new ItemStack(TMMItems.DERRINGER);
             ItemStack knife = new ItemStack(TMMItems.KNIFE);
 
-            int cooldown = GameConstants.getInTicks(1, 0);
+            int cooldown = GameConstants.getInTicks(0, 10);
             ItemCooldowns itemCooldownManager = player.getCooldowns();
             itemCooldownManager.addCooldown(TMMItems.DERRINGER, cooldown);
             itemCooldownManager.addCooldown(TMMItems.KNIFE, cooldown);
@@ -41,6 +58,14 @@ public class LooseEndsGameMode extends GameMode {
             player.addItem(new ItemStack(TMMItems.CROWBAR));
             player.addItem(derringer);
             player.addItem(knife);
+
+            // 添加亡命徒模式专属物品
+            for (Supplier<ItemStack> itemSupplier : looseEndsItems) {
+                ItemStack itemStack = itemSupplier.get();
+                if (itemStack != null && !itemStack.isEmpty()) {
+                    player.addItem(itemStack);
+                }
+            }
 
             gameWorldComponent.addRole(player, TMMRoles.LOOSE_END);
 
