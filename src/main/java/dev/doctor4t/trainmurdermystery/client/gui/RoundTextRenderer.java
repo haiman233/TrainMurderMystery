@@ -151,7 +151,7 @@ public class RoundTextRenderer {
                         context.pose().translate(7 + (killers % 2) * 12, 14 + (killers / 2) * 12, 0);
                         killers++;
                     }
-                    final var role1 = TMMClient.gameComponent.getRole(entry.player().getId());
+                    final var role1 = lastRole.get(entry.player().getId());
                     //final var first = TMM.REPLAY_MANAGER.getCurrentReplay().players().stream().filter(replayPlayerInfo -> replayPlayerInfo.uuid().equals(entry.player().getId())).findFirst();
                     if (role1 !=null) {
                         context.pose().pushPose();
