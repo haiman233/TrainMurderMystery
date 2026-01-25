@@ -128,9 +128,15 @@ public abstract class Role {
         return new ArrayList<>();
     }
 
+    /*
+        在HarpyModLoader中使用
+    */
     public List<ItemStack> getDefaultItems() {
         return new ArrayList<>();
     }
+    /*
+    在HarpyModLoader中使用
+    */
     public  void onInit(MinecraftServer server,ServerPlayer serverPlayer){
 
     }

@@ -21,6 +21,14 @@ public class RoleAnnouncementTexts {
         return role;
     }
 
+    public static RoleAnnouncementText getFromName(String name) {
+        for (RoleAnnouncementText role : ROLE_ANNOUNCEMENT_TEXTS.values()) {
+            if (role.getName().equals(name)) {
+                return role;
+            }
+        }
+        return null;
+    }
     // 为现有职业注册公告文本
     static {
         // 为每个注册的角色创建对应的公告文本
