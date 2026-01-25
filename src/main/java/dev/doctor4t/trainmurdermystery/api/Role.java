@@ -224,6 +224,7 @@ public abstract class Role {
 
     public void setCanPickUpRevolver(boolean able) {
         this.ableToPickUpRevolver = able;
+        return this;
     }
 
     public boolean isGambler() {
