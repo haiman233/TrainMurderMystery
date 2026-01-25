@@ -71,7 +71,7 @@ public class RoleMethodDispatcher {
     public static boolean callOnPickupItem(Player player, Item item) {
         Role role = getCurrentRole(player);
         if (role != null) {
-           return role.cantPickupItem(player).test( item);
+           return !role.cantPickupItem(player).test(item);
         }
         return true;
     }
