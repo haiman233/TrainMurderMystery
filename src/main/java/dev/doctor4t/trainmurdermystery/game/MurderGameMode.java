@@ -82,6 +82,42 @@ public class MurderGameMode extends GameMode {
             }
         }
 
+        // 检查场上是否存在亡命徒
+        if (winStatus != GameFunctions.WinStatus.NONE) {
+            boolean hasLooseEndAlive = false;
+            Player lastLooseEnd = null;
+            int looseEndCount = 0;
+
+            for (ServerPlayer player : serverWorld.players()) {
+                if (gameWorldComponent.isRole(player, TMMRoles.LOOSE_END) && !GameFunctions.isPlayerEliminated(player)) {
+                    hasLooseEndAlive = true;
+                    looseEndCount++;
+                    lastLooseEnd = player;
+                }
+            }
+
+            // 如果只有一名亡命徒存活，且没有其他存活玩家，触发亡命徒获胜
+            if (hasLooseEndAlive && looseEndCount == 1 && lastLooseEnd != null) {
+                // 检查是否有其他非亡命徒的存活玩家
+                boolean hasOtherAlive = false;
+                for (ServerPlayer player : serverWorld.players()) {
+                    if (!gameWorldComponent.isRole(player, TMMRoles.LOOSE_END) && !GameFunctions.isPlayerEliminated(player)) {
+                        hasOtherAlive = true;
+                        break;
+                    }
+                }
+                if (!hasOtherAlive) {
+                    winStatus = GameFunctions.WinStatus.LOOSE_END;
+                } else {
+                    // 有其他玩家存活，游戏继续
+                    winStatus = GameFunctions.WinStatus.NONE;
+                }
+            } else if (hasLooseEndAlive) {
+                // 有多个亡命徒或其他情况，游戏继续
+                winStatus = GameFunctions.WinStatus.NONE;
+            }
+        }
+
         // game end on win and display
         if (winStatus != GameFunctions.WinStatus.NONE && gameWorldComponent.getGameStatus() == GameWorldComponent.GameStatus.ACTIVE) {
             GameRoundEndComponent.KEY.get(serverWorld).setRoundEndData(serverWorld.players(), winStatus);
