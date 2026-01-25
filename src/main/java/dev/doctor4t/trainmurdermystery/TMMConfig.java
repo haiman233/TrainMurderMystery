@@ -69,7 +69,7 @@ public class TMMConfig extends MidnightConfig {
 
     
     @Entry(category = "client")
-    public static boolean disableScreenShake = false;
+    public static boolean disableScreenShake = true;
 
     
     @Entry(category = "client")

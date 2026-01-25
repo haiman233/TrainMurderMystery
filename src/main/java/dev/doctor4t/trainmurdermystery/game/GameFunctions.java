@@ -5,6 +5,7 @@ import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.TMMConfig;
 import dev.doctor4t.trainmurdermystery.api.GameMode;
 import dev.doctor4t.trainmurdermystery.api.Role;
+import dev.doctor4t.trainmurdermystery.api.RoleMethodDispatcher;
 import dev.doctor4t.trainmurdermystery.cca.*;
 import dev.doctor4t.trainmurdermystery.compat.TrainVoicePlugin;
 import dev.doctor4t.trainmurdermystery.entity.FirecrackerEntity;
@@ -45,6 +46,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -474,6 +476,7 @@ public class GameFunctions {
     public static void killPlayer(Player victim, boolean spawnBody, @Nullable Player killer, ResourceLocation deathReason) {
         PlayerPsychoComponent component = PlayerPsychoComponent.KEY.get(victim);
 
+        boolean canDeath = true;
         if (victim instanceof ServerPlayer serverVictim) {
             TMM.REPLAY_MANAGER.recordPlayerKill(killer != null ? killer.getUUID() : null, serverVictim.getUUID(), deathReason);
         }
@@ -503,6 +506,7 @@ public class GameFunctions {
             killerStats.incrementTotalKills();
             Role killerRole = gameWorldComponent.getRole(serverKiller);
             if (killerRole != null) {
+                canDeath =  killerRole.onKill(victim, spawnBody, killer, deathReason);
                 killerStats.getOrCreateRoleStats(killerRole.identifier()).incrementKillsAsRole();
                 // 检测是否为友军击杀
                 if (victim instanceof ServerPlayer serverVictim) {
@@ -526,36 +530,28 @@ public class GameFunctions {
             }
         }
         // --- 结束新增统计数据更新逻辑 (击杀者) ---
-    
+
+
+
         // --- 新增统计数据更新逻辑 (受害者) ---
         if (victim instanceof ServerPlayer serverVictim) {
+            Role victimRole = gameWorldComponent.getRole(serverVictim);
+             canDeath = victimRole.onDeath(victim, spawnBody, killer, deathReason);
             PlayerStatsComponent victimStats = PlayerStatsComponent.KEY.get(serverVictim);
             victimStats.incrementTotalDeaths();
-            Role victimRole = gameWorldComponent.getRole(serverVictim);
             if (victimRole != null) {
                 victimStats.getOrCreateRoleStats(victimRole.identifier()).incrementDeathsAsRole();
             }
         }
         // --- 结束新增统计数据更新逻辑 (受害者) ---
-
-        if (victim instanceof ServerPlayer serverPlayerEntity && isPlayerAliveAndSurvival(serverPlayerEntity)) {
+        if (canDeath) {
+            if (victim instanceof ServerPlayer serverPlayerEntity && isPlayerAliveAndSurvival(serverPlayerEntity)) {
             serverPlayerEntity.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
         } else {
             return;
         }
 
-        if (killer != null) {
-            // 任何击杀者都可以补充弹药
-            for (List<ItemStack> list : killer.getInventory().compartments) {
-                for (ItemStack stack : list) {
-                    Boolean used = stack.get(TMMDataComponentTypes.USED);
-                    if (stack.is(TMMItems.DERRINGER) && used != null && used) {
-                        stack.set(TMMDataComponentTypes.USED, false);
-                        killer.playNotifySound(TMMSounds.ITEM_DERRINGER_RELOAD, SoundSource.PLAYERS, 1.0f, 1.0f);
-                    }
-                }
-            }
-        }
+
 
         // 杀手击杀获得金钱奖励
         if (killer != null && GameWorldComponent.KEY.get(killer.level()).canUseKillerFeatures(killer)) {
@@ -563,6 +559,8 @@ public class GameFunctions {
         }
 
         PlayerMoodComponent.KEY.get(victim).reset();
+
+
 
         if (spawnBody) {
             PlayerBodyEntity body = TMMEntities.PLAYER_BODY.create(victim.level());
@@ -579,7 +577,7 @@ public class GameFunctions {
         for (List<ItemStack> list : victim.getInventory().compartments) {
             for (int i = 0; i < list.size(); i++) {
                 ItemStack stack = list.get(i);
-                if (shouldDropOnDeath(stack)) {
+                if (shouldDropOnDeath(stack)  ) {
                     victim.drop(stack, true, false);
                     list.set(i, ItemStack.EMPTY);
                 }
@@ -600,6 +598,7 @@ public class GameFunctions {
         if (!isVoiceChatMissing()) {
             TrainVoicePlugin.addPlayer(victim.getUUID());
         }
+        }
     }
 
 
@@ -609,6 +608,9 @@ public class GameFunctions {
 
     public static boolean isPlayerAliveAndSurvival(Player player) {
         return player != null && !player.isSpectator() && !player.isCreative();
+    }
+    public static boolean isPlayerCreative(Player player) {
+        return player != null && player.isCreative();
     }
 
     public static boolean isPlayerSpectatingOrCreative(Player player) {

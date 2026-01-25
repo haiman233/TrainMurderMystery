@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.*;
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.cca.MapVotingComponent;
 import dev.doctor4t.trainmurdermystery.client.TMMClient;
+import dev.doctor4t.trainmurdermystery.data.MapConfig;
 import dev.doctor4t.trainmurdermystery.voting.MapVotingManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -61,13 +62,25 @@ public class MapSelectorScreen extends Screen {
     private void initMapOptions() {
         mapOptions.clear();
 
-        mapOptions.add(new MapOption("random", Component.translatable("gui.tmm.map_selector.random").getString(), Component.translatable("gui.tmm.map_selector.random.desc").getString(), 0xFF4CC9F0));
-        mapOptions.add(new MapOption("areas1", Component.translatable("gui.tmm.map_selector.zeppelin").getString(), Component.translatable("gui.tmm.map_selector.zeppelin.desc").getString(), 0xFF9D0208));
-        mapOptions.add(new MapOption("areas2", Component.translatable("gui.tmm.map_selector.star_train_v2").getString(), Component.translatable("gui.tmm.map_selector.star_train_v2.desc").getString(), 0xFF70E000));
-        mapOptions.add(new MapOption("areas3", Component.translatable("gui.tmm.map_selector.pirate_ship").getString(), Component.translatable("gui.tmm.map_selector.pirate_ship.desc").getString(), 0xFFF72585));
-        mapOptions.add(new MapOption("areas4", Component.translatable("gui.tmm.map_selector.star_train_expanded").getString(), Component.translatable("gui.tmm.map_selector.star_train_expanded.desc").getString(), 0xFF7209B7));
-        mapOptions.add(new MapOption("areas5", Component.translatable("gui.tmm.map_selector.original").getString(), Component.translatable("gui.tmm.map_selector.original.desc").getString(), 0xFF00B4D8));
-        mapOptions.add(new MapOption("areas6", Component.translatable("gui.tmm.map_selector.wider_train").getString(), Component.translatable("gui.tmm.map_selector.wider_train.desc").getString(), 0xFFF72585));
+        // 从动态配置加载地图选项
+        List<MapConfig.MapEntry> configMaps = MapConfig.getInstance().getMaps();
+        if (configMaps != null) {
+            for (MapConfig.MapEntry entry : configMaps) {
+                mapOptions.add(new MapOption(entry.getId(), 
+                    Component.translatable(entry.getDisplayName()).getString(),
+                    Component.translatable(entry.getDescription()).getString(),
+                    entry.getColor()));
+            }
+        } else {
+            // 如果配置为空，使用默认配置
+            mapOptions.add(new MapOption("random", Component.translatable("gui.tmm.map_selector.random").getString(), Component.translatable("gui.tmm.map_selector.random.desc").getString(), 0xFF4CC9F0));
+            mapOptions.add(new MapOption("areas1", Component.translatable("gui.tmm.map_selector.zeppelin").getString(), Component.translatable("gui.tmm.map_selector.zeppelin.desc").getString(), 0xFF9D0208));
+            mapOptions.add(new MapOption("areas2", Component.translatable("gui.tmm.map_selector.star_train_v2").getString(), Component.translatable("gui.tmm.map_selector.star_train_v2.desc").getString(), 0xFF70E000));
+            mapOptions.add(new MapOption("areas3", Component.translatable("gui.tmm.map_selector.pirate_ship").getString(), Component.translatable("gui.tmm.map_selector.pirate_ship.desc").getString(), 0xFFF72585));
+            mapOptions.add(new MapOption("areas4", Component.translatable("gui.tmm.map_selector.star_train_expanded").getString(), Component.translatable("gui.tmm.map_selector.star_train_expanded.desc").getString(), 0xFF7209B7));
+            mapOptions.add(new MapOption("areas5", Component.translatable("gui.tmm.map_selector.original").getString(), Component.translatable("gui.tmm.map_selector.original.desc").getString(), 0xFF00B4D8));
+            mapOptions.add(new MapOption("areas6", Component.translatable("gui.tmm.map_selector.wider_train").getString(), Component.translatable("gui.tmm.map_selector.wider_train.desc").getString(), 0xFFF72585));
+        }
     }
     
     private void initParticles() {

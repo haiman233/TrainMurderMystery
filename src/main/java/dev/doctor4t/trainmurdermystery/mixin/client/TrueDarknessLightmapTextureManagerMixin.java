@@ -29,7 +29,7 @@ public abstract class TrueDarknessLightmapTextureManagerMixin {
         ClientLevel world = client.level;
 
         if (client.player != null && world != null) {
-            return original.call(instance, new Vector3f(.6f, .6f, .6f), Mth.lerp(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false), TMMClient.prevInstinctLightLevel, TMMClient.instinctLightLevel));
+            return original.call(instance, new Vector3f(.8f, .8f, .8f), Mth.lerp(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false), TMMClient.prevInstinctLightLevel, TMMClient.instinctLightLevel));
         }
 
         return original.call(instance, other, t);

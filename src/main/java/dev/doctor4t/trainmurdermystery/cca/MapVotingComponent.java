@@ -198,7 +198,7 @@ public class MapVotingComponent implements AutoSyncedComponent, CommonTickingCom
         MinecraftServer server = TMM.SERVER;
         if (server != null) {
             Level level = server.overworld();
-            GameWorldComponent gameComponent = GameWorldComponent.KEY.get(level);
+            //GameWorldComponent gameComponent = GameWorldComponent.KEY.get(level);
 
             if (!winningMap.equals("random")) {
                 // 加载对应地图

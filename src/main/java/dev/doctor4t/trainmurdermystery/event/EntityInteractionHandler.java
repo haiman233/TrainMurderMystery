@@ -59,6 +59,9 @@ public class EntityInteractionHandler {
             if (!hand.equals(InteractionHand.OFF_HAND) && hitResult != null) {
                 if (hitResult.getEntity() != null) {
 
+                    // 调用角色的右键点击实体方法
+                    dev.doctor4t.trainmurdermystery.api.RoleMethodDispatcher.callRightClickEntity(player, hitResult.getEntity());
+
                 // 获取实体上的自定义数据
                 String customData = entity.getAttached(EntityDataCommand.ENTITY_CUSTOM_DATA_COMMAND);
                     if (customData != null) {

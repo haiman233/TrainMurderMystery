@@ -125,6 +125,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerSt
 
 		if (!GameFunctions.isPlayerAliveAndSurvival(self) || this.getMainHandItem().is(TMMItems.KNIFE)
 				|| IsPlayerPunchable.EVENT.invoker().gotPunchable(target) || AllowPlayerPunching.EVENT.invoker().allowPunching(self)) {
+			// 在攻击实体之前调用角色的左键点击实体方法
+			dev.doctor4t.trainmurdermystery.api.RoleMethodDispatcher.callLeftClickEntity(self, target);
 			original.call(target);
 		}
 	}

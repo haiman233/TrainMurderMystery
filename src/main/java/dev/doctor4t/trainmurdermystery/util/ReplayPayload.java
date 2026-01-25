@@ -43,7 +43,7 @@ public record ReplayPayload(GameReplay replay) implements CustomPacketPayload {
             String name = buf.readUtf();
             ResourceLocation roleId = buf.readResourceLocation();
 
-            Role role = TMMRoles.ROLES.stream()
+            Role role = TMMRoles.ROLES.values().stream()
                     .filter(r -> r.identifier().equals(roleId))
                     .findFirst()
                     .orElse(TMMRoles.CIVILIAN);

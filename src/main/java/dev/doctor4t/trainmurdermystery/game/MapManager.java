@@ -5,18 +5,19 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.cca.AreasWorldComponent;
+import dev.doctor4t.trainmurdermystery.data.MapConfig;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.AABB;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MapManager {
     private static final Gson gson = new Gson();
@@ -341,6 +342,18 @@ public class MapManager {
      */
     public static boolean loadRandomMap(ServerLevel serverWorld) {
         List<String> availableMaps = getAvailableMaps(serverWorld);
+        availableMaps.removeIf(
+                e-> {
+                    final var first = MapConfig.getInstance().maps.stream().filter(mapEntry -> mapEntry.id.equals(e)).findFirst();
+                    AtomicBoolean isAvailable = new AtomicBoolean(false);
+                    first.ifPresent(
+                    a-> {
+                        isAvailable.set(first.get().maxCount < serverWorld.players().size());
+                    }
+                    );
+                    return isAvailable.get();
+                }
+                );
 
         if (availableMaps.isEmpty()) {
             TMM.LOGGER.warn("No maps available to load randomly");

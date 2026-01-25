@@ -1,28 +1,25 @@
 package dev.doctor4t.trainmurdermystery;
 
 import com.google.common.reflect.Reflection;
-import dev.doctor4t.trainmurdermystery.TMMConfig;
 import dev.doctor4t.trainmurdermystery.api.Role;
+import dev.doctor4t.trainmurdermystery.api.replay.ReplayApiInitializer;
 import dev.doctor4t.trainmurdermystery.block.DoorPartBlock;
 import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.command.*;
-import dev.doctor4t.trainmurdermystery.command.ReloadReadyAreaCommand;
-import dev.doctor4t.trainmurdermystery.command.EntityDataCommand;
 import dev.doctor4t.trainmurdermystery.command.argument.GameModeArgumentType;
 import dev.doctor4t.trainmurdermystery.command.argument.TimeOfDayArgumentType;
-import dev.doctor4t.trainmurdermystery.event.PlayerInteractionHandler;
-import dev.doctor4t.trainmurdermystery.event.EntityInteractionHandler;
+import dev.doctor4t.trainmurdermystery.data.ServerMapConfig;
 import dev.doctor4t.trainmurdermystery.event.AFKEventHandler;
-
+import dev.doctor4t.trainmurdermystery.event.EntityInteractionHandler;
+import dev.doctor4t.trainmurdermystery.event.PlayerInteractionHandler;
 import dev.doctor4t.trainmurdermystery.game.*;
 import dev.doctor4t.trainmurdermystery.index.*;
 import dev.doctor4t.trainmurdermystery.network.*;
-import dev.doctor4t.trainmurdermystery.network.NetworkStatistics;
+
 import dev.doctor4t.trainmurdermystery.util.*;
-import dev.upcraft.datasync.api.DataSyncAPI;
+import dev.doctor4t.trainmurdermystery.voting.MapVotingManager;
 import dev.upcraft.datasync.api.util.Entitlements;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
@@ -31,10 +28,11 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -42,19 +40,22 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dev.doctor4t.trainmurdermystery.api.replay.ReplayApiInitializer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
+
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 public class TMM implements ModInitializer {
     public static final String MOD_ID = "trainmurdermystery";
@@ -100,6 +101,9 @@ public class TMM implements ModInitializer {
                 dev.doctor4t.trainmurdermystery.voting.MapVotingManager.getInstance().tick();
             });
             REPLAY_MANAGER = new GameReplayManager(server);
+            
+            // 当服务器启动时，发送地图配置到所有在线玩家
+            SyncMapConfigPayload.sendToAllPlayers();
         });
 
         // Registry initializers
@@ -200,6 +204,8 @@ public class TMM implements ModInitializer {
             }
         });
 
+        // 注册地图配置同步包
+        PayloadTypeRegistry.playS2C().register(SyncMapConfigPayload.ID, SyncMapConfigPayload.CODEC);
 
         PayloadTypeRegistry.playS2C().register(ShootMuzzleS2CPayload.ID, ShootMuzzleS2CPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(PoisonUtils.PoisonOverlayPayload.ID, PoisonUtils.PoisonOverlayPayload.CODEC);
@@ -228,6 +234,11 @@ public class TMM implements ModInitializer {
             dev.doctor4t.trainmurdermystery.network.VoteForMapPayload.Handler.handle(payload, context.player());
         });
 
+
+        
+        ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
+            SyncMapConfigPayload.sendToPlayer(newPlayer);
+        });
 
         Scheduler.init();
     }

@@ -4,6 +4,7 @@ import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.compat.TrainVoicePlugin;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.game.GameReplayManager;
+import dev.doctor4t.trainmurdermystery.network.SyncMapConfigPayload;
 import net.minecraft.network.Connection;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -27,6 +28,7 @@ public class DecServerJoinPlayer {
 
             }
         }
+        SyncMapConfigPayload.sendToPlayer(serverPlayer);
         gameWorldComponent.setSyncRole( true);
         GameWorldComponent.KEY.syncWith(serverPlayer, (ComponentProvider) serverPlayer.level());
         gameWorldComponent.setSyncRole( false);

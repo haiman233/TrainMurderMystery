@@ -112,7 +112,7 @@ public class ReplayDisplayUtils {
         if (roleId == null) {
             return ChatFormatting.WHITE; // 默认颜色
         }
-        final var first = TMMRoles.ROLES.stream().filter(role -> role.identifier().toString().equals(roleId)).findFirst();
+        final var first = TMMRoles.ROLES.values().stream().filter(role -> role.identifier().toString().equals(roleId)).findFirst();
         if (first.isPresent()){
             final var role = first.get();
             if (role.isInnocent()){

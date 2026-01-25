@@ -136,23 +136,26 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
             this.nextTaskTimer = Math.max(this.nextTaskTimer, 2);
             shouldSync = true;
         }
-        ArrayList<Task> removals = new ArrayList<>();
+        ArrayList<TrainTask> removals = new ArrayList<>();
         for (TrainTask task : this.tasks.values()) {
             task.tick(this.player);
             if (task.isFulfilled(this.player)) {
-                removals.add(task.getType());
+                removals.add(task);
                 this.setMood(this.mood + GameConstants.MOOD_GAIN);
                 if (this.player instanceof ServerPlayer tempPlayer)
                     ServerPlayNetworking.send(tempPlayer, new TaskCompletePayload());
                 shouldSync = true;
             }
         }
-        for (Task task : removals) {
+        for (TrainTask task : removals) {
             this.tasks.remove(task);
             // 更新计分板上的任务计数
             if (this.player instanceof ServerPlayer serverPlayer) {
                 GameScoreboardComponent scoreboardComponent = GameScoreboardComponent.KEY.get(serverPlayer.getServer().getScoreboard());
                 scoreboardComponent.incrementPlayerTaskCount(this.player);
+                
+                // 调用角色的任务完成方法
+                dev.doctor4t.trainmurdermystery.api.RoleMethodDispatcher.callOnFinishQuest(this.player, task.getName());
             }
         }
         if (shouldSync) this.sync();

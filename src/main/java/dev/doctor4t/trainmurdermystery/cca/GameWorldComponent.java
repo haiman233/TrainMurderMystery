@@ -1,5 +1,6 @@
 package dev.doctor4t.trainmurdermystery.cca;
 
+
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.api.GameMode;
 import dev.doctor4t.trainmurdermystery.api.Role;
@@ -7,6 +8,20 @@ import dev.doctor4t.trainmurdermystery.api.TMMGameModes;
 import dev.doctor4t.trainmurdermystery.api.TMMRoles;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
+
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
@@ -19,20 +34,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
+
+// 导入Mth类
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import dev.doctor4t.trainmurdermystery.cca.TMMComponents;
 
 public class GameWorldComponent implements AutoSyncedComponent, ServerTickingComponent, ClientTickingComponent {
     public static final ComponentKey<GameWorldComponent> KEY = ComponentRegistry.getOrCreate(TMM.id("game"), GameWorldComponent.class);
@@ -291,7 +295,7 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
                 this.lastWinStatus = GameFunctions.WinStatus.NONE;
             }
 //        }else {
-            for (Role role : TMMRoles.ROLES) {
+            for (Role role : TMMRoles.ROLES.values()) {
                 this.setRoles(uuidListFromNbt(nbtCompound, role.identifier().toString()), role);
 //            }
             this.setSyncRole(false);
@@ -373,7 +377,7 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
         }
 
         // if not running and spectators or not in lobby reset them
-        if (serverWorld.getGameTime() % 20 == 0) {
+        if (serverWorld.getServer().getTickCount() % 20 == 0) {
             for (ServerPlayer player : serverWorld.players()) {
                 if (!isRunning() && (player.isSpectator() && serverWorld.getServer().getProfilePermissions(player.getGameProfile()) < 2 || (GameFunctions.isPlayerAliveAndSurvival(player) && areas.playArea.contains(player.position())))) {
                     GameFunctions.resetPlayer(player);
@@ -408,6 +412,9 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
                         if (GameWorldComponent.KEY.get(world).getRole(player) == null) {
                             player.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
                         }
+                        
+                        // 调用角色的服务器端tick方法
+                        dev.doctor4t.trainmurdermystery.api.RoleMethodDispatcher.callServerTick(player);
                     }
                 }
 
@@ -457,5 +464,4 @@ public class GameWorldComponent implements AutoSyncedComponent, ServerTickingCom
             gameMode.tickCommonGameLoop();
         }
     }
-
 }

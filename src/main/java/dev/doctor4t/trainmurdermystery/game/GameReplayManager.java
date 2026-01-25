@@ -393,7 +393,7 @@ public class GameReplayManager {
                 String roleId = entry.getValue();
                 if (roleId == null) continue; // 跳过空的角色ID
                 boolean isDead = deadPlayers.contains(uuid);
-                final var first = TMMRoles.ROLES.stream().filter(role -> role.identifier().toString().equals(roleId)).findFirst();
+                final var first = TMMRoles.ROLES.values().stream().filter(role -> role.identifier().toString().equals(roleId)).findFirst();
                 // 根据角色ID分类
                 if (first.isPresent()&& first.get().isInnocent()) {
                     if (isDead) {
