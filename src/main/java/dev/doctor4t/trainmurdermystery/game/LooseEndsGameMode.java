@@ -50,7 +50,7 @@ public class LooseEndsGameMode extends GameMode {
             ItemStack derringer = new ItemStack(TMMItems.DERRINGER);
             ItemStack knife = new ItemStack(TMMItems.KNIFE);
 
-            int cooldown = GameConstants.getInTicks(1, 0);
+            int cooldown = GameConstants.getInTicks(0, 10);
             ItemCooldowns itemCooldownManager = player.getCooldowns();
             itemCooldownManager.addCooldown(TMMItems.DERRINGER, cooldown);
             itemCooldownManager.addCooldown(TMMItems.KNIFE, cooldown);
