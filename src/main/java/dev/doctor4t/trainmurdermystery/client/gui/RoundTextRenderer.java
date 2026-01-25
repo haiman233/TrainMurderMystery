@@ -42,6 +42,7 @@ public class RoundTextRenderer {
     private static int targets = 0;
     private static int endTime = 0;
 
+    public static Map<UUID,Role> lastRole = new HashMap<>();
     @SuppressWarnings("IntegerDivisionInFloatingPointContext")
     public static void renderHud(Font renderer, LocalPlayer player, @NotNull GuiGraphics context) {
         boolean isLooseEnds = GameWorldComponent.KEY.get(player.level()).getGameMode() == TMMGameModes.LOOSE_ENDS;
@@ -150,11 +151,14 @@ public class RoundTextRenderer {
                         context.pose().translate(7 + (killers % 2) * 12, 14 + (killers / 2) * 12, 0);
                         killers++;
                     }
-                    final var role1 = TMMClient.gameComponent.getRole(entry.player().getId());
+                    final var role1 = lastRole.get(entry.player().getId());
                     //final var first = TMM.REPLAY_MANAGER.getCurrentReplay().players().stream().filter(replayPlayerInfo -> replayPlayerInfo.uuid().equals(entry.player().getId())).findFirst();
                     if (role1 !=null) {
-
-                        context.drawString(renderer, Component.translatable("announcement.role."+role1.getIdentifier().getPath()), 0, 4, role1.getColor(), false);
+                        context.pose().pushPose();
+                        context.pose().scale(0.5f, 0.5f, 1f);
+                        context.pose().translate(0, 4, 0);
+                        context.drawString(renderer, Component.translatable("announcement.role."+role1.getIdentifier().getPath()), 0, 0, role1.getColor(), false);
+                        context.pose().popPose();
                     }else {
                    //     context.drawText(renderer, player.getName(), 0, 4, 0xFFFFFF, false);
                     }

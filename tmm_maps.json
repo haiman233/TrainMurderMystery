@@ -1,0 +1,60 @@
+{
+  "maps": [
+    {
+      "id": "random",
+      "displayName": "gui.tmm.map_selector.random",
+      "maxcount": 100,
+      "description": "gui.tmm.map_selector.random.desc",
+      "color": "0xFF4CC9F0"
+    },
+    {
+      "id": "areas1",
+      "displayName": "gui.tmm.map_selector.zeppelin",
+      "maxcount": 100,
+      "description": "gui.tmm.map_selector.zeppelin.desc",
+      "color": "0xFF9D0208"
+    },
+    {
+      "id": "areas2",
+      "displayName": "gui.tmm.map_selector.star_train_v2",
+      "maxcount": 100,
+      "description": "gui.tmm.map_selector.star_train_v2.desc",
+      "color": "0xFF70E000"
+    },
+    {
+      "id": "areas3",
+      "displayName": "gui.tmm.map_selector.pirate_ship",
+      "maxcount": 100,
+      "description": "gui.tmm.map_selector.pirate_ship.desc",
+      "color": "0xFFF72585"
+    },
+    {
+      "id": "areas4",
+      "displayName": "gui.tmm.map_selector.star_train_expanded",
+      "maxcount": 100,
+      "description": "gui.tmm.map_selector.star_train_expanded.desc",
+      "color": "0xFF7209B7"
+    },
+    {
+      "id": "areas5",
+      "displayName": "gui.tmm.map_selector.original",
+      "maxcount": 12,
+      "description": "gui.tmm.map_selector.original.desc",
+      "color": "0xFF00B4D8"
+    },
+    {
+      "id": "areas6",
+      "displayName": "gui.tmm.map_selector.wider_train",
+      "maxcount": 100,
+      "description": "gui.tmm.map_selector.wider_train.desc",
+      "color": "0xFFF72585"
+    },
+    {
+      "id": "areas7",
+      "displayName": "gui.tmm.map_selector.sky_village",
+      "maxcount": 100,
+      "description": "gui.tmm.map_selector.sky_village.desc",
+      "color": "0xFF0077B6"
+    }
+  ]
+}

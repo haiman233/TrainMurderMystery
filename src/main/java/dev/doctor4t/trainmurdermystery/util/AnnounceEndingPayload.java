@@ -1,6 +1,8 @@
 package dev.doctor4t.trainmurdermystery.util;
 
 import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
+import dev.doctor4t.trainmurdermystery.client.TMMClient;
 import dev.doctor4t.trainmurdermystery.client.gui.RoundTextRenderer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
@@ -21,6 +23,11 @@ public record AnnounceEndingPayload() implements CustomPacketPayload {
         @Override
         public void receive(@NotNull AnnounceEndingPayload payload, ClientPlayNetworking.@NotNull Context context) {
             RoundTextRenderer.startEnd();
+            final var gameComponent = TMMClient.gameComponent;
+            if (gameComponent != null) {
+                RoundTextRenderer.lastRole.putAll(gameComponent.getRoles());
+            }
+
         }
     }
 }

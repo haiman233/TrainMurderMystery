@@ -15,7 +15,7 @@ public class ServerMapConfig {
     private static ServerMapConfig instance;
     
     private List<MapConfig.MapEntry> maps;
-    private final Path configPath = Paths.get("config", "tmm_maps.json");
+    private final Path configPath = Paths.get("world", "tmm_maps.json");
     
     public static synchronized ServerMapConfig getInstance() {
         if (instance == null) {

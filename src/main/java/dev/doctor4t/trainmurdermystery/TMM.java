@@ -153,6 +153,7 @@ public class TMM implements ModInitializer {
             ShowStatsCommand.register(dispatcher);
             ShowSelectedMapUICommand.register(dispatcher);
             NetworkStatsCommand.register(dispatcher);
+            ReloadMapConfigCommand.register(dispatcher);
         }));
 
 //        // server lock to supporters
