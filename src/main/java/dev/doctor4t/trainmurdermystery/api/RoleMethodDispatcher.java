@@ -160,10 +160,10 @@ public class RoleMethodDispatcher {
     /**
      * 调用玩家角色的 onPressAbilityKey 方法
      */
-    public static void callOnPressAbilityKey(Player player) {
-        Role role = getCurrentRole(player);
+    public static void callOnPressAbilityKey(Minecraft client) {
+        Role role = getCurrentRole(client.player);
         if (role != null) {
-            role.onPressAbilityKey(player);
+            role.onPressAbilityKey(client);
         }
     }
 
