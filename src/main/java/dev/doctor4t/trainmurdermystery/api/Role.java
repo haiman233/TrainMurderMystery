@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import dev.doctor4t.trainmurdermystery.util.ShopEntry;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -217,7 +218,7 @@ public abstract class Role {
     /**
      * 在按下技能键G时触发（请补充调用callOnPressAbilityKey）
      */
-    public void onPressAbilityKey(Player player) {
+    public void onPressAbilityKey(Minecraft client) {
     }
 
     private ComponentKey<? extends RoleComponent> componentKey;
