@@ -2,6 +2,7 @@ package dev.doctor4t.trainmurdermystery.cca;
 
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.api.Role;
+import dev.doctor4t.trainmurdermystery.api.RoleComponent;
 import dev.doctor4t.trainmurdermystery.client.TMMClient;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
 import dev.doctor4t.trainmurdermystery.game.ShopContent;
@@ -21,13 +22,12 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.ladysnake.cca.api.v3.component.ComponentRegistry;
-import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 import org.ladysnake.cca.api.v3.component.tick.ClientTickingComponent;
 import org.ladysnake.cca.api.v3.component.tick.ServerTickingComponent;
 
 import java.util.List;
 
-public class PlayerShopComponent implements AutoSyncedComponent, ServerTickingComponent, ClientTickingComponent {
+public class PlayerShopComponent implements RoleComponent, ServerTickingComponent, ClientTickingComponent {
     public static final ComponentKey<PlayerShopComponent> KEY = ComponentRegistry.getOrCreate(TMM.id("shop"), PlayerShopComponent.class);
     private final Player player;
     public int balance = 0;
@@ -36,10 +36,16 @@ public class PlayerShopComponent implements AutoSyncedComponent, ServerTickingCo
         this.player = player;
     }
 
+    @Override
+    public Player getPlayer() {
+        return this.player;
+    }
+
     public void sync() {
         KEY.sync(this.player);
     }
 
+    @Override
     public void reset() {
         this.balance = 0;
         this.sync();

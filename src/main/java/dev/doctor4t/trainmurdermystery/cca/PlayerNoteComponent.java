@@ -1,15 +1,15 @@
 package dev.doctor4t.trainmurdermystery.cca;
 
 import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.api.RoleComponent;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.ladysnake.cca.api.v3.component.ComponentRegistry;
-import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 
-public class PlayerNoteComponent implements AutoSyncedComponent {
+public class PlayerNoteComponent implements RoleComponent {
     public static final ComponentKey<PlayerNoteComponent> KEY = ComponentRegistry.getOrCreate(TMM.id("note"), PlayerNoteComponent.class);
     public final Player player;
     public String[] text = new String[]{"", "", "", ""};
@@ -19,10 +19,16 @@ public class PlayerNoteComponent implements AutoSyncedComponent {
         this.player = player;
     }
 
+    @Override
+    public Player getPlayer() {
+        return this.player;
+    }
+
     public void sync() {
         KEY.sync(this.player);
     }
 
+    @Override
     public void reset() {
         this.text = new String[]{"", "", "", ""};
         this.written = false;

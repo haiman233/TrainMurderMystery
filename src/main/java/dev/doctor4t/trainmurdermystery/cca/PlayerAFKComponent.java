@@ -2,6 +2,7 @@ package dev.doctor4t.trainmurdermystery.cca;
 
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.TMMConfig;
+import dev.doctor4t.trainmurdermystery.api.RoleComponent;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -10,10 +11,9 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.ladysnake.cca.api.v3.component.ComponentRegistry;
-import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 import org.ladysnake.cca.api.v3.component.tick.ServerTickingComponent;
 
-public class PlayerAFKComponent implements AutoSyncedComponent, ServerTickingComponent {
+public class PlayerAFKComponent implements RoleComponent, ServerTickingComponent {
     public static final ComponentKey<PlayerAFKComponent> KEY = ComponentRegistry.getOrCreate(TMM.id("afk"), PlayerAFKComponent.class);
     private final Player player;
     private int afkTime = 0; // 挂机时间（刻）
@@ -26,12 +26,22 @@ public class PlayerAFKComponent implements AutoSyncedComponent, ServerTickingCom
         this.afkTime = 0;
         this.isAFK = false;
     }
+
+    @Override
+    public Player getPlayer() {
+        return this.player;
+    }
     @Override
     public boolean shouldSyncWith(ServerPlayer player) {
         return player == this.player;
     }
     public void sync() {
         KEY.sync(this.player);
+    }
+
+    @Override
+    public void reset() {
+        this.resetAFKTimer();
     }
 
     public void resetAFKTimer() {

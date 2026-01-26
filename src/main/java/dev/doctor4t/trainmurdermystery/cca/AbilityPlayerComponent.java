@@ -1,6 +1,7 @@
 package dev.doctor4t.trainmurdermystery.cca;
 
 import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.api.RoleComponent;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -8,7 +9,6 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.ladysnake.cca.api.v3.component.ComponentRegistry;
-import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 import org.ladysnake.cca.api.v3.component.tick.ClientTickingComponent;
 import org.ladysnake.cca.api.v3.component.tick.ServerTickingComponent;
 
@@ -23,7 +23,7 @@ import org.ladysnake.cca.api.v3.component.tick.ServerTickingComponent;
  * - 技能使用次数限制
  * - 自动同步到客户端（用于 HUD 显示）
  */
-public class AbilityPlayerComponent implements AutoSyncedComponent, ServerTickingComponent, ClientTickingComponent {
+public class AbilityPlayerComponent implements RoleComponent, ServerTickingComponent, ClientTickingComponent {
 
     @Override
     public boolean shouldSyncWith(ServerPlayer player) {
@@ -50,11 +50,17 @@ public class AbilityPlayerComponent implements AutoSyncedComponent, ServerTickin
     public AbilityPlayerComponent(Player player) {
         this.player = player;
     }
-    
+
+    @Override
+    public Player getPlayer() {
+        return this.player;
+    }
+
     /**
      * 重置组件状态
      * 在游戏开始时或角色分配时调用
      */
+    @Override
     public void reset() {
         this.cooldown = 0;
         this.charges = -1;

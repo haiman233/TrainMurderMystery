@@ -1,12 +1,12 @@
 package dev.doctor4t.trainmurdermystery.cca;
 
 import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.api.RoleComponent;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import org.jetbrains.annotations.NotNull;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.ladysnake.cca.api.v3.component.ComponentRegistry;
-import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 import org.ladysnake.cca.api.v3.component.tick.ClientTickingComponent;
 import org.ladysnake.cca.api.v3.component.tick.ServerTickingComponent;
 
@@ -18,7 +18,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Player;
 
-public class PlayerPoisonComponent implements AutoSyncedComponent, ServerTickingComponent, ClientTickingComponent {
+public class PlayerPoisonComponent implements RoleComponent, ServerTickingComponent, ClientTickingComponent {
     public static final ComponentKey<PlayerPoisonComponent> KEY = ComponentRegistry.getOrCreate(TMM.id("poison"), PlayerPoisonComponent.class);
     public static final Tuple<Integer, Integer> clampTime = new Tuple<>(800, 1400);
     private final Player player;
@@ -33,10 +33,16 @@ public class PlayerPoisonComponent implements AutoSyncedComponent, ServerTicking
         this.player = player;
     }
 
+    @Override
+    public Player getPlayer() {
+        return this.player;
+    }
+
     public void sync() {
         KEY.sync(this.player);
     }
 
+    @Override
     public void reset() {
         this.poisonTicks = -1;
         this.poisonPulseCooldown = 0;
