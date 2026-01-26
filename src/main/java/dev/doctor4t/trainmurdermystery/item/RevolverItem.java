@@ -27,15 +27,14 @@ public class RevolverItem extends Item {
         super(settings.durability(4)); // 设置最大耐久度为4
     }
 
-
     @Override
     public InteractionResultHolder<ItemStack> use(@NotNull Level world, @NotNull Player user, InteractionHand hand) {
         ItemStack stack = user.getItemInHand(hand);
 
         // 检查物品是否已经损坏（耐久度为0）
-//        if (stack.getDamage() >= stack.getMaxDamage()-1) {
-//            return TypedActionResult.fail(stack);
-//        }
+        // if (stack.getDamage() >= stack.getMaxDamage()-1) {
+        // return TypedActionResult.fail(stack);
+        // }
 
         if (world.isClientSide) {
             final var gameComponent = TMMClient.gameComponent;
@@ -58,10 +57,10 @@ public class RevolverItem extends Item {
             spawnHandParticle();
         } else {
             // 在服务端消耗耐久度
-//            stack.setDamage(stack.getDamage() + 1);
+            // stack.setDamage(stack.getDamage() + 1);
             GameWorldComponent gameWorldComponent = GameWorldComponent.KEY.get(world);
             final var role = gameWorldComponent.getRole(user);
-            if (role!=null) {
+            if (role != null) {
                 if (!role.onUseGun(user)) {
                     return InteractionResultHolder.fail(stack);
                 }
@@ -85,6 +84,7 @@ public class RevolverItem extends Item {
     }
 
     public static HitResult getGunTarget(Player user) {
-        return ProjectileUtil.getHitResultOnViewVector(user, entity -> entity instanceof Player player && GameFunctions.isPlayerAliveAndSurvival(player), 15f);
+        return ProjectileUtil.getHitResultOnViewVector(user,
+                entity -> entity instanceof Player player && GameFunctions.isPlayerAliveAndSurvival(player), 15f);
     }
 }

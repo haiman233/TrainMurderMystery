@@ -35,7 +35,17 @@ public class DerringerItem extends RevolverItem {
         ItemStack stack = user.getItemInHand(hand);
         boolean used = stack.getOrDefault(TMMDataComponentTypes.USED, false);
 
+
         if (world.isClientSide) {
+            final var gameComponent = TMMClient.gameComponent;
+            if (gameComponent != null) {
+                final var role = gameComponent.getRole(user);
+                if (role != null) {
+                    if (!role.onUseDerringer(user)) {
+                        return InteractionResultHolder.fail(stack);
+                    }
+                }
+            }
             HitResult collision = getGunTarget(user);
             if (collision instanceof EntityHitResult entityHitResult) {
                 Entity target = entityHitResult.getEntity();
@@ -49,6 +59,16 @@ public class DerringerItem extends RevolverItem {
                 if (!world.isClientSide) {
                     if (TMM.REPLAY_MANAGER != null) {
                         TMM.REPLAY_MANAGER.recordItemUse(user.getUUID(), BuiltInRegistries.ITEM.getKey(this));
+                    }
+                }
+            }
+        } else {
+            final var gameComponent = TMMClient.gameComponent;
+            if (gameComponent != null) {
+                final var role = gameComponent.getRole(user);
+                if (role != null) {
+                    if (!role.onUseDerringer(user)) {
+                        return InteractionResultHolder.fail(stack);
                     }
                 }
             }

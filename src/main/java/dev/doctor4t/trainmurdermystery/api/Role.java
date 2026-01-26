@@ -2,6 +2,7 @@ package dev.doctor4t.trainmurdermystery.api;
 
 import dev.doctor4t.trainmurdermystery.cca.AbilityPlayerComponent;
 import dev.doctor4t.trainmurdermystery.client.gui.screen.ingame.LimitedInventoryScreen;
+import dev.doctor4t.trainmurdermystery.index.TMMItems;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -142,6 +143,15 @@ public abstract class Role {
     }
 
     /**
+     * 在使用德林加手枪时触发。
+     * 
+     * @return 返回true继续执行，返回false不允许使用枪。
+     */
+    public boolean onUseDerringer(Player player) {
+        return true;
+    }
+
+    /**
      * 在使用枪枪中人时触发。
      * 
      * @return 返回true继续执行，返回false终止。
@@ -185,8 +195,9 @@ public abstract class Role {
     public static AbilityPlayerComponent getCooldownComponent(Player player) {
         return AbilityPlayerComponent.KEY.get(player);
     }
-    public void onAbilityUse(Player player){
-        
+
+    public void onAbilityUse(Player player) {
+
     }
 
     /**
