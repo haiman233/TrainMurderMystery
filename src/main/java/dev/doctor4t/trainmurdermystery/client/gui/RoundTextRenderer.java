@@ -41,7 +41,8 @@ public class RoundTextRenderer {
     private static int targets = 0;
     private static int endTime = 0;
 
-    public static Map<UUID,Role> lastRole = new HashMap<>();
+    public static Map<UUID, Role> lastRole = new HashMap<>();
+
     @SuppressWarnings("IntegerDivisionInFloatingPointContext")
     public static void renderHud(Font renderer, LocalPlayer player, @NotNull GuiGraphics context) {
         boolean isLooseEnds = GameWorldComponent.KEY.get(player.level()).getGameMode() == TMMGameModes.LOOSE_ENDS;
@@ -53,33 +54,41 @@ public class RoundTextRenderer {
             context.pose().scale(2.6f, 2.6f, 1f);
             int color = isLooseEnds ? 0x9F0000 : 0xFFFFFF;
             if (welcomeTime <= 180) {
-                Component welcomeText = isLooseEnds ? Component.translatable("announcement.loose_ends.welcome") : role.welcomeText;
+                Component welcomeText = isLooseEnds ? Component.translatable("announcement.loose_ends.welcome")
+                        : role.welcomeText;
                 context.drawString(renderer, welcomeText, -renderer.width(welcomeText) / 2, -12, color);
             }
             context.pose().popPose();
             context.pose().pushPose();
             context.pose().scale(1.2f, 1.2f, 1f);
             if (welcomeTime <= 120) {
-                Component premiseText = isLooseEnds ? Component.translatable("announcement.loose_ends.premise") : role.premiseText.apply(killers);
+                Component premiseText = isLooseEnds ? Component.translatable("announcement.loose_ends.premise")
+                        : role.premiseText.apply(killers);
                 context.drawString(renderer, premiseText, -renderer.width(premiseText) / 2, 0, color);
             }
             context.pose().popPose();
             context.pose().pushPose();
             context.pose().scale(1f, 1f, 1f);
             if (welcomeTime <= 60) {
-                Component goalText = isLooseEnds ? Component.translatable("announcement.loose_ends.goal") : role.goalText.apply(targets);
+                Component goalText = isLooseEnds ? Component.translatable("announcement.loose_ends.goal")
+                        : role.goalText.apply(targets);
                 context.drawString(renderer, goalText, -renderer.width(goalText) / 2, 14, color);
             }
             context.pose().popPose();
             context.pose().popPose();
         }
         GameWorldComponent game = GameWorldComponent.KEY.get(player.level());
-        if (endTime > 0 && endTime < END_DURATION - (GameConstants.FADE_TIME * 2) && !game.isRunning() && game.getGameMode() != TMMGameModes.DISCOVERY) {
+        if (endTime > 0 && endTime < END_DURATION - (GameConstants.FADE_TIME * 2) && !game.isRunning()
+                && game.getGameMode() != TMMGameModes.DISCOVERY) {
             GameRoundEndComponent roundEnd = GameRoundEndComponent.KEY.get(player.level());
-            if (roundEnd.getWinStatus() == GameFunctions.WinStatus.NONE) return;
-            Player winner = player.level().getPlayerByUUID(game.getLooseEndWinner() == null ? UUID.randomUUID() : game.getLooseEndWinner());
-            Component endText = role.getEndText(roundEnd.getWinStatus(), winner == null ? Component.empty() : winner.getDisplayName());
-            if (endText == null) return;
+            if (roundEnd.getWinStatus() == GameFunctions.WinStatus.NONE)
+                return;
+            Player winner = player.level()
+                    .getPlayerByUUID(game.getLooseEndWinner() == null ? UUID.randomUUID() : game.getLooseEndWinner());
+            Component endText = role.getEndText(roundEnd.getWinStatus(),
+                    winner == null ? Component.empty() : winner.getDisplayName());
+            if (endText == null)
+                return;
             context.pose().pushPose();
             context.pose().translate(context.guiWidth() / 2f, context.guiHeight() / 2f - 40, 0);
             context.pose().pushPose();
@@ -88,11 +97,13 @@ public class RoundTextRenderer {
             context.pose().popPose();
             context.pose().pushPose();
             context.pose().scale(1.2f, 1.2f, 1f);
-            MutableComponent winMessage = Component.translatable("game.win." + roundEnd.getWinStatus().name().toLowerCase().toLowerCase());
+            MutableComponent winMessage = Component
+                    .translatable("game.win." + roundEnd.getWinStatus().name().toLowerCase().toLowerCase());
             context.drawString(renderer, winMessage, -renderer.width(winMessage) / 2, -4, 0xFFFFFF);
             context.pose().popPose();
             if (isLooseEnds) {
-                context.drawString(renderer, RoleAnnouncementTexts.LOOSE_END.titleText, -renderer.width(RoleAnnouncementTexts.LOOSE_END.titleText) / 2, 14, 0xFFFFFF);
+                context.drawString(renderer, RoleAnnouncementTexts.LOOSE_END.titleText,
+                        -renderer.width(RoleAnnouncementTexts.LOOSE_END.titleText) / 2, 14, 0xFFFFFF);
                 int looseEnds = 0;
                 for (GameRoundEndComponent.RoundEndData entry : roundEnd.players) {
                     context.pose().pushPose();
@@ -103,15 +114,16 @@ public class RoundTextRenderer {
                     if (playerEntry != null && playerEntry.getSkin().texture() != null) {
                         ResourceLocation texture = playerEntry.getSkin().texture();
 
-
                         RenderSystem.enableBlend();
                         context.pose().pushPose();
                         context.pose().translate(8, 0, 0);
                         float offColour = entry.wasDead() ? 0.4f : 1f;
-                        context.innerBlit(texture, 0, 8, 0, 8, 0, 8 / 64f, 16 / 64f, 8 / 64f, 16 / 64f, 1f, offColour, offColour, 1f);
+                        context.innerBlit(texture, 0, 8, 0, 8, 0, 8 / 64f, 16 / 64f, 8 / 64f, 16 / 64f, 1f, offColour,
+                                offColour, 1f);
                         context.pose().translate(-0.5, -0.5, 0);
                         context.pose().scale(1.125f, 1.125f, 1f);
-                        context.innerBlit(texture, 0, 8, 0, 8, 0, 40 / 64f, 48 / 64f, 8 / 64f, 16 / 64f, 1f, offColour, offColour, 1f);
+                        context.innerBlit(texture, 0, 8, 0, 8, 0, 40 / 64f, 48 / 64f, 8 / 64f, 16 / 64f, 1f, offColour,
+                                offColour, 1f);
                         context.pose().popPose();
                     }
                     if (entry.wasDead()) {
@@ -126,10 +138,15 @@ public class RoundTextRenderer {
             } else {
                 int vigilanteTotal = 1;
                 for (GameRoundEndComponent.RoundEndData entry : roundEnd.players)
-                    if (entry.role() == RoleAnnouncementTexts.VIGILANTE) vigilanteTotal += 1;
-                context.drawString(renderer, RoleAnnouncementTexts.CIVILIAN.titleText, -renderer.width(RoleAnnouncementTexts.CIVILIAN.titleText) / 2 - 60, 14, 0xFFFFFF);
-                context.drawString(renderer, RoleAnnouncementTexts.VIGILANTE.titleText, -renderer.width(RoleAnnouncementTexts.VIGILANTE.titleText) / 2 + 50, 14, 0xFFFFFF);
-                context.drawString(renderer, RoleAnnouncementTexts.KILLER.titleText, -renderer.width(RoleAnnouncementTexts.KILLER.titleText) / 2 + 50, 14 + 16 + 24 * ((vigilanteTotal) / 2), 0xFFFFFF);
+                    if (entry.role() == RoleAnnouncementTexts.VIGILANTE)
+                        vigilanteTotal += 1;
+                context.drawString(renderer, RoleAnnouncementTexts.CIVILIAN.titleText,
+                        -renderer.width(RoleAnnouncementTexts.CIVILIAN.titleText) / 2 - 60, 14, 0xFFFFFF);
+                context.drawString(renderer, RoleAnnouncementTexts.VIGILANTE.titleText,
+                        -renderer.width(RoleAnnouncementTexts.VIGILANTE.titleText) / 2 + 50, 14, 0xFFFFFF);
+                context.drawString(renderer, RoleAnnouncementTexts.KILLER.titleText,
+                        -renderer.width(RoleAnnouncementTexts.KILLER.titleText) / 2 + 50,
+                        14 + 16 + 24 * ((vigilanteTotal) / 2), 0xFFFFFF);
                 int civilians = 0;
                 int vigilantes = 0;
                 int killers = 0;
@@ -137,17 +154,18 @@ public class RoundTextRenderer {
                     context.pose().pushPose();
                     context.pose().scale(2f, 2f, 1f);
 
-
-                if (entry.role()==null)continue;
-                    if ( Objects.equals(entry.role().getName(), RoleAnnouncementTexts.CIVILIAN.getName())) {
+                    if (entry.role() == null)
+                        continue;
+                    if (Objects.equals(entry.role().getName(), RoleAnnouncementTexts.CIVILIAN.getName())) {
                         context.pose().translate(-60 + (civilians % 4) * 12, 14 + (civilians / 4) * 12, 0);
                         civilians++;
                     } else {
-                        final var first = RoleAnnouncementTexts.ROLE_ANNOUNCEMENT_TEXTS.entrySet().stream().filter(role -> role.getValue().getName().equals(entry.role().getName())).findFirst();
-                        if (first.isPresent() ){
+                        final var first = RoleAnnouncementTexts.ROLE_ANNOUNCEMENT_TEXTS.entrySet().stream()
+                                .filter(role -> role.getValue().getName().equals(entry.role().getName())).findFirst();
+                        if (first.isPresent()) {
                             final var role1 = TMMRoles.ROLES.get(first.get().getKey());
-                            if (role1!=null) {
-                                if ( role1.isInnocent()) {
+                            if (role1 != null) {
+                                if (role1.isInnocent()) {
                                     context.pose().translate(7 + (vigilantes % 2) * 12, 14 + (vigilantes / 2) * 12, 0);
                                     vigilantes++;
                                 } else if (role1.canUseKiller()) {
@@ -159,15 +177,19 @@ public class RoundTextRenderer {
                         }
                     }
                     final var role1 = lastRole.get(entry.player().getId());
-                    //final var first = TMM.REPLAY_MANAGER.getCurrentReplay().players().stream().filter(replayPlayerInfo -> replayPlayerInfo.uuid().equals(entry.player().getId())).findFirst();
-                    if (role1 !=null) {
+                    // final var first =
+                    // TMM.REPLAY_MANAGER.getCurrentReplay().players().stream().filter(replayPlayerInfo
+                    // -> replayPlayerInfo.uuid().equals(entry.player().getId())).findFirst();
+                    if (role1 != null) {
                         context.pose().pushPose();
                         context.pose().scale(0.5f, 0.5f, 1f);
                         context.pose().translate(7, 14, 200);
-                        context.drawString(renderer, Component.translatable("announcement.role."+role1.getIdentifier().getPath()), 0, 0, role1.getColor(), false);
+                        context.drawString(renderer,
+                                Component.translatable("announcement.role." + role1.getIdentifier().getPath()), 0, 0,
+                                role1.getColor(), false);
                         context.pose().popPose();
-                    }else {
-                   //     context.drawText(renderer, player.getName(), 0, 4, 0xFFFFFF, false);
+                    } else {
+                        // context.drawText(renderer, player.getName(), 0, 4, 0xFFFFFF, false);
                     }
                     PlayerInfo playerListEntry = TMMClient.PLAYER_ENTRIES_CACHE.get(entry.player().getId());
                     if (playerListEntry != null) {
@@ -178,10 +200,12 @@ public class RoundTextRenderer {
                             context.pose().pushPose();
                             context.pose().translate(8, 0, 0);
                             float offColour = entry.wasDead() ? 0.4f : 1f;
-                            context.innerBlit(texture, 0, 8, 0, 8, 0, 8 / 64f, 16 / 64f, 8 / 64f, 16 / 64f, 1f, offColour, offColour, 1f);
+                            context.innerBlit(texture, 0, 8, 0, 8, 0, 8 / 64f, 16 / 64f, 8 / 64f, 16 / 64f, 1f,
+                                    offColour, offColour, 1f);
                             context.pose().translate(-0.5, -0.5, 0);
                             context.pose().scale(1.125f, 1.125f, 1f);
-                            context.innerBlit(texture, 0, 8, 0, 8, 0, 40 / 64f, 48 / 64f, 8 / 64f, 16 / 64f, 1f, offColour, offColour, 1f);
+                            context.innerBlit(texture, 0, 8, 0, 8, 0, 40 / 64f, 48 / 64f, 8 / 64f, 16 / 64f, 1f,
+                                    offColour, offColour, 1f);
                             context.pose().popPose();
                         }
                         if (entry.wasDead()) {
@@ -199,29 +223,36 @@ public class RoundTextRenderer {
     }
 
     public static void tick() {
-        if (Minecraft.getInstance().level != null && GameWorldComponent.KEY.get(Minecraft.getInstance().level).getGameMode() != TMMGameModes.DISCOVERY) {
+        if (Minecraft.getInstance().level != null
+                && GameWorldComponent.KEY.get(Minecraft.getInstance().level).getGameMode() != TMMGameModes.DISCOVERY) {
             LocalPlayer player = Minecraft.getInstance().player;
             if (welcomeTime > 0) {
                 switch (welcomeTime) {
                     case 200 -> {
                         if (player != null)
-                            player.level().playSeededSound(player, player.getX(), player.getY(), player.getZ(), TMMSounds.UI_RISER, SoundSource.MASTER, 10f, 1f, player.getRandom().nextLong());
+                            player.level().playSeededSound(player, player.getX(), player.getY(), player.getZ(),
+                                    TMMSounds.UI_RISER, SoundSource.MASTER, 10f, 1f, player.getRandom().nextLong());
                     }
                     case 180 -> {
                         if (player != null)
-                            player.level().playSeededSound(player, player.getX(), player.getY(), player.getZ(), TMMSounds.UI_PIANO, SoundSource.MASTER, 10f, 1.25f, player.getRandom().nextLong());
+                            player.level().playSeededSound(player, player.getX(), player.getY(), player.getZ(),
+                                    TMMSounds.UI_PIANO, SoundSource.MASTER, 10f, 1.25f, player.getRandom().nextLong());
                     }
                     case 120 -> {
                         if (player != null)
-                            player.level().playSeededSound(player, player.getX(), player.getY(), player.getZ(), TMMSounds.UI_PIANO, SoundSource.MASTER, 10f, 1.5f, player.getRandom().nextLong());
+                            player.level().playSeededSound(player, player.getX(), player.getY(), player.getZ(),
+                                    TMMSounds.UI_PIANO, SoundSource.MASTER, 10f, 1.5f, player.getRandom().nextLong());
                     }
                     case 60 -> {
                         if (player != null)
-                            player.level().playSeededSound(player, player.getX(), player.getY(), player.getZ(), TMMSounds.UI_PIANO, SoundSource.MASTER, 10f, 1.75f, player.getRandom().nextLong());
+                            player.level().playSeededSound(player, player.getX(), player.getY(), player.getZ(),
+                                    TMMSounds.UI_PIANO, SoundSource.MASTER, 10f, 1.75f, player.getRandom().nextLong());
                     }
                     case 1 -> {
                         if (player != null)
-                            player.level().playSeededSound(player, player.getX(), player.getY(), player.getZ(), TMMSounds.UI_PIANO_STINGER, SoundSource.MASTER, 10f, 1f, player.getRandom().nextLong());
+                            player.level().playSeededSound(player, player.getX(), player.getY(), player.getZ(),
+                                    TMMSounds.UI_PIANO_STINGER, SoundSource.MASTER, 10f, 1f,
+                                    player.getRandom().nextLong());
                     }
                 }
                 welcomeTime--;
@@ -229,12 +260,17 @@ public class RoundTextRenderer {
             if (endTime > 0) {
                 if (endTime == END_DURATION - (GameConstants.FADE_TIME * 2)) {
                     if (player != null)
-                        player.level().playSeededSound(player, player.getX(), player.getY(), player.getZ(), GameRoundEndComponent.KEY.get(player.level()).didWin(player.getUUID()) ? TMMSounds.UI_PIANO_WIN : TMMSounds.UI_PIANO_LOSE, SoundSource.MASTER, 10f, 1f, player.getRandom().nextLong());
+                        player.level().playSeededSound(player, player.getX(), player.getY(), player.getZ(),
+                                GameRoundEndComponent.KEY.get(player.level()).didWin(player.getUUID())
+                                        ? TMMSounds.UI_PIANO_WIN
+                                        : TMMSounds.UI_PIANO_LOSE,
+                                SoundSource.MASTER, 10f, 1f, player.getRandom().nextLong());
                 }
                 endTime--;
             }
             Options options = Minecraft.getInstance().options;
-            if (options != null && options.keyPlayerList.isDown()) endTime = Math.max(2, endTime);
+            if (options != null && options.keyPlayerList.isDown())
+                endTime = Math.max(2, endTime);
         }
     }
 

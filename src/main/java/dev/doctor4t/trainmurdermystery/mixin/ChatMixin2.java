@@ -40,7 +40,7 @@ public class ChatMixin2 {
                      if (sender.getUUID().equals(player.getUUID())) {
                          player.sendSystemMessage(senderMessage);
                      } else {
-                         GameWorldComponent  gameWorldComponent = GameWorldComponent.KEY.get(sender);
+                         GameWorldComponent gameWorldComponent = GameWorldComponent.KEY.get(sender.level());
                          if (!ConfigCache.opAsPlayer && server.getPlayerList().getOps().get(sender.getGameProfile()) != null || sender.isSpectator() || !gameWorldComponent.isRunning()) {
                              String var5 = doPrefix(sender, player);
                              return Component.literal(var5 + ConfigCache.angleBraceColor + "<" + ConfigCache.nameColor + playerName(sender).getString() + ConfigCache.angleBraceColor + "> " + ConfigCache.defaultColor + message);
