@@ -22,9 +22,8 @@ public class AFKEventHandler {
                 PlayerAFKComponent afkComponent = PlayerAFKComponent.KEY.maybeGet(player).orElse(null);
                 if (afkComponent != null) {
                     afkComponent.updateActivity();
-                    
                     // 调用角色的技能使用方法
-                    dev.doctor4t.trainmurdermystery.api.RoleMethodDispatcher.callOnAbilityUse(player);
+                    dev.doctor4t.trainmurdermystery.api.RoleMethodDispatcher.callOnItemUse(player, world, hand);
                 }
             }
             return InteractionResultHolder.pass(ItemStack.EMPTY);
@@ -36,6 +35,7 @@ public class AFKEventHandler {
                 PlayerAFKComponent afkComponent = PlayerAFKComponent.KEY.maybeGet(player).orElse(null);
                 if (afkComponent != null) {
                     afkComponent.updateActivity();
+                    return dev.doctor4t.trainmurdermystery.api.RoleMethodDispatcher.callOnUseBlock(player, world, hand, hitResult);
                 }
             }
             return InteractionResult.PASS;

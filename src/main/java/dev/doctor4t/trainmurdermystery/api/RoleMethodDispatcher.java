@@ -4,44 +4,52 @@ import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.cca.PlayerShopComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
+
 import org.jetbrains.annotations.Nullable;
 
 /**
  * 角色方法调度器，用于调用角色的各个方法
  */
 public class RoleMethodDispatcher {
-    
+
     /**
      * 调用玩家角色的 onDeath 方法
      */
-    public static void callOnDeath(Player victim, boolean spawnBody, @Nullable Player killer, ResourceLocation deathReason) {
+    public static void callOnDeath(Player victim, boolean spawnBody, @Nullable Player killer,
+            ResourceLocation deathReason) {
         Role role = getCurrentRole(victim);
         if (role != null) {
             role.onDeath(victim, spawnBody, killer, deathReason);
         }
     }
-    
+
     /**
      * 调用玩家角色的 onKill 方法
      */
-    public static void callOnKill(Player victim, boolean spawnBody, @Nullable Player killer, ResourceLocation deathReason) {
+    public static void callOnKill(Player victim, boolean spawnBody, @Nullable Player killer,
+            ResourceLocation deathReason) {
         Role role = getCurrentRole(killer);
         if (role != null) {
             role.onKill(victim, spawnBody, killer, deathReason);
         }
     }
-    
+
     /**
      * 调用玩家角色的 onFinishQuest 方法
      */
     public static void callOnFinishQuest(Player player, String quest) {
         Role role = getCurrentRole(player);
         if (role != null) {
-            GameWorldComponent gameWorldComponent = (GameWorldComponent)GameWorldComponent.KEY.get(player.level());
+            GameWorldComponent gameWorldComponent = (GameWorldComponent) GameWorldComponent.KEY.get(player.level());
             if (gameWorldComponent.getRole(player) != null) {
                 if (gameWorldComponent.getRole(player).getMoodType().equals(Role.MoodType.REAL)) {
                     PlayerShopComponent shopComponent = PlayerShopComponent.KEY.get(player);
@@ -53,29 +61,29 @@ public class RoleMethodDispatcher {
 
         }
     }
-    
+
     /**
      * 调用玩家角色的 cantPickupItem 方法
      */
-//    public static boolean callCantPickupItem(Player player, Item item) {
-//        Role role = getCurrentRole(player);
-//        if (role != null) {
-//            return role.cantPickupItem(player).test(item);
-//        }
-//        return false;
-//    }
-//
+    // public static boolean callCantPickupItem(Player player, Item item) {
+    // Role role = getCurrentRole(player);
+    // if (role != null) {
+    // return role.cantPickupItem(player).test(item);
+    // }
+    // return false;
+    // }
+    //
     /**
      * 调用玩家角色的 onPickupItem 方法
      */
     public static boolean callOnPickupItem(Player player, Item item) {
         Role role = getCurrentRole(player);
         if (role != null) {
-           return !role.cantPickupItem(player).test(item);
+            return !role.cantPickupItem(player).test(item);
         }
         return true;
     }
-    
+
     /**
      * 调用玩家角色的 serverTick 方法
      */
@@ -85,7 +93,7 @@ public class RoleMethodDispatcher {
             role.serverTick(player);
         }
     }
-    
+
     /**
      * 调用玩家角色的 clientTick 方法
      */
@@ -95,7 +103,7 @@ public class RoleMethodDispatcher {
             role.clientTick(player);
         }
     }
-    
+
     /**
      * 调用玩家角色的 rightClickEntity 方法
      */
@@ -105,7 +113,7 @@ public class RoleMethodDispatcher {
             role.rightClickEntity(player, victim);
         }
     }
-    
+
     /**
      * 调用玩家角色的 leftClickEntity 方法
      */
@@ -115,7 +123,18 @@ public class RoleMethodDispatcher {
             role.leftClickEntity(player, victim);
         }
     }
-    
+
+    /**
+     * 调用玩家角色的 onItemUse 方法
+     */
+    public static InteractionResultHolder<ItemStack> callOnItemUse(Player player, Level world, InteractionHand hand) {
+        Role role = getCurrentRole(player);
+        if (role != null) {
+            return role.onItemUse(player, world, hand);
+        }
+        return InteractionResultHolder.pass(ItemStack.EMPTY);
+    }
+
     /**
      * 调用玩家角色的 onAbilityUse 方法
      */
@@ -125,7 +144,29 @@ public class RoleMethodDispatcher {
             role.onAbilityUse(player);
         }
     }
-    
+
+    /**
+     * 调用玩家角色的 onUseBlock 方法
+     */
+    public static InteractionResult callOnUseBlock(Player player, Level world, InteractionHand hand,
+            BlockHitResult hitResult) {
+        Role role = getCurrentRole(player);
+        if (role != null) {
+            return role.onUseBlock(player, world, hand, hitResult);
+        }
+        return InteractionResult.PASS;
+    }
+
+    /**
+     * 调用玩家角色的 onPressAbilityKey 方法
+     */
+    public static void callOnPressAbilityKey(Player player) {
+        Role role = getCurrentRole(player);
+        if (role != null) {
+            role.onPressAbilityKey(player);
+        }
+    }
+
     /**
      * 获取玩家当前的角色
      */
@@ -133,7 +174,7 @@ public class RoleMethodDispatcher {
         if (player.level() == null) {
             return null;
         }
-        
+
         var gameComponent = dev.doctor4t.trainmurdermystery.cca.GameWorldComponent.KEY.get(player.level());
         return gameComponent.getRole(player);
     }

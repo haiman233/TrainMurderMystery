@@ -1,8 +1,6 @@
 package dev.doctor4t.trainmurdermystery.api;
 
 import dev.doctor4t.trainmurdermystery.cca.AbilityPlayerComponent;
-import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
-import dev.doctor4t.trainmurdermystery.cca.PlayerShopComponent;
 import dev.doctor4t.trainmurdermystery.client.gui.screen.ingame.LimitedInventoryScreen;
 
 import java.util.ArrayList;
@@ -14,10 +12,16 @@ import dev.doctor4t.trainmurdermystery.util.ShopEntry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
+
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
 
@@ -128,27 +132,50 @@ public abstract class Role {
         return new ArrayList<>();
     }
 
+    /**
+     * 在使用枪时触发。
+     * 
+     * @return 返回true继续执行，返回false不允许使用枪。
+     */
     public boolean onUseGun(Player player) {
         return true;
     }
+
+    /**
+     * 在使用枪枪中人时触发。
+     * 
+     * @return 返回true继续执行，返回false终止。
+     */
     public boolean onGunHit(Player killer, Player victim) {
         return true;
     }
+
+    /**
+     * 在使用刀时触发。
+     * 
+     * @return 返回true继续执行，返回false不允许使用刀。
+     */
     public boolean onUseKnife(Player player) {
         return true;
     }
-    public boolean onUseKnifeHit(Player player, Player victim) {
+
+    /**
+     * 在使用刀刀中人时触发。在onUseKnife后。
+     * 
+     * @return 返回true继续执行，返回false不执行。
+     */
+    public boolean onUseKnifeHit(Player player, Player target) {
         return true;
     }
 
-    /*
+    /**
      * 在HarpyModLoader中使用
      */
     public List<ItemStack> getDefaultItems() {
         return new ArrayList<>();
     }
 
-    /*
+    /**
      * 在HarpyModLoader中使用
      */
     public void onInit(MinecraftServer server, ServerPlayer serverPlayer) {
@@ -158,8 +185,28 @@ public abstract class Role {
     public static AbilityPlayerComponent getCooldownComponent(Player player) {
         return AbilityPlayerComponent.KEY.get(player);
     }
+    public void onAbilityUse(Player player){
+        
+    }
 
-    public void onAbilityUse(Player player) {
+    /**
+     * 在使用物品时触发（从AFK组件）
+     */
+    public InteractionResultHolder<ItemStack> onItemUse(Player player, Level world, InteractionHand hand) {
+        return InteractionResultHolder.pass(ItemStack.EMPTY);
+    }
+
+    /**
+     * 在与方块交互时触发（从AFK组件）
+     */
+    public InteractionResult onUseBlock(Player player, Level world, InteractionHand hand, BlockHitResult hitResult) {
+        return InteractionResult.PASS;
+    }
+
+    /**
+     * 在按下技能键G时触发（请补充调用callOnPressAbilityKey）
+     */
+    public void onPressAbilityKey(Player player) {
     }
 
     private ComponentKey<? extends RoleComponent> componentKey;
