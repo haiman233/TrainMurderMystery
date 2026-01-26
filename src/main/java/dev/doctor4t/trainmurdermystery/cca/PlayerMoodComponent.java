@@ -2,6 +2,7 @@ package dev.doctor4t.trainmurdermystery.cca;
 
 import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.api.Role;
+import dev.doctor4t.trainmurdermystery.api.RoleComponent;
 import dev.doctor4t.trainmurdermystery.client.TMMClient;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
@@ -32,7 +33,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.ladysnake.cca.api.v3.component.ComponentRegistry;
-import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 import org.ladysnake.cca.api.v3.component.tick.ClientTickingComponent;
 import org.ladysnake.cca.api.v3.component.tick.ServerTickingComponent;
 
@@ -41,7 +41,7 @@ import java.util.function.Function;
 
 import static dev.doctor4t.trainmurdermystery.TMM.isSkyVisibleAdjacent;
 
-public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingComponent, ClientTickingComponent {
+public class PlayerMoodComponent implements RoleComponent, ServerTickingComponent, ClientTickingComponent {
     public static final ComponentKey<PlayerMoodComponent> KEY = ComponentRegistry.getOrCreate(TMM.id("mood"), PlayerMoodComponent.class);
     private final Player player;
     public final Map<Task, TrainTask> tasks = new HashMap<>();
@@ -55,6 +55,11 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
         this.player = player;
     }
 
+    @Override
+    public Player getPlayer() {
+        return this.player;
+    }
+
     public void sync() {
         KEY.sync(this.player);
     }
@@ -64,6 +69,7 @@ public class PlayerMoodComponent implements AutoSyncedComponent, ServerTickingCo
         return player == this.player;
     }
 
+    @Override
     public void reset() {
         this.tasks.clear();
         this.timesGotten.clear();

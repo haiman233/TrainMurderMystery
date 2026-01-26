@@ -1,6 +1,7 @@
 package dev.doctor4t.trainmurdermystery.cca;
 
 import dev.doctor4t.trainmurdermystery.TMM;
+import dev.doctor4t.trainmurdermystery.api.RoleComponent;
 import dev.doctor4t.trainmurdermystery.game.GameConstants;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.index.TMMItems;
@@ -12,11 +13,10 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.ladysnake.cca.api.v3.component.ComponentRegistry;
-import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 import org.ladysnake.cca.api.v3.component.tick.ClientTickingComponent;
 import org.ladysnake.cca.api.v3.component.tick.ServerTickingComponent;
 
-public class PlayerPsychoComponent implements AutoSyncedComponent, ServerTickingComponent, ClientTickingComponent {
+public class PlayerPsychoComponent implements RoleComponent, ServerTickingComponent, ClientTickingComponent {
     public static final ComponentKey<PlayerPsychoComponent> KEY = ComponentRegistry.getOrCreate(TMM.id("psycho"), PlayerPsychoComponent.class);
     private final Player player;
     public int psychoTicks = 0;
@@ -26,10 +26,16 @@ public class PlayerPsychoComponent implements AutoSyncedComponent, ServerTicking
         this.player = player;
     }
 
+    @Override
+    public Player getPlayer() {
+        return this.player;
+    }
+
     public void sync() {
         KEY.sync(this.player);
     }
 
+    @Override
     public void reset() {
         this.stopPsycho();
         this.sync();
