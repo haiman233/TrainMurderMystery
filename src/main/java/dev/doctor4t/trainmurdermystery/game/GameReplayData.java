@@ -285,7 +285,7 @@ public class GameReplayData {
                     PSYCHO_STATE_CHANGE ->
                 null;
             case CHANGE_ROLE -> {
-                yield Component.translatable("tmm.replay.event.change_role",sourceName, Role_1,Role_2);
+                yield Component.translatable("tmm.replay.event.change_role",sourceName, Role_1, Role_2);
             }
             // 次要事件
 
