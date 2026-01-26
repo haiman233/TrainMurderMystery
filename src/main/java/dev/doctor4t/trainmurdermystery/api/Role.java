@@ -29,6 +29,7 @@ import org.ladysnake.cca.api.v3.component.ComponentKey;
 
 public abstract class Role {
     private ResourceLocation identifier;
+    private boolean canSeeCoin;
 
     public Role setColor(int color) {
         this.color = color;
@@ -292,6 +293,15 @@ public abstract class Role {
 
     public boolean canPickUpRevolver() {
         return this.ableToPickUpRevolver;
+    }
+
+    public Role setCanSeeCoin(boolean able) {
+        this.canSeeCoin = able;
+        return this;
+    }
+
+    public boolean canSeeCoin() {
+        return this.canSeeCoin;
     }
 
     public Role setCanPickUpRevolver(boolean able) {
