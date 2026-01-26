@@ -187,7 +187,7 @@ public class RoundTextRenderer {
                         context.pose().translate(22, 24, 200);
                         var text = Component.translatable("announcement.role." + role1.getIdentifier().getPath());
                         context.drawString(renderer,
-                                text, 3 - (int) (renderer.width(text) * 0.4 / 2), 0,
+                                text, 9 - (renderer.width(text) / 2), 0,
                                 role1.getColor());
                         context.pose().popPose();
                     } else {
@@ -196,7 +196,7 @@ public class RoundTextRenderer {
                         context.pose().translate(22, 24, 200);
                         var text = Component.translatable("announcement.role.unknown");
                         context.drawString(renderer,
-                                text, 3 - (int) (renderer.width(text) * 0.4 / 2), 0,
+                                text, 9 - (renderer.width(text) / 2), 0,
                                 0xffffff);
                         context.pose().popPose();
                     }
