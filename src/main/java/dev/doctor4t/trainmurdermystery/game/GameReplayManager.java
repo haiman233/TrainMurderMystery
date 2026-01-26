@@ -197,7 +197,11 @@ public class GameReplayManager {
                 if (str_arr.length == 2) {
                     yield new ReplayEventTypes.ChangeRoleDetails(dataEvent.getSourcePlayer(), str_arr[0], str_arr[1]);
                 } else {
-                    yield null;
+                    if (str_arr.length >= 1) {
+                        yield new ReplayEventTypes.ChangeRoleDetails(dataEvent.getSourcePlayer(), "",
+                                dataEvent.getMessage());
+                    } else
+                        yield null;
                 }
             }
             // 默认空详情
@@ -591,7 +595,7 @@ public class GameReplayManager {
                 if (eventText != null) {
                     sendSystemMessage(player, Component.literal(timePrefix).append(eventText));
                 } else {
-                    sendSystemMessage(player, Component.literal(timePrefix + "[事件无法显示]"));
+                    sendSystemMessage(player, Component.literal(timePrefix).append(Component.translatable("tmm.replay.event.null")));
                 }
             }
         }

@@ -159,7 +159,8 @@ public class GameReplayData {
         UUID targetPlayer = null;
         Component itemUsedText = null;
         String message = null;
-        Component message_com = null;
+        Component Role_1 = null;
+        Component Role_2 = null;
         // 根据 EventDetails 类型提取信息
         if (event
                 .details() instanceof PlayerKillDetails(UUID killerUuid, UUID victimUuid, ResourceLocation deathReason)) {
@@ -198,10 +199,10 @@ public class GameReplayData {
                 .details() instanceof GrenadeThrownDetails(UUID playerUuid, net.minecraft.core.BlockPos position)) {
             sourcePlayer = playerUuid;
             message = String.valueOf(position);
-        } else if (event.details() instanceof ChangeRoleDetails(UUID player, String oldRole, String newRole)) {
-            sourcePlayer = player;
-            message_com = Component.translatable("event.trainmurdermystery.change_role", getRoleName(oldRole),
-                    getRoleName(newRole));
+        } else if (event.details() instanceof ChangeRoleDetails roleDetail) {
+            sourcePlayer = roleDetail.player();
+            Role_1 = getRoleName(roleDetail.oldRole());
+            Role_2 = getRoleName(roleDetail.newRole());
             // message = ;
         } else if (event.details() instanceof ReplayEventTypes.CustomEventDetails details) {
             // CustomEventDetails 没有 playerUuid 和 message，只有 eventId 和 data
@@ -283,7 +284,9 @@ public class GameReplayData {
             case TASK_COMPLETE, LOCKPICK_ATTEMPT, DOOR_CLOSE, DOOR_OPEN, DOOR_UNLOCK, DOOR_LOCK, STORE_BUY, MOOD_CHANGE,
                     PSYCHO_STATE_CHANGE ->
                 null;
-            case CHANGE_ROLE -> message_com;
+            case CHANGE_ROLE -> {
+                yield Component.translatable("tmm.replay.event.change_role",sourceName, Role_1,Role_2);
+            }
             // 次要事件
 
             /*
