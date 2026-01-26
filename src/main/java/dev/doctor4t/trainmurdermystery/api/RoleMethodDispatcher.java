@@ -158,15 +158,6 @@ public class RoleMethodDispatcher {
         return InteractionResult.PASS;
     }
 
-    /**
-     * 调用玩家角色的 onPressAbilityKey 方法
-     */
-    public static void callOnPressAbilityKey(Minecraft client) {
-        Role role = getCurrentRole(client.player);
-        if (role != null) {
-            role.onPressAbilityKey(client);
-        }
-    }
 
     /**
      * 获取玩家当前的角色

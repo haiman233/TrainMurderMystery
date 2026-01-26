@@ -31,45 +31,60 @@ public class ReplayEventTypes {
         BLACKOUT_START,
         BLACKOUT_END,
         GRENADE_THROWN,
+        CHANGE_ROLE,
         // Add more event types as needed
         CUSTOM_EVENT // 用于第三方模组的自定义事件
     }
 
-    public record PlayerKillDetails(UUID killerUuid, UUID victimUuid, ResourceLocation deathReason) implements EventDetails {
+    public record PlayerKillDetails(UUID killerUuid, UUID victimUuid, ResourceLocation deathReason)
+            implements EventDetails {
+    }
+
+    public record ChangeRoleDetails(UUID player, String oldRole, String newRole) implements EventDetails {
     }
 
     public record PlayerPoisonedDetails(UUID poisonerUuid, UUID victimUuid) implements EventDetails {
     }
 
     // 任务完成事件详情
-    public record TaskCompleteDetails(UUID playerUuid, ResourceLocation taskId) implements EventDetails {}
+    public record TaskCompleteDetails(UUID playerUuid, ResourceLocation taskId) implements EventDetails {
+    }
 
     // 商店购买事件详情
-    public record StoreBuyDetails(UUID playerUuid, ResourceLocation itemId, int cost) implements EventDetails {}
+    public record StoreBuyDetails(UUID playerUuid, ResourceLocation itemId, int cost) implements EventDetails {
+    }
 
     // 门操作事件详情（锁定、解锁、打开、关闭）
-    public record DoorActionDetails(UUID playerUuid, BlockPos doorPos, boolean success) implements EventDetails {}
+    public record DoorActionDetails(UUID playerUuid, BlockPos doorPos, boolean success) implements EventDetails {
+    }
 
     // 撬锁尝试事件详情
-    public record LockpickAttemptDetails(UUID playerUuid, BlockPos doorPos, boolean success) implements EventDetails {}
+    public record LockpickAttemptDetails(UUID playerUuid, BlockPos doorPos, boolean success) implements EventDetails {
+    }
 
     // 物品使用事件详情
-    public record ItemUsedDetails(UUID playerUuid, ResourceLocation itemId) implements EventDetails {}
+    public record ItemUsedDetails(UUID playerUuid, ResourceLocation itemId) implements EventDetails {
+    }
 
     // 心情变化事件详情
-    public record MoodChangeDetails(UUID playerUuid, int oldMood, int newMood) implements EventDetails {}
+    public record MoodChangeDetails(UUID playerUuid, int oldMood, int newMood) implements EventDetails {
+    }
 
     // 精神病状态变化事件详情
-    public record PsychoStateChangeDetails(UUID playerUuid, int oldState, int newState) implements EventDetails {}
+    public record PsychoStateChangeDetails(UUID playerUuid, int oldState, int newState) implements EventDetails {
+    }
 
     // 停电事件详情
-    public record BlackoutEventDetails(long duration) implements EventDetails {}
+    public record BlackoutEventDetails(long duration) implements EventDetails {
+    }
 
     // 手榴弹投掷事件详情
-    public record GrenadeThrownDetails(UUID playerUuid, BlockPos position) implements EventDetails {}
+    public record GrenadeThrownDetails(UUID playerUuid, BlockPos position) implements EventDetails {
+    }
 
     // 自定义事件详情，用于第三方模组
-    public record CustomEventDetails(ResourceLocation eventId, String data) implements EventDetails {}
+    public record CustomEventDetails(ResourceLocation eventId, String data) implements EventDetails {
+    }
 
     // Add more specific EventDetails classes for other event types
 }

@@ -217,9 +217,9 @@ public abstract class Role {
     }
 
     /**
-     * 在按下技能键G时触发（请补充调用callOnPressAbilityKey）
+     * 在按下技能键G时触发（近客户端可用）
      */
-    public void onPressAbilityKey(Minecraft client) {
+    public void onPressAbilityKey(Object client) {
     }
 
     private ComponentKey<? extends RoleComponent> componentKey;
