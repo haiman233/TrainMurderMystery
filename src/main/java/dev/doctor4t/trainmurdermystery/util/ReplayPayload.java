@@ -130,6 +130,8 @@ public record ReplayPayload(GameReplay replay) implements CustomPacketPayload {
                     break;
                 }
                 // Add more cases for other event types if needed
+                default:
+                    break;
             }
             timelineEvents.add(new ReplayEvent(eventType, timestamp, details));
         }

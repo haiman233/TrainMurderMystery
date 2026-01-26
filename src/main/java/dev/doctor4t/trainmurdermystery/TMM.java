@@ -223,6 +223,10 @@ public class TMM implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointVisibilityPacket.ID, dev.doctor4t.trainmurdermystery.network.packet.SyncWaypointVisibilityPacket.CODEC);
         PayloadTypeRegistry.playS2C().register(dev.doctor4t.trainmurdermystery.network.packet.SyncSpecificWaypointVisibilityPacket.ID, dev.doctor4t.trainmurdermystery.network.packet.SyncSpecificWaypointVisibilityPacket.CODEC);
         PayloadTypeRegistry.playC2S().register(KnifeStabPayload.ID, KnifeStabPayload.CODEC);
+
+        // 新加的，出问题直接删下面这一行
+        PayloadTypeRegistry.playC2S().register(ReplayPayload.ID, ReplayPayload.CODEC);
+
         PayloadTypeRegistry.playC2S().register(GunShootPayload.ID, GunShootPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(StoreBuyPayload.ID, StoreBuyPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(NoteEditPayload.ID, NoteEditPayload.CODEC);
