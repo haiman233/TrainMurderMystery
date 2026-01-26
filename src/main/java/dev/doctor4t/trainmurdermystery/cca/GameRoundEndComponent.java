@@ -106,7 +106,7 @@ public class GameRoundEndComponent implements AutoSyncedComponent {
             CompoundTag tag = new CompoundTag();
             tag.putUUID("uuid", this.player.getId());
             tag.putString("name", this.player.getName());
-            tag.putString("role", this.role != null ? this.role.getName() : "blank"); // 存储角色名称
+            tag.putString("role", this.role != null ? this.role.getId().getPath() : "blank"); // 存储角色名称
             tag.putBoolean("wasDead", this.wasDead);
             return tag;
         }

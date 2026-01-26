@@ -15,7 +15,9 @@ import org.slf4j.LoggerFactory;
 
 public record AnnounceWelcomePayload(String role, int killers, int targets) implements CustomPacketPayload {
     public static final Type<AnnounceWelcomePayload> ID = new Type<>(TMM.id("announcewelcome"));
-    public static final StreamCodec<FriendlyByteBuf, AnnounceWelcomePayload> CODEC = StreamCodec.composite(ByteBufCodecs.STRING_UTF8, AnnounceWelcomePayload::role, ByteBufCodecs.INT, AnnounceWelcomePayload::killers, ByteBufCodecs.INT, AnnounceWelcomePayload::targets, AnnounceWelcomePayload::new);
+    public static final StreamCodec<FriendlyByteBuf, AnnounceWelcomePayload> CODEC = StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8, AnnounceWelcomePayload::role, ByteBufCodecs.INT, AnnounceWelcomePayload::killers,
+            ByteBufCodecs.INT, AnnounceWelcomePayload::targets, AnnounceWelcomePayload::new);
 
     @Override
     public Type<? extends CustomPacketPayload> type() {
@@ -25,11 +27,17 @@ public record AnnounceWelcomePayload(String role, int killers, int targets) impl
     public static class Receiver implements ClientPlayNetworking.PlayPayloadHandler<AnnounceWelcomePayload> {
         @Override
         public void receive(@NotNull AnnounceWelcomePayload payload, ClientPlayNetworking.@NotNull Context context) {
-
-            if (payload.role == null) return;
+            if (payload.role == null)
+                return;
             var res = ResourceLocation.tryParse(payload.role());
+
             var announcementText = RoleAnnouncementTexts.getFromName(res.getPath());
-            if (announcementText == null) return;
+            if (announcementText == null) {
+                LoggerFactory.getLogger(this.getClass())
+                        .error("Unable to get announcement Text for '" + res.getPath() + "' (" + res
+                                + "). Available: ");
+                return;
+            }
             RoundTextRenderer.startWelcome(announcementText, payload.killers(), payload.targets());
         }
     }

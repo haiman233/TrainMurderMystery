@@ -154,12 +154,12 @@ public class RoundTextRenderer {
 
                     if (entry.role() == null)
                         continue;
-                    if (Objects.equals(entry.role().getName(), RoleAnnouncementTexts.CIVILIAN.getName())) {
+                    if (Objects.equals(entry.role().getId().getPath(), RoleAnnouncementTexts.CIVILIAN.getId().getPath())) {
                         context.pose().translate(-60 + (civilians % 4) * 12, 14 + (civilians / 4) * 12, 0);
                         civilians++;
                     } else {
                         final var first = RoleAnnouncementTexts.ROLE_ANNOUNCEMENT_TEXTS.entrySet().stream()
-                                .filter(role -> role.getValue().getName().equals(entry.role().getName())).findFirst();
+                                .filter(role -> role.getValue().getId().getPath().equals(entry.role().getId().getPath())).findFirst();
                         if (first.isPresent()) {
                             final var role1 = TMMRoles.ROLES.get(first.get().getKey());
                             if (role1 != null) {
