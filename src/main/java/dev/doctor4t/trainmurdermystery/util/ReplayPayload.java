@@ -129,6 +129,14 @@ public record ReplayPayload(GameReplay replay) implements CustomPacketPayload {
                     details = new ReplayEventTypes.MoodChangeDetails(playerUuid, oldMood, newMood);
                     break;
                 }
+                case CHANGE_ROLE: {
+                    int playerIndex = buf.readVarInt();
+                    UUID playerUuid = players.get(playerIndex).uuid();
+                    String oldJob = buf.readUtf();
+                    String newJob = buf.readUtf();
+                    details = new ReplayEventTypes.ChangeRoleDetails(playerUuid, oldJob, newJob);
+                    break;
+                }
                 // Add more cases for other event types if needed
                 default:
                     break;
@@ -212,6 +220,34 @@ public record ReplayPayload(GameReplay replay) implements CustomPacketPayload {
                     buf.writeInt(moodDetails.newMood());
                     break;
                 // Add more cases for other event types if needed
+                case BLACKOUT_END:
+                    break;
+                case BLACKOUT_START:
+                    break;
+                case CHANGE_ROLE:
+                    ReplayEventTypes.ChangeRoleDetails roleDetails = (ReplayEventTypes.ChangeRoleDetails) event.details();
+                    buf.writeVarInt(playerUuidToIndex.get(roleDetails.player()));
+                    buf.writeUtf(roleDetails.oldRole());
+                    buf.writeUtf(roleDetails.newRole());
+                    break;
+                case CUSTOM_EVENT:
+                    break;
+                case DOOR_LOCK:
+                    break;
+                case DOOR_UNLOCK:
+                    break;
+                case GAME_END:
+                    break;
+                case GAME_START:
+                    break;
+                case PLAYER_JOIN:
+                    break;
+                case PLAYER_LEAVE:
+                    break;
+                case PSYCHO_STATE_CHANGE:
+                    break;
+                default:
+                    break;
             }
         }
     }

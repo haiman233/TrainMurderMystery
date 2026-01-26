@@ -192,7 +192,7 @@ public class GameReplayManager {
                 yield new ReplayEventTypes.BlackoutEventDetails(duration);
             }
             case CHANGE_ROLE -> {
-                String[] str_arr = dataEvent.getMessage().split(":");
+                String[] str_arr = dataEvent.getMessage().split("|");
 
                 if (str_arr.length == 2) {
                     yield new ReplayEventTypes.ChangeRoleDetails(dataEvent.getSourcePlayer(), str_arr[0], str_arr[1]);
@@ -328,6 +328,12 @@ public class GameReplayManager {
     public void recordPlayerKill(UUID killerUuid, UUID victimUuid, ResourceLocation deathReason) {
         String deathReasonStr = deathReason != null ? deathReason.toString() : "unknown";
         addEvent(GameReplayData.EventType.PLAYER_KILL, killerUuid, victimUuid, deathReasonStr, null);
+    }
+
+    public void recordPlayerRoleChange(UUID player, Role oldRole, Role newRole) {
+        String old_role_str = oldRole.identifier().getPath();
+        String new_role_str = newRole.identifier().getPath();
+        addEvent(GameReplayData.EventType.CHANGE_ROLE, player, null, "", old_role_str + "|" + new_role_str);
     }
 
     public void recordStoreBuy(UUID playerUuid, ResourceLocation itemBought, int amount, int price) {
