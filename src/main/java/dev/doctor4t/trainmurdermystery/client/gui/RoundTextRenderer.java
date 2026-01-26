@@ -183,26 +183,26 @@ public class RoundTextRenderer {
                     // -> replayPlayerInfo.uuid().equals(entry.player().getId())).findFirst();
                     if (role1 != null) {
                         context.pose().pushPose();
-                        context.pose().scale(0.4f, 0.4f, 1f);
-                        context.pose().translate(22, 24, 200);
+                        context.pose().scale(0.32f, 0.32f, 1f);
+                        context.pose().translate(38, 36, 200);
                         var text = Component.translatable("announcement.role." + role1.getIdentifier().getPath());
                         context.drawString(renderer,
-                                text, 9 - (renderer.width(text) / 2), 0,
+                                text, -(renderer.width(text) / 2), 0,
                                 role1.getColor());
                         context.pose().popPose();
                     } else {
                         context.pose().pushPose();
-                        context.pose().scale(0.4f, 0.4f, 1f);
-                        context.pose().translate(22, 24, 200);
+                        context.pose().scale(0.32f, 0.32f, 1f);
+                        context.pose().translate(38, 36, 200);
                         var text = Component.translatable("announcement.role.unknown");
                         context.drawString(renderer,
-                                text, 9 - (renderer.width(text) / 2), 0,
+                                text, -(renderer.width(text) / 2), 0,
                                 0xffffff);
                         context.pose().popPose();
                     }
                     PlayerInfo playerListEntry = TMMClient.PLAYER_ENTRIES_CACHE.get(entry.player().getId());
                     if (playerListEntry != null) {
-
+                        GameProfile playerProfile = playerListEntry.getProfile();
                         ResourceLocation texture = playerListEntry.getSkin().texture();
                         if (texture != null) {
                             RenderSystem.enableBlend();
@@ -215,6 +215,21 @@ public class RoundTextRenderer {
                             context.pose().scale(1.125f, 1.125f, 1f);
                             context.innerBlit(texture, 0, 8, 0, 8, 0, 40 / 64f, 48 / 64f, 8 / 64f, 16 / 64f, 1f,
                                     offColour, offColour, 1f);
+                            context.pose().popPose();
+
+                        }
+                        if (playerProfile != null) {
+                            context.pose().pushPose();
+                            context.pose().scale(0.2f, 0.2f, 1f);
+                            context.pose().translate(60, 44, 200);
+                            String p_name = playerProfile.getName();
+                            if (p_name.length() >= 10) {
+                                p_name = p_name.substring(0, 9) + "...";
+                            }
+                            var text = Component.literal(p_name);
+                            context.drawString(renderer,
+                                    text, -(renderer.width(text) / 2), 0,
+                                    0xffffff);
                             context.pose().popPose();
                         }
                         if (entry.wasDead()) {
