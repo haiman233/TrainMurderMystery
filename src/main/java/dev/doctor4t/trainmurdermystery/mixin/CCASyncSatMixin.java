@@ -27,6 +27,7 @@ import java.util.Objects;
 public abstract class CCASyncSatMixin<C extends Component>  {
 @Inject(method = "syncWith(Lnet/minecraft/server/level/ServerPlayer;Lorg/ladysnake/cca/api/v3/component/ComponentProvider;Lorg/ladysnake/cca/api/v3/component/sync/ComponentPacketWriter;Lorg/ladysnake/cca/api/v3/component/sync/PlayerSyncPredicate;)V", at = @At("HEAD"), cancellable = true)
     public void syncWith(ServerPlayer player, ComponentProvider provider, ComponentPacketWriter writer, PlayerSyncPredicate predicate, CallbackInfo ci) {
+    @SuppressWarnings("unchecked")
     ComponentKey<C> key = (ComponentKey<C>) (Object) this;
     if (predicate.shouldSyncWith(player)) {
         RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), player.serverLevel().registryAccess());

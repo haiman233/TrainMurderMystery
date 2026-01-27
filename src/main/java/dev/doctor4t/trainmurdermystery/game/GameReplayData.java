@@ -286,10 +286,12 @@ public class GameReplayData {
                 }
             }
             case DOOR_LOCK -> {
-                yield Component.translatable("tmm.replay.event.door_lock", sourceName, message);
+                // yield Component.translatable("tmm.replay.event.door_lock", sourceName, message);
+                yield null;
             }
             case DOOR_UNLOCK -> {
-                yield Component.translatable("tmm.replay.event.door_unlock", sourceName, message);
+                // yield Component.translatable("tmm.replay.event.door_unlock", sourceName, message);
+                yield null;
             }
             case TASK_COMPLETE, LOCKPICK_ATTEMPT, DOOR_CLOSE, DOOR_OPEN, STORE_BUY, MOOD_CHANGE,
                     PSYCHO_STATE_CHANGE ->
