@@ -595,7 +595,8 @@ public class GameReplayManager {
                 if (eventText != null) {
                     sendSystemMessage(player, Component.literal(timePrefix).append(eventText));
                 } else {
-                    sendSystemMessage(player, Component.literal(timePrefix).append(Component.translatable("tmm.replay.event.null")));
+                    // 不再显示无法显示的消息
+                    // sendSystemMessage(player, Component.literal(timePrefix).append(Component.translatable("tmm.replay.event.null")));
                 }
             }
         }

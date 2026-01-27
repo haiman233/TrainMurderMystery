@@ -148,9 +148,9 @@ public class GameReplayData {
         return Component.translatable("death_reason.trainmurdermystery." + itemId.getPath());
     }
 
-    public static Component getRoleName(String path) {
+    public static Component getRoleNameWithColor(String path) {
         String translationKey = "announcement.role." + path;
-        return Component.translatable(translationKey);
+        return Component.translatable(translationKey).withStyle(getRoleColor(path));
     }
 
     public Component toText(GameReplayManager manager, GameReplayData replayData,
@@ -201,8 +201,8 @@ public class GameReplayData {
             message = String.valueOf(position);
         } else if (event.details() instanceof ChangeRoleDetails roleDetail) {
             sourcePlayer = roleDetail.player();
-            Role_1 = getRoleName(roleDetail.oldRole());
-            Role_2 = getRoleName(roleDetail.newRole());
+            Role_1 = getRoleNameWithColor(roleDetail.oldRole());
+            Role_2 = getRoleNameWithColor(roleDetail.newRole());
             // message = ;
         } else if (event.details() instanceof ReplayEventTypes.CustomEventDetails details) {
             // CustomEventDetails 没有 playerUuid 和 message，只有 eventId 和 data
@@ -268,7 +268,9 @@ public class GameReplayData {
                     yield Component.translatable("tmm.replay.event.player_join", sourceName)
                             .withStyle(ChatFormatting.GRAY);
                 } else {
-                    yield Component.translatable("tmm.replay.event.player_join", Component.literal("未知玩家"))
+                    yield Component
+                            .translatable("tmm.replay.event.player_join",
+                                    Component.translatable("tmm.replay.event.unknown_player"))
                             .withStyle(ChatFormatting.GRAY);
                 }
             }
@@ -277,15 +279,23 @@ public class GameReplayData {
                     yield Component.translatable("tmm.replay.event.player_leave", sourceName)
                             .withStyle(ChatFormatting.GRAY);
                 } else {
-                    yield Component.translatable("tmm.replay.event.player_leave", Component.literal("未知玩家"))
+                    yield Component
+                            .translatable("tmm.replay.event.player_leave",
+                                    Component.translatable("tmm.replay.event.unknown_player"))
                             .withStyle(ChatFormatting.GRAY);
                 }
             }
-            case TASK_COMPLETE, LOCKPICK_ATTEMPT, DOOR_CLOSE, DOOR_OPEN, DOOR_UNLOCK, DOOR_LOCK, STORE_BUY, MOOD_CHANGE,
+            case DOOR_LOCK -> {
+                yield Component.translatable("tmm.replay.event.door_lock", sourceName, message);
+            }
+            case DOOR_UNLOCK -> {
+                yield Component.translatable("tmm.replay.event.door_unlock", sourceName, message);
+            }
+            case TASK_COMPLETE, LOCKPICK_ATTEMPT, DOOR_CLOSE, DOOR_OPEN, STORE_BUY, MOOD_CHANGE,
                     PSYCHO_STATE_CHANGE ->
                 null;
             case CHANGE_ROLE -> {
-                yield Component.translatable("tmm.replay.event.change_role",sourceName, Role_1, Role_2);
+                yield Component.translatable("tmm.replay.event.change_role", sourceName, Role_1, Role_2);
             }
             // 次要事件
 
@@ -333,11 +343,12 @@ public class GameReplayData {
         };
     }
 
-    private ChatFormatting getRoleColor(String roleId) {
+    public static ChatFormatting getRoleColor(String roleId) {
         if (roleId == null) {
             return ChatFormatting.WHITE; // 默认颜色
         }
-        final var first = TMMRoles.ROLES.values().stream().filter(role -> role.identifier().toString().equals(roleId))
+        final var first = TMMRoles.ROLES.values().stream().filter(
+                role -> role.identifier().toString().equals(roleId) || role.identifier().getPath().equals(roleId))
                 .findFirst();
         // 根据角色ID分类
         if (first.isPresent() && first.get().isInnocent()) {
