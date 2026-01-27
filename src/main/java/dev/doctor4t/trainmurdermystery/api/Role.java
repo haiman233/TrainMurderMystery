@@ -216,12 +216,6 @@ public abstract class Role {
         return InteractionResult.PASS;
     }
 
-    /**
-     * 在按下技能键G时触发（近客户端可用）
-     */
-    public void onPressAbilityKey(Object client) {
-    }
-
     private ComponentKey<? extends RoleComponent> componentKey;
     private int maxSprintTime;
     private boolean canSeeTime;
