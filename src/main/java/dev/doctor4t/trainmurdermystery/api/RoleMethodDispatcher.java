@@ -97,8 +97,8 @@ public class RoleMethodDispatcher {
     }
 
     public static void onInit(Role role, MinecraftServer minecraftServer,ServerPlayer player){
+        role.onInit(minecraftServer,player);
         if (role.isAutoReset()){
-            role.onInit(minecraftServer,player);
             role.getComponentKey().get( player).reset();
         }
     }
