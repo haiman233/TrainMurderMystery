@@ -72,6 +72,39 @@ public abstract class Role {
     private MoodType moodType;
     private boolean ableToPickUpRevolver;
 
+    public boolean isVigilanteTeam() {
+        return isVigilanteTeam;
+    }
+
+    public Role setVigilanteTeam(boolean vigilanteTeam) {
+        isVigilanteTeam = vigilanteTeam;
+        return this;
+    }
+
+    public boolean isCanSeeCoin() {
+        return canSeeCoin;
+    }
+
+    public boolean isAbleToPickUpRevolver() {
+        return ableToPickUpRevolver;
+    }
+
+    public Role setAbleToPickUpRevolver(boolean ableToPickUpRevolver) {
+        this.ableToPickUpRevolver = ableToPickUpRevolver;
+        return this;
+    }
+
+    public ComponentKey<? extends RoleComponent> getComponentKey() {
+        return componentKey;
+    }
+
+    public Role setComponentKey(ComponentKey<? extends RoleComponent> componentKey) {
+        this.componentKey = componentKey;
+        return this;
+    }
+
+    private boolean isVigilanteTeam;
+
     public ResourceLocation getIdentifier() {
         return identifier;
     }
@@ -110,6 +143,7 @@ public abstract class Role {
     public void onFinishQuest(Player player, String quest) {
 
     }
+
 
     public Predicate<Item> cantPickupItem(Player player) {
         return a -> false;
