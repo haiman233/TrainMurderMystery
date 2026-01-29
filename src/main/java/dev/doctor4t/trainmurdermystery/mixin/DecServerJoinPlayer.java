@@ -1,12 +1,12 @@
 package dev.doctor4t.trainmurdermystery.mixin;
 
+import dev.doctor4t.trainmurdermystery.cca.AreasWorldComponent;
 import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
-import dev.doctor4t.trainmurdermystery.compat.TrainVoicePlugin;
 import dev.doctor4t.trainmurdermystery.game.GameFunctions;
 import dev.doctor4t.trainmurdermystery.game.GameReplayManager;
 import dev.doctor4t.trainmurdermystery.network.SyncMapConfigPayload;
 import net.minecraft.network.Connection;
-import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.players.PlayerList;
@@ -19,18 +19,27 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(PlayerList.class)
 public class DecServerJoinPlayer {
     @Inject(method = "placeNewPlayer", at = @At("TAIL"))
-    public void placeNewPlayer(Connection connection, ServerPlayer serverPlayer, CommonListenerCookie commonListenerCookie, CallbackInfo ci) {
+    public void placeNewPlayer(Connection connection, ServerPlayer serverPlayer,
+            CommonListenerCookie commonListenerCookie, CallbackInfo ci) {
         GameReplayManager.playerNames.put(serverPlayer.getUUID(), serverPlayer.getScoreboardName());
         final var gameWorldComponent = GameWorldComponent.KEY.get(serverPlayer.level());
-        if (gameWorldComponent.isRunning()){
-            if (!GameFunctions.isPlayerAliveAndSurvival(serverPlayer)){
-                TrainVoicePlugin.addPlayer(serverPlayer.getUUID());
+        if (gameWorldComponent.isRunning()) {
+            if (!GameFunctions.isPlayerAliveAndSurvival(serverPlayer)) {
+                // 加群组功能已换成VoiceChat事件监听(trainVoicePlugin.java)
+                serverPlayer.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
+                
+                if (serverPlayer.level() instanceof ServerLevel serverWorld) {
+                    AreasWorldComponent areas = AreasWorldComponent.KEY.get(serverWorld);
+                    AreasWorldComponent.PosWithOrientation spectatorSpawnPos = areas.getSpectatorSpawnPos();
+                    serverPlayer.teleportTo(serverWorld, spectatorSpawnPos.pos.x(), spectatorSpawnPos.pos.y(),
+                            spectatorSpawnPos.pos.z(), spectatorSpawnPos.yaw, spectatorSpawnPos.pitch);
+                }
 
             }
         }
         SyncMapConfigPayload.sendToPlayer(serverPlayer);
-        gameWorldComponent.setSyncRole( true);
+        gameWorldComponent.setSyncRole(true);
         GameWorldComponent.KEY.syncWith(serverPlayer, (ComponentProvider) serverPlayer.level());
-        gameWorldComponent.setSyncRole( false);
+        gameWorldComponent.setSyncRole(false);
     }
 }

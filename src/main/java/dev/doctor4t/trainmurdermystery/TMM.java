@@ -1,6 +1,9 @@
 package dev.doctor4t.trainmurdermystery;
 
 import com.google.common.reflect.Reflection;
+
+import de.maxhenkel.voicechat.api.events.PlayerConnectedEvent;
+import dev.architectury.event.events.common.PlayerEvent.PlayerJoin;
 import dev.doctor4t.trainmurdermystery.api.Role;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayApiInitializer;
 import dev.doctor4t.trainmurdermystery.block.DoorPartBlock;
@@ -8,7 +11,6 @@ import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.command.*;
 import dev.doctor4t.trainmurdermystery.command.argument.GameModeArgumentType;
 import dev.doctor4t.trainmurdermystery.command.argument.TimeOfDayArgumentType;
-import dev.doctor4t.trainmurdermystery.data.ServerMapConfig;
 import dev.doctor4t.trainmurdermystery.event.AFKEventHandler;
 import dev.doctor4t.trainmurdermystery.event.EntityInteractionHandler;
 import dev.doctor4t.trainmurdermystery.event.PlayerInteractionHandler;
@@ -17,7 +19,6 @@ import dev.doctor4t.trainmurdermystery.index.*;
 import dev.doctor4t.trainmurdermystery.network.*;
 
 import dev.doctor4t.trainmurdermystery.util.*;
-import dev.doctor4t.trainmurdermystery.voting.MapVotingManager;
 import dev.upcraft.datasync.api.util.Entitlements;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
@@ -31,17 +32,12 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -51,11 +47,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Predicate;
 
-import static net.minecraft.commands.Commands.argument;
-import static net.minecraft.commands.Commands.literal;
 
 public class TMM implements ModInitializer {
     public static final String MOD_ID = "trainmurdermystery";
@@ -113,7 +106,7 @@ public class TMM implements ModInitializer {
         TMMBlocks.initialize();
         TMMItems.initialize();
         TMMBlockEntities.initialize();
-
+            
 
         TMMParticles.initialize();
 
@@ -155,6 +148,7 @@ public class TMM implements ModInitializer {
             NetworkStatsCommand.register(dispatcher);
             ReloadMapConfigCommand.register(dispatcher);
         }));
+        
 
 //        // server lock to supporters
 //        ServerPlayerEvents.JOIN.register(player -> {
