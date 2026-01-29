@@ -17,6 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 
 import org.jetbrains.annotations.Nullable;
+import org.ladysnake.cca.api.v3.component.ComponentKey;
 
 /**
  * 角色方法调度器，用于调用角色的各个方法
@@ -99,7 +100,10 @@ public class RoleMethodDispatcher {
     public static void onInit(Role role, MinecraftServer minecraftServer,ServerPlayer player){
         role.onInit(minecraftServer,player);
         if (role.isAutoReset()){
-            role.getComponentKey().get( player).reset();
+            ComponentKey<? extends RoleComponent> componentKey = role.getComponentKey();
+            if (componentKey != null) {
+                componentKey.get(player).reset();
+            }
         }
     }
     /**
