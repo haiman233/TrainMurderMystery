@@ -5,7 +5,6 @@ import dev.doctor4t.trainmurdermystery.TMM;
 import dev.doctor4t.trainmurdermystery.TMMConfig;
 import dev.doctor4t.trainmurdermystery.api.GameMode;
 import dev.doctor4t.trainmurdermystery.api.Role;
-import dev.doctor4t.trainmurdermystery.api.RoleMethodDispatcher;
 import dev.doctor4t.trainmurdermystery.cca.*;
 import dev.doctor4t.trainmurdermystery.compat.TrainVoicePlugin;
 import dev.doctor4t.trainmurdermystery.entity.FirecrackerEntity;
@@ -13,7 +12,6 @@ import dev.doctor4t.trainmurdermystery.entity.NoteEntity;
 import dev.doctor4t.trainmurdermystery.entity.PlayerBodyEntity;
 import dev.doctor4t.trainmurdermystery.event.AllowPlayerDeath;
 import dev.doctor4t.trainmurdermystery.event.ShouldDropOnDeath;
-import dev.doctor4t.trainmurdermystery.index.TMMDataComponentTypes;
 import dev.doctor4t.trainmurdermystery.index.TMMEntities;
 import dev.doctor4t.trainmurdermystery.index.TMMItems;
 import dev.doctor4t.trainmurdermystery.index.TMMSounds;
@@ -23,7 +21,6 @@ import dev.doctor4t.trainmurdermystery.util.ReplayPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.impl.util.log.Log;
 import net.fabricmc.loader.impl.util.log.LogCategory;
-import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentMap;
@@ -38,7 +35,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Clearable;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -46,7 +42,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -61,7 +56,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 import static dev.doctor4t.trainmurdermystery.compat.TrainVoicePlugin.isVoiceChatMissing;
@@ -69,36 +63,36 @@ import static dev.doctor4t.trainmurdermystery.compat.TrainVoicePlugin.isVoiceCha
 public class GameFunctions {
 
     public static void limitPlayerToBox(ServerPlayer player, AABB box) {
-//        Vec3 playerPos = player.position();
-//
-//        if (!box.contains(playerPos)) {
-//            double x = playerPos.x();
-//            double y = playerPos.y();
-//            double z = playerPos.z();
-//
-//            if (z < box.minZ) {
-//                z = box.minZ;
-//            }
-//            if (z > box.maxZ) {
-//                z = box.maxZ;
-//            }
-//
-//            if (y < box.minY) {
-//                y = box.minY;
-//            }
-//            if (y > box.maxY) {
-//                y = box.maxY;
-//            }
-//
-//            if (x < box.minX) {
-//                x = box.minX;
-//            }
-//            if (x > box.maxX) {
-//                x = box.maxX;
-//            }
-//
-//            player.teleportTo(x, y, z);
-//        }
+        // Vec3 playerPos = player.position();
+        //
+        // if (!box.contains(playerPos)) {
+        // double x = playerPos.x();
+        // double y = playerPos.y();
+        // double z = playerPos.z();
+        //
+        // if (z < box.minZ) {
+        // z = box.minZ;
+        // }
+        // if (z > box.maxZ) {
+        // z = box.maxZ;
+        // }
+        //
+        // if (y < box.minY) {
+        // y = box.minY;
+        // }
+        // if (y > box.maxY) {
+        // y = box.maxY;
+        // }
+        //
+        // if (x < box.minX) {
+        // x = box.minX;
+        // }
+        // if (x > box.maxX) {
+        // x = box.maxX;
+        // }
+        //
+        // player.teleportTo(x, y, z);
+        // }
     }
 
     public static void startGame(ServerLevel world, GameMode gameMode, int time) {
@@ -108,19 +102,22 @@ public class GameFunctions {
         }
         GameWorldComponent game = GameWorldComponent.KEY.get(world);
         AreasWorldComponent areas = AreasWorldComponent.KEY.get(world);
-        int playerCount = Math.toIntExact(world.players().stream().filter(serverPlayerEntity -> (areas.getReadyArea().contains(serverPlayerEntity.position()))).count());
+        int playerCount = Math.toIntExact(world.players().stream()
+                .filter(serverPlayerEntity -> (areas.getReadyArea().contains(serverPlayerEntity.position()))).count());
         game.setGameMode(gameMode);
         GameTimeComponent.KEY.get(world).setResetTime(time);
 
         if (playerCount >= gameMode.minPlayerCount) {
             game.setGameStatus(GameWorldComponent.GameStatus.STARTING);
-            
+
             // 初始化计分板组件
-            GameScoreboardComponent scoreboardComponent = GameScoreboardComponent.KEY.get(world.getServer().getScoreboard());
+            GameScoreboardComponent scoreboardComponent = GameScoreboardComponent.KEY
+                    .get(world.getServer().getScoreboard());
             scoreboardComponent.reset();
         } else {
             for (ServerPlayer player : world.players()) {
-                player.displayClientMessage(Component.translatable("game.start_error.not_enough_players", gameMode.minPlayerCount), true);
+                player.displayClientMessage(
+                        Component.translatable("game.start_error.not_enough_players", gameMode.minPlayerCount), true);
             }
         }
     }
@@ -129,6 +126,7 @@ public class GameFunctions {
         GameWorldComponent component = GameWorldComponent.KEY.get(world);
         component.setGameStatus(GameWorldComponent.GameStatus.STOPPING);
     }
+
     private static void executeFunction(CommandSourceStack source, String function) {
         try {
             source.getServer().getCommands().performPrefixedCommand(source, "function " + function);
@@ -136,15 +134,16 @@ public class GameFunctions {
             Log.warn(LogCategory.GENERAL, "Failed to execute function: " + function + ", error: " + e.getMessage());
         }
     }
+
     public static void initializeGame(ServerLevel serverWorld) {
 
         GameWorldComponent gameComponent = GameWorldComponent.KEY.get(serverWorld);
-        //AreasWorldComponent areasWorldComponent = AreasWorldComponent.KEY.get(serverWorld);
-
+        // AreasWorldComponent areasWorldComponent =
+        // AreasWorldComponent.KEY.get(serverWorld);
 
         List<ServerPlayer> readyPlayerList = getReadyPlayerList(serverWorld);
 
-        //serverWorld.setWeatherParameters(0,-1, true, true);
+        // serverWorld.setWeatherParameters(0,-1, true, true);
         baseInitialize(serverWorld, gameComponent, readyPlayerList);
 
         // 在分配角色前将所有玩家设置为冒险模式
@@ -169,7 +168,8 @@ public class GameFunctions {
         gameComponent.sync();
 
         // 初始化计分板组件
-        GameScoreboardComponent scoreboardComponent = GameScoreboardComponent.KEY.get(serverWorld.getServer().getScoreboard());
+        GameScoreboardComponent scoreboardComponent = GameScoreboardComponent.KEY
+                .get(serverWorld.getServer().getScoreboard());
         scoreboardComponent.reset();
 
         // 设置平民获胜所需的总任务数 (这里可以根据玩家数量动态计算)
@@ -192,55 +192,58 @@ public class GameFunctions {
         // --- 结束新增统计数据更新逻辑 ---
     }
 
-    public static Vec3 getSpawnPos(AreasWorldComponent areas, int room){
+    public static Vec3 getSpawnPos(AreasWorldComponent areas, int room) {
         // Try to get position from configured room positions
         Vec3 configuredPos = areas.getRoomPosition(room);
         if (configuredPos != null) {
             return configuredPos;
         }
-        
+
         // Fallback to default positions based on room count
-//        int roomCount = areas.getRoomCount();
-//        if (roomCount >= 7) {
-//            if (room == 1) {
-//                return new Vec3(116, 122, -539);
-//            } else if (room == 2) {
-//                return new Vec3(124, 122, -534);
-//            } else if (room == 3) {
-//                return new Vec3(131, 122, -534);
-//            } else if (room == 4) {
-//                return new Vec3(144, 122, -540);
-//            } else if (room == 5) {
-//                return new Vec3(119, 128, -537);
-//            } else if (room == 6) {
-//                return new Vec3(132, 128, -536);
-//            } else if (room == 7) {
-//                return new Vec3(146, 128, -537);
-//            }
-//        } else if (roomCount >= 4) {
-//            // Handle 4-6 rooms
-//            switch (room) {
-//                case 1: return new Vec3(116, 122, -539);
-//                case 2: return new Vec3(124, 122, -534);
-//                case 3: return new Vec3(131, 122, -534);
-//                case 4: return new Vec3(144, 122, -540);
-//            }
-//        } else if (roomCount >= 2) {
-//            // Handle 2-3 rooms
-//            switch (room) {
-//                case 1: return new Vec3(116, 122, -539);
-//                case 2: return new Vec3(131, 122, -534);
-//                case 3: return new Vec3(144, 122, -540);
-//            }
-//        } else if (roomCount == 1) {
-//            // Handle single room
-//            return new Vec3(131, 122, -534);
-//        }
+        // int roomCount = areas.getRoomCount();
+        // if (roomCount >= 7) {
+        // if (room == 1) {
+        // return new Vec3(116, 122, -539);
+        // } else if (room == 2) {
+        // return new Vec3(124, 122, -534);
+        // } else if (room == 3) {
+        // return new Vec3(131, 122, -534);
+        // } else if (room == 4) {
+        // return new Vec3(144, 122, -540);
+        // } else if (room == 5) {
+        // return new Vec3(119, 128, -537);
+        // } else if (room == 6) {
+        // return new Vec3(132, 128, -536);
+        // } else if (room == 7) {
+        // return new Vec3(146, 128, -537);
+        // }
+        // } else if (roomCount >= 4) {
+        // // Handle 4-6 rooms
+        // switch (room) {
+        // case 1: return new Vec3(116, 122, -539);
+        // case 2: return new Vec3(124, 122, -534);
+        // case 3: return new Vec3(131, 122, -534);
+        // case 4: return new Vec3(144, 122, -540);
+        // }
+        // } else if (roomCount >= 2) {
+        // // Handle 2-3 rooms
+        // switch (room) {
+        // case 1: return new Vec3(116, 122, -539);
+        // case 2: return new Vec3(131, 122, -534);
+        // case 3: return new Vec3(144, 122, -540);
+        // }
+        // } else if (roomCount == 1) {
+        // // Handle single room
+        // return new Vec3(131, 122, -534);
+        // }
         return null;
     }
-    public static long startTime  = 0;
+
+    public static long startTime = 0;
     public static Map<UUID, Integer> roomToPlayer = new HashMap<>();
-    private static void baseInitialize(ServerLevel serverWorld, GameWorldComponent gameComponent, List<ServerPlayer> players) {
+
+    private static void baseInitialize(ServerLevel serverWorld, GameWorldComponent gameComponent,
+            List<ServerPlayer> players) {
         AreasWorldComponent areas = AreasWorldComponent.KEY.get(serverWorld);
         startTime = System.currentTimeMillis();
 
@@ -254,7 +257,8 @@ public class GameFunctions {
         serverWorld.getGameRules().getRule(GameRules.RULE_DOMOBSPAWNING).set(false, serverWorld.getServer());
         serverWorld.getGameRules().getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(false, serverWorld.getServer());
         serverWorld.getGameRules().getRule(GameRules.RULE_DO_TRADER_SPAWNING).set(false, serverWorld.getServer());
-        serverWorld.getGameRules().getRule(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE).set(9999, serverWorld.getServer());
+        serverWorld.getGameRules().getRule(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE).set(9999,
+                serverWorld.getServer());
         serverWorld.getServer().setDifficulty(Difficulty.PEACEFUL, true);
 
         // dismount all players as it can cause issues
@@ -264,13 +268,14 @@ public class GameFunctions {
 
         // teleport players to play area
 
-
         // teleport non playing players
-        for (ServerPlayer player : serverWorld.getPlayers(serverPlayerEntity -> !players.contains(serverPlayerEntity))) {
+        for (ServerPlayer player : serverWorld
+                .getPlayers(serverPlayerEntity -> !players.contains(serverPlayerEntity))) {
             player.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
 
             AreasWorldComponent.PosWithOrientation spectatorSpawnPos = areas.getSpectatorSpawnPos();
-            player.teleportTo(serverWorld, spectatorSpawnPos.pos.x(), spectatorSpawnPos.pos.y(), spectatorSpawnPos.pos.z(), spectatorSpawnPos.yaw, spectatorSpawnPos.pitch);
+            player.teleportTo(serverWorld, spectatorSpawnPos.pos.x(), spectatorSpawnPos.pos.y(),
+                    spectatorSpawnPos.pos.z(), spectatorSpawnPos.yaw, spectatorSpawnPos.pitch);
         }
 
         // clear items, clear previous game data
@@ -288,7 +293,8 @@ public class GameFunctions {
 
             // remove item cooldowns
             HashSet<Item> copy = new HashSet<>(serverPlayerEntity.getCooldowns().cooldowns.keySet());
-            for (Item item : copy) serverPlayerEntity.getCooldowns().removeCooldown(item);
+            for (Item item : copy)
+                serverPlayerEntity.getCooldowns().removeCooldown(item);
         }
         gameComponent.clearRoleMap();
         GameTimeComponent.KEY.get(serverWorld).reset();
@@ -304,7 +310,8 @@ public class GameFunctions {
             ItemStack itemStack = new ItemStack(TMMItems.KEY);
             roomNumber = roomNumber % roomCount + 1;
             int finalRoomNumber = roomNumber;
-            itemStack.update(DataComponents.LORE, ItemLore.EMPTY, component -> new ItemLore(Component.literal("Room " + finalRoomNumber).toFlatList(Style.EMPTY.withItalic(false).withColor(0xFF8C00))));
+            itemStack.update(DataComponents.LORE, ItemLore.EMPTY, component -> new ItemLore(Component
+                    .literal("Room " + finalRoomNumber).toFlatList(Style.EMPTY.withItalic(false).withColor(0xFF8C00))));
             serverPlayerEntity.addItem(itemStack);
             roomToPlayer.put(serverPlayerEntity.getUUID(), finalRoomNumber);
 
@@ -315,30 +322,29 @@ public class GameFunctions {
             int letterColor = 0xC5AE8B;
             String tipString = "tip.letter.";
             letter.update(DataComponents.LORE, ItemLore.EMPTY, component -> {
-                        List<Component> text = new ArrayList<>();
-                        UnaryOperator<Style> stylizer = style -> style.withItalic(false).withColor(letterColor);
+                List<Component> text = new ArrayList<>();
+                UnaryOperator<Style> stylizer = style -> style.withItalic(false).withColor(letterColor);
 
-                        Component displayName = serverPlayerEntity.getDisplayName();
-                        String string = displayName != null ? displayName.getString() : serverPlayerEntity.getName().getString();
-                        if (string.charAt(string.length() - 1) == '\uE780') { // remove ratty supporter icon
-                            string = string.substring(0, string.length() - 1);
-                        }
+                Component displayName = serverPlayerEntity.getDisplayName();
+                String string = displayName != null ? displayName.getString()
+                        : serverPlayerEntity.getName().getString();
+                if (string.charAt(string.length() - 1) == '\uE780') { // remove ratty supporter icon
+                    string = string.substring(0, string.length() - 1);
+                }
 
-                        text.add(Component.translatable(tipString + "name", string).withStyle(style -> style.withItalic(false).withColor(0xFFFFFF)));
-                        text.add(Component.translatable(tipString + "room").withStyle(stylizer));
-                        text.add(Component.translatable(tipString + "tooltip1",
-                                Component.translatable(tipString + "room." + switch (finalRoomNumber) {
-                                    case 1 -> "grand_suite";
-                                    case 2, 3 -> "cabin_suite";
-                                    default -> "twin_cabin";
-                                }).getString()
-                        ).withStyle(stylizer));
-                        text.add(Component.translatable(tipString + "tooltip2").withStyle(stylizer));
+                text.add(Component.translatable(tipString + "name", string)
+                        .withStyle(style -> style.withItalic(false).withColor(0xFFFFFF)));
+                text.add(Component.translatable(tipString + "room").withStyle(stylizer));
+                text.add(Component.translatable(tipString + "tooltip1",
+                        Component.translatable(tipString + "room." + switch (finalRoomNumber) {
+                            case 1 -> "grand_suite";
+                            case 2, 3 -> "cabin_suite";
+                            default -> "twin_cabin";
+                        }).getString()).withStyle(stylizer));
+                text.add(Component.translatable(tipString + "tooltip2").withStyle(stylizer));
 
-
-                        return new ItemLore(text);
-                    }
-            );
+                return new ItemLore(text);
+            });
             serverPlayerEntity.addItem(letter);
         }
         for (ServerPlayer player : players) {
@@ -347,13 +353,13 @@ public class GameFunctions {
             Vec3 pos = getSpawnPos(areas, roomToPlayer.getOrDefault(player.getUUID(), 1));
             if (pos != null) {
                 player.teleportTo(pos.x(), pos.y() + 1, pos.z());
-            }
-            else {
+            } else {
                 Vec3 pos1 = player.position().add(areas.getPlayAreaOffset());
-                player.teleportTo(player.serverLevel(),pos1.x(), pos1.y() + 1, pos1.z(),Set.of(),0 ,0);
+                player.teleportTo(player.serverLevel(), pos1.x(), pos1.y() + 1, pos1.z(), Set.of(), 0, 0);
             }
         }
-        // Don't set game status to ACTIVE here - it will be set after roles are assigned in initializeGame()
+        // Don't set game status to ACTIVE here - it will be set after roles are
+        // assigned in initializeGame()
         // Create a copy of entities to avoid concurrent modification issues
         List<net.minecraft.world.entity.Entity> entitiesToDiscard = new ArrayList<>();
         serverWorld.getAllEntities().forEach(entity -> {
@@ -365,13 +371,14 @@ public class GameFunctions {
     }
 
     private static List<ServerPlayer> getReadyPlayerList(ServerLevel serverWorld) {
-        AreasWorldComponent areas =AreasWorldComponent.KEY.get(serverWorld);
-        return serverWorld.getPlayers(serverPlayerEntity -> areas.getReadyArea().contains(serverPlayerEntity.position()));
+        AreasWorldComponent areas = AreasWorldComponent.KEY.get(serverWorld);
+        return serverWorld
+                .getPlayers(serverPlayerEntity -> areas.getReadyArea().contains(serverPlayerEntity.position()));
     }
 
     public static void finalizeGame(ServerLevel world) {
         GameWorldComponent gameComponent = GameWorldComponent.KEY.get(world);
-       //var areasWorldComponent = AreasWorldComponent.KEY.get(world);
+        // var areasWorldComponent = AreasWorldComponent.KEY.get(world);
 
         world.setDayTime(18000);
         gameComponent.getGameMode().finalizeGame(world, gameComponent);
@@ -382,7 +389,7 @@ public class GameFunctions {
         for (ServerPlayer player : world.players()) {
             PlayerStatsComponent stats = PlayerStatsComponent.KEY.get(player);
             Role playerRole = gameComponent.getRole(player);
-            
+
             boolean isWinner = false;
             if (winStatus == WinStatus.KILLERS && playerRole != null && playerRole.canUseKiller()) {
                 isWinner = true;
@@ -419,9 +426,12 @@ public class GameFunctions {
         trainComponent.setTimeOfDay(TrainWorldComponent.TimeOfDay.DAY);
 
         // discard all player bodies
-        for (PlayerBodyEntity body : world.getEntities(TMMEntities.PLAYER_BODY, playerBodyEntity -> true)) body.discard();
-        for (FirecrackerEntity entity : world.getEntities(TMMEntities.FIRECRACKER, entity -> true)) entity.discard();
-        for (NoteEntity entity : world.getEntities(TMMEntities.NOTE, entity -> true)) entity.discard();
+        for (PlayerBodyEntity body : world.getEntities(TMMEntities.PLAYER_BODY, playerBodyEntity -> true))
+            body.discard();
+        for (FirecrackerEntity entity : world.getEntities(TMMEntities.FIRECRACKER, entity -> true))
+            entity.discard();
+        for (NoteEntity entity : world.getEntities(TMMEntities.NOTE, entity -> true))
+            entity.discard();
 
         // reset all players
         for (ServerPlayer player : world.players()) {
@@ -434,9 +444,10 @@ public class GameFunctions {
         gameComponent.setGameStatus(GameWorldComponent.GameStatus.INACTIVE);
         trainComponent.setTime(0);
         gameComponent.sync();
-        
+
         // 重置计分板组件
-        GameScoreboardComponent scoreboardComponent = GameScoreboardComponent.KEY.get(world.getServer().getScoreboard());
+        GameScoreboardComponent scoreboardComponent = GameScoreboardComponent.KEY
+                .get(world.getServer().getScoreboard());
         scoreboardComponent.reset();
     }
 
@@ -460,7 +471,8 @@ public class GameFunctions {
         player.setGameMode(net.minecraft.world.level.GameType.ADVENTURE);
         player.stopSleeping();
         AreasWorldComponent.PosWithOrientation spawnPos = AreasWorldComponent.KEY.get(player.level()).getSpawnPos();
-        DimensionTransition teleportTarget = new DimensionTransition(player.serverLevel(), spawnPos.pos, Vec3.ZERO, spawnPos.yaw, spawnPos.pitch, DimensionTransition.DO_NOTHING);
+        DimensionTransition teleportTarget = new DimensionTransition(player.serverLevel(), spawnPos.pos, Vec3.ZERO,
+                spawnPos.yaw, spawnPos.pitch, DimensionTransition.DO_NOTHING);
         player.changeDimension(teleportTarget);
     }
 
@@ -473,22 +485,26 @@ public class GameFunctions {
         killPlayer(victim, spawnBody, killer, GameConstants.DeathReasons.GENERIC);
     }
 
-    public static void killPlayer(Player victim, boolean spawnBody, @Nullable Player killer, ResourceLocation deathReason) {
+    public static void killPlayer(Player victim, boolean spawnBody, @Nullable Player killer,
+            ResourceLocation deathReason) {
         PlayerPsychoComponent component = PlayerPsychoComponent.KEY.get(victim);
 
         boolean canDeath = true;
         if (victim instanceof ServerPlayer serverVictim) {
-            TMM.REPLAY_MANAGER.recordPlayerKill(killer != null ? killer.getUUID() : null, serverVictim.getUUID(), deathReason);
+            TMM.REPLAY_MANAGER.recordPlayerKill(killer != null ? killer.getUUID() : null, serverVictim.getUUID(),
+                    deathReason);
         }
 
         // Check if victim has a role assigned - if not, skip role-dependent logic
         GameWorldComponent gameWorldComponent = GameWorldComponent.KEY.get(victim.level());
         if (gameWorldComponent.getRole(victim) == null) {
-            // Player doesn't have a role (game not started or joined mid-game), don't kill them
+            // Player doesn't have a role (game not started or joined mid-game), don't kill
+            // them
             return;
         }
 
-        if (!AllowPlayerDeath.EVENT.invoker().allowDeath(victim, deathReason)) return;
+        if (!AllowPlayerDeath.EVENT.invoker().allowDeath(victim, deathReason))
+            return;
         if (component.getPsychoTicks() > 0) {
             if (component.getArmour() > 0) {
                 component.setArmour(component.getArmour() - 1);
@@ -499,14 +515,14 @@ public class GameFunctions {
                 component.stopPsycho();
             }
         }
-        
+
         // --- 新增统计数据更新逻辑 (击杀者) ---
         if (killer instanceof ServerPlayer serverKiller) {
             PlayerStatsComponent killerStats = PlayerStatsComponent.KEY.get(serverKiller);
             killerStats.incrementTotalKills();
             Role killerRole = gameWorldComponent.getRole(serverKiller);
             if (killerRole != null) {
-                canDeath =  killerRole.onKill(victim, spawnBody, killer, deathReason);
+                canDeath = killerRole.onKill(victim, spawnBody, killer, deathReason);
                 killerStats.getOrCreateRoleStats(killerRole.identifier()).incrementKillsAsRole();
                 // 检测是否为友军击杀
                 if (victim instanceof ServerPlayer serverVictim) {
@@ -531,12 +547,10 @@ public class GameFunctions {
         }
         // --- 结束新增统计数据更新逻辑 (击杀者) ---
 
-
-
         // --- 新增统计数据更新逻辑 (受害者) ---
         if (victim instanceof ServerPlayer serverVictim) {
             Role victimRole = gameWorldComponent.getRole(serverVictim);
-             canDeath = victimRole.onDeath(victim, spawnBody, killer, deathReason);
+            canDeath = victimRole.onDeath(victim, spawnBody, killer, deathReason);
             PlayerStatsComponent victimStats = PlayerStatsComponent.KEY.get(serverVictim);
             victimStats.incrementTotalDeaths();
             if (victimRole != null) {
@@ -546,69 +560,66 @@ public class GameFunctions {
         // --- 结束新增统计数据更新逻辑 (受害者) ---
         if (canDeath) {
             if (victim instanceof ServerPlayer serverPlayerEntity && isPlayerAliveAndSurvival(serverPlayerEntity)) {
-            serverPlayerEntity.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
-        } else {
-            return;
-        }
-
-
-
-        // 杀手击杀获得金钱奖励
-        if (killer != null && GameWorldComponent.KEY.get(killer.level()).canUseKillerFeatures(killer)) {
-            PlayerShopComponent.KEY.get(killer).addToBalance(GameConstants.getMoneyPerKill());
-        }
-
-        PlayerMoodComponent.KEY.get(victim).reset();
-
-
-
-        if (spawnBody) {
-            PlayerBodyEntity body = TMMEntities.PLAYER_BODY.create(victim.level());
-            if (body != null) {
-                body.setPlayerUuid(victim.getUUID());
-                Vec3 spawnPos = victim.position().add(victim.getLookAngle().normalize().scale(1));
-                body.moveTo(spawnPos.x(), victim.getY(), spawnPos.z(), victim.getYHeadRot(), 0f);
-                body.setYRot(victim.getYHeadRot());
-                body.setYHeadRot(victim.getYHeadRot());
-                victim.level().addFreshEntity(body);
+                serverPlayerEntity.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
+            } else {
+                return;
             }
-        }
 
-        for (List<ItemStack> list : victim.getInventory().compartments) {
-            for (int i = 0; i < list.size(); i++) {
-                ItemStack stack = list.get(i);
-                if (shouldDropOnDeath(stack)  ) {
-                    victim.drop(stack, true, false);
-                    list.set(i, ItemStack.EMPTY);
+            // 杀手击杀获得金钱奖励
+            if (killer != null && GameWorldComponent.KEY.get(killer.level()).canUseKillerFeatures(killer)) {
+                PlayerShopComponent.KEY.get(killer).addToBalance(GameConstants.getMoneyPerKill());
+            }
+
+            PlayerMoodComponent.KEY.get(victim).reset();
+
+            if (spawnBody) {
+                PlayerBodyEntity body = TMMEntities.PLAYER_BODY.create(victim.level());
+                if (body != null) {
+                    body.setPlayerUuid(victim.getUUID());
+                    Vec3 spawnPos = victim.position().add(victim.getLookAngle().normalize().scale(1));
+                    body.moveTo(spawnPos.x(), victim.getY(), spawnPos.z(), victim.getYHeadRot(), 0f);
+                    body.setYRot(victim.getYHeadRot());
+                    body.setYHeadRot(victim.getYHeadRot());
+                    victim.level().addFreshEntity(body);
                 }
             }
-        }
 
-        if (gameWorldComponent.isInnocent(victim)) {
-            final var gameTimeComponent = GameTimeComponent.KEY.get(victim.level());
-
-            if (gameTimeComponent != null) {
-                {
-                    if (gameTimeComponent.getTime()< 60*10*20) {
-                        gameTimeComponent.addTime(GameConstants.TIME_ON_CIVILIAN_KILL);
+            for (List<ItemStack> list : victim.getInventory().compartments) {
+                for (int i = 0; i < list.size(); i++) {
+                    ItemStack stack = list.get(i);
+                    if (shouldDropOnDeath(stack)) {
+                        victim.drop(stack, true, false);
+                        list.set(i, ItemStack.EMPTY);
                     }
                 }
             }
-        }
-        if (!isVoiceChatMissing()) {
-            TrainVoicePlugin.addPlayer(victim.getUUID());
-        }
+
+            if (gameWorldComponent.isInnocent(victim)) {
+                final var gameTimeComponent = GameTimeComponent.KEY.get(victim.level());
+
+                if (gameTimeComponent != null) {
+                    {
+                        if (gameTimeComponent.getTime() < 60 * 10 * 20) {
+                            gameTimeComponent.addTime(GameConstants.TIME_ON_CIVILIAN_KILL);
+                        }
+                    }
+                }
+            }
+            if (!isVoiceChatMissing()) {
+                TrainVoicePlugin.addPlayer(victim.getUUID());
+            }
         }
     }
 
-
     public static boolean shouldDropOnDeath(@NotNull ItemStack stack) {
-        return !stack.isEmpty() && (stack.is(TMMItems.REVOLVER)|| stack.is(Items.SPYGLASS) || ShouldDropOnDeath.EVENT.invoker().shouldDrop(stack));
+        return !stack.isEmpty() && (stack.is(TMMItems.REVOLVER) || stack.is(Items.SPYGLASS)
+                || ShouldDropOnDeath.EVENT.invoker().shouldDrop(stack));
     }
 
     public static boolean isPlayerAliveAndSurvival(Player player) {
         return player != null && !player.isSpectator() && !player.isCreative();
     }
+
     public static boolean isPlayerCreative(Player player) {
         return player != null && player.isCreative();
     }
@@ -645,7 +656,7 @@ public class GameFunctions {
         if (!TMMConfig.enableAutoTrainReset) {
             return false;
         }
-        
+
         if (serverWorld.getServer().overworld().equals(serverWorld)) {
             AreasWorldComponent areas = AreasWorldComponent.KEY.get(serverWorld);
             if (TMMConfig.verboseTrainResetLogs) {
@@ -658,10 +669,10 @@ public class GameFunctions {
             BlockPos trainMaxPos = trainMinPos.offset(backupTrainBox.getLength());
             BoundingBox trainBox = BoundingBox.fromCorners(trainMinPos, trainMaxPos);
 
-            //Mode mode = Mode.FORCE;
+            // Mode mode = Mode.FORCE;
 
-
-            if (!serverWorld.hasChunksAt(backupMinPos, backupMaxPos) || !serverWorld.hasChunksAt(trainMinPos, trainMaxPos)) {
+            if (!serverWorld.hasChunksAt(backupMinPos, backupMaxPos)
+                    || !serverWorld.hasChunksAt(trainMinPos, trainMaxPos)) {
 
                 int backupChunkMinX = backupMinPos.getX() >> 4;
                 int backupChunkMinZ = backupMinPos.getZ() >> 4;
@@ -671,13 +682,14 @@ public class GameFunctions {
                 int trainChunkMinZ = trainMinPos.getZ() >> 4;
                 int trainChunkMaxX = trainMaxPos.getX() >> 4;
                 int trainChunkMaxZ = trainMaxPos.getZ() >> 4;
-                
+
                 if (TMMConfig.verboseTrainResetLogs) {
-                    TMM.LOGGER.info("Train reset: Loading chunks - Template: ({}, {}) to ({}, {}), Paste: ({}, {}) to ({}, {})",
-                        backupChunkMinX, backupChunkMinZ, backupChunkMaxX, backupChunkMaxZ,
-                        trainChunkMinX, trainChunkMinZ, trainChunkMaxX, trainChunkMaxZ);
+                    TMM.LOGGER.info(
+                            "Train reset: Loading chunks - Template: ({}, {}) to ({}, {}), Paste: ({}, {}) to ({}, {})",
+                            backupChunkMinX, backupChunkMinZ, backupChunkMaxX, backupChunkMaxZ,
+                            trainChunkMinX, trainChunkMinZ, trainChunkMaxX, trainChunkMaxZ);
                 }
-                
+
                 // Force load the required chunks
                 for (int x = backupChunkMinX; x <= backupChunkMaxX; x++) {
                     for (int z = backupChunkMinZ; z <= backupChunkMaxZ; z++) {
@@ -695,15 +707,16 @@ public class GameFunctions {
                 }
                 // Continue with the reset after loading chunks
             }
-            
-            if (serverWorld.hasChunksAt(backupMinPos, backupMaxPos) && serverWorld.hasChunksAt(trainMinPos, trainMaxPos)) {
+
+            if (serverWorld.hasChunksAt(backupMinPos, backupMaxPos)
+                    && serverWorld.hasChunksAt(trainMinPos, trainMaxPos)) {
                 List<BlockInfo> list = Lists.newArrayList();
                 List<BlockInfo> list2 = Lists.newArrayList();
                 List<BlockInfo> list3 = Lists.newArrayList();
                 Deque<BlockPos> deque = Lists.newLinkedList();
                 BlockPos blockPos5 = new BlockPos(
-                        trainBox.minX() - backupTrainBox.minX(), trainBox.minY() - backupTrainBox.minY(), trainBox.minZ() - backupTrainBox.minZ()
-                );
+                        trainBox.minX() - backupTrainBox.minX(), trainBox.minY() - backupTrainBox.minY(),
+                        trainBox.minZ() - backupTrainBox.minZ());
 
                 for (int k = backupTrainBox.minZ(); k <= backupTrainBox.maxZ(); k++) {
                     for (int l = backupTrainBox.minY(); l <= backupTrainBox.maxY(); l++) {
@@ -716,11 +729,12 @@ public class GameFunctions {
                             BlockEntity blockEntity = serverWorld.getBlockEntity(blockPos6);
                             if (blockEntity != null) {
                                 BlockEntityInfo blockEntityInfo = new BlockEntityInfo(
-                                        blockEntity.saveCustomOnly(serverWorld.registryAccess()), blockEntity.components()
-                                );
+                                        blockEntity.saveCustomOnly(serverWorld.registryAccess()),
+                                        blockEntity.components());
                                 list2.add(new BlockInfo(blockPos7, blockState, blockEntityInfo));
                                 deque.addLast(blockPos6);
-                            } else if (!blockState.isSolidRender(serverWorld, blockPos6) && !blockState.isCollisionShapeFullBlock(serverWorld, blockPos6)) {
+                            } else if (!blockState.isSolidRender(serverWorld, blockPos6)
+                                    && !blockState.isCollisionShapeFullBlock(serverWorld, blockPos6)) {
                                 list3.add(new BlockInfo(blockPos7, blockState, null));
                                 deque.addFirst(blockPos6);
                             } else {
@@ -787,9 +801,10 @@ public class GameFunctions {
             for (ItemEntity item : serverWorld.getEntities(EntityType.ITEM, playerBodyEntity -> true)) {
                 item.discard();
             }
-            for (FirecrackerEntity entity : serverWorld.getEntities(TMMEntities.FIRECRACKER, entity -> true)) entity.discard();
-            for (NoteEntity entity : serverWorld.getEntities(TMMEntities.NOTE, entity -> true)) entity.discard();
-
+            for (FirecrackerEntity entity : serverWorld.getEntities(TMMEntities.FIRECRACKER, entity -> true))
+                entity.discard();
+            for (NoteEntity entity : serverWorld.getEntities(TMMEntities.NOTE, entity -> true))
+                entity.discard();
 
             TMM.LOGGER.info("Train reset successful.");
             return false;
@@ -804,6 +819,6 @@ public class GameFunctions {
     }
 
     public enum WinStatus {
-        NONE, KILLERS, PASSENGERS, TIME, LOOSE_END,GAMBLER,RECORDER
+        NONE, KILLERS, PASSENGERS, TIME, LOOSE_END, GAMBLER, RECORDER
     }
 }

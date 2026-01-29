@@ -3,6 +3,7 @@ package dev.doctor4t.trainmurdermystery.game;
 import dev.doctor4t.trainmurdermystery.api.TMMRoles;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.BlackoutEventDetails;
+import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.ChangeRoleDetails;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.DoorActionDetails;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.GrenadeThrownDetails;
 import dev.doctor4t.trainmurdermystery.api.replay.ReplayEventTypes.ItemUsedDetails;
@@ -27,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 
 public class GameReplayData {
     private int playerCount;
@@ -148,16 +148,22 @@ public class GameReplayData {
         return Component.translatable("death_reason.trainmurdermystery." + itemId.getPath());
     }
 
-    public Component toText(GameReplayManager manager, GameReplayData replayData, dev.doctor4t.trainmurdermystery.api.replay.ReplayEvent event) {
+    public static Component getRoleNameWithColor(String path) {
+        String translationKey = "announcement.role." + path;
+        return Component.translatable(translationKey).withStyle(getRoleColor(path));
+    }
+
+    public Component toText(GameReplayManager manager, GameReplayData replayData,
+            dev.doctor4t.trainmurdermystery.api.replay.ReplayEvent event) {
         UUID sourcePlayer = null;
         UUID targetPlayer = null;
         Component itemUsedText = null;
         String message = null;
-
+        Component Role_1 = null;
+        Component Role_2 = null;
         // 根据 EventDetails 类型提取信息
-        if (event.details() instanceof PlayerKillDetails(
-                UUID killerUuid, UUID victimUuid, ResourceLocation deathReason
-        )) {
+        if (event
+                .details() instanceof PlayerKillDetails(UUID killerUuid, UUID victimUuid, ResourceLocation deathReason)) {
             sourcePlayer = killerUuid;
             targetPlayer = victimUuid;
             itemUsedText = getItemDisplayName(deathReason);
@@ -189,11 +195,15 @@ public class GameReplayData {
             message = String.format("%d -> %d", oldState, newState);
         } else if (event.details() instanceof BlackoutEventDetails(long duration)) {
             message = String.valueOf(duration);
-        } else if (event.details() instanceof GrenadeThrownDetails(
-                UUID playerUuid, net.minecraft.core.BlockPos position
-        )) {
+        } else if (event
+                .details() instanceof GrenadeThrownDetails(UUID playerUuid, net.minecraft.core.BlockPos position)) {
             sourcePlayer = playerUuid;
             message = String.valueOf(position);
+        } else if (event.details() instanceof ChangeRoleDetails roleDetail) {
+            sourcePlayer = roleDetail.player();
+            Role_1 = getRoleNameWithColor(roleDetail.oldRole());
+            Role_2 = getRoleNameWithColor(roleDetail.newRole());
+            // message = ;
         } else if (event.details() instanceof ReplayEventTypes.CustomEventDetails details) {
             // CustomEventDetails 没有 playerUuid 和 message，只有 eventId 和 data
             // 暂时不设置 sourcePlayer 和 message
@@ -201,26 +211,27 @@ public class GameReplayData {
         }
 
         Component sourceName = sourcePlayer != null ? manager.getPlayerName(sourcePlayer) : null;
-        Component targetName = targetPlayer != null ? manager.getPlayerName(targetPlayer) : Component.literal("未知玩家").withStyle(ChatFormatting.GRAY);
-        
+        Component targetName = targetPlayer != null ? manager.getPlayerName(targetPlayer)
+                : Component.literal("未知玩家").withStyle(ChatFormatting.GRAY);
+
         // 获取角色信息并设置颜色
         String sourceRoleId = sourcePlayer != null ? replayData.getPlayerRoles().get(sourcePlayer) : null;
         String targetRoleId = targetPlayer != null ? replayData.getPlayerRoles().get(targetPlayer) : null;
-        
+
         if (sourceName != null && sourceRoleId != null) {
             Component sourceRoleName = ReplayDisplayUtils.getRoleDisplayName(sourceRoleId);
             ChatFormatting sourceColor = getRoleColor(sourceRoleId);
             sourceName = sourceName.copy().withStyle(sourceColor)
-                .append(Component.literal(" (").withStyle(ChatFormatting.GRAY))
-                .append(sourceRoleName).append(Component.literal(")").withStyle(ChatFormatting.GRAY));
+                    .append(Component.literal(" (").withStyle(ChatFormatting.GRAY))
+                    .append(sourceRoleName).append(Component.literal(")").withStyle(ChatFormatting.GRAY));
         }
-        
+
         if (targetRoleId != null) {
             Component targetRoleName = ReplayDisplayUtils.getRoleDisplayName(targetRoleId);
             ChatFormatting targetColor = getRoleColor(targetRoleId);
             targetName = targetName.copy().withStyle(targetColor)
-                .append(Component.literal(" (").withStyle(ChatFormatting.GRAY))
-                .append(targetRoleName).append(Component.literal(")").withStyle(ChatFormatting.GRAY));
+                    .append(Component.literal(" (").withStyle(ChatFormatting.GRAY))
+                    .append(targetRoleName).append(Component.literal(")").withStyle(ChatFormatting.GRAY));
         }
 
         return switch (event.eventType()) {
@@ -243,59 +254,106 @@ public class GameReplayData {
             }
             case GRENADE_THROWN -> Component.translatable("tmm.replay.event.grenade_thrown", sourceName);
             case ITEM_USED -> Component.translatable("tmm.replay.event.skill_used", sourceName, itemUsedText);
-            case BLACKOUT_START -> Component.translatable("tmm.replay.event.blackout_start", Component.literal(message));
+            case BLACKOUT_START ->
+                Component.translatable("tmm.replay.event.blackout_start", Component.literal(message));
             case BLACKOUT_END -> Component.translatable("tmm.replay.event.blackout_end");
             // 系统事件
             case GAME_START -> Component.translatable("tmm.replay.event.game_start").withStyle(ChatFormatting.GREEN);
-            case GAME_END -> Component.translatable("tmm.replay.event.game_end", Component.literal(replayData.getWinningTeam()).withStyle(ChatFormatting.GOLD)).withStyle(ChatFormatting.GREEN);
+            case GAME_END -> Component
+                    .translatable("tmm.replay.event.game_end",
+                            Component.literal(replayData.getWinningTeam()).withStyle(ChatFormatting.GOLD))
+                    .withStyle(ChatFormatting.GREEN);
             case PLAYER_JOIN -> {
                 if (sourceName != null) {
-                    yield Component.translatable("tmm.replay.event.player_join", sourceName).withStyle(ChatFormatting.GRAY);
+                    yield Component.translatable("tmm.replay.event.player_join", sourceName)
+                            .withStyle(ChatFormatting.GRAY);
                 } else {
-                    yield Component.translatable("tmm.replay.event.player_join", Component.literal("未知玩家")).withStyle(ChatFormatting.GRAY);
+                    yield Component
+                            .translatable("tmm.replay.event.player_join",
+                                    Component.translatable("tmm.replay.event.unknown_player"))
+                            .withStyle(ChatFormatting.GRAY);
                 }
             }
             case PLAYER_LEAVE -> {
                 if (sourceName != null) {
-                    yield Component.translatable("tmm.replay.event.player_leave", sourceName).withStyle(ChatFormatting.GRAY);
+                    yield Component.translatable("tmm.replay.event.player_leave", sourceName)
+                            .withStyle(ChatFormatting.GRAY);
                 } else {
-                    yield Component.translatable("tmm.replay.event.player_leave", Component.literal("未知玩家")).withStyle(ChatFormatting.GRAY);
+                    yield Component
+                            .translatable("tmm.replay.event.player_leave",
+                                    Component.translatable("tmm.replay.event.unknown_player"))
+                            .withStyle(ChatFormatting.GRAY);
                 }
+            }
+            case DOOR_LOCK -> {
+                // yield Component.translatable("tmm.replay.event.door_lock", sourceName, message);
+                yield null;
+            }
+            case DOOR_UNLOCK -> {
+                // yield Component.translatable("tmm.replay.event.door_unlock", sourceName, message);
+                yield null;
+            }
+            case TASK_COMPLETE, LOCKPICK_ATTEMPT, DOOR_CLOSE, DOOR_OPEN, STORE_BUY, MOOD_CHANGE,
+                    PSYCHO_STATE_CHANGE ->
+                null;
+            case CHANGE_ROLE -> {
+                yield Component.translatable("tmm.replay.event.change_role", sourceName, Role_1, Role_2);
             }
             // 次要事件
 
-            /*case DOOR_OPEN -> Component.translatable("tmm.replay.event.door_open", sourceName);
-            case DOOR_CLOSE -> Component.translatable("tmm.replay.event.door_close", sourceName);
-            case LOCKPICK_ATTEMPT -> Component.translatable("tmm.replay.event.lockpick_attempt", sourceName, Boolean.parseBoolean(message) ? Component.translatable("tmm.replay.event.success").withStyle(ChatFormatting.GREEN) : Component.translatable("tmm.replay.event.failed").withStyle(ChatFormatting.RED));
-            case TASK_COMPLETE -> Component.translatable("tmm.replay.event.task_complete", sourceName, itemUsedText);
-            case STORE_BUY -> {
-                Component costComponent = message != null ? Component.literal(message) : Component.literal("?");
-                yield Component.translatable("tmm.replay.event.store_buy", sourceName, itemUsedText, costComponent);
-            }
-            case MOOD_CHANGE -> Component.translatable("tmm.replay.event.mood_change", sourceName, Component.literal(message));
-            case DOOR_LOCK -> Component.translatable("tmm.replay.event.door_lock", sourceName, Component.literal(message));
-            case DOOR_UNLOCK -> Component.translatable("tmm.replay.event.door_unlock", sourceName, Component.literal(message));
-            case PSYCHO_STATE_CHANGE -> Component.translatable("tmm.replay.event.psycho_state_change", sourceName, Component.literal(message));*/
+            /*
+             * case DOOR_OPEN -> Component.translatable("tmm.replay.event.door_open",
+             * sourceName);
+             * case DOOR_CLOSE -> Component.translatable("tmm.replay.event.door_close",
+             * sourceName);
+             * case LOCKPICK_ATTEMPT ->
+             * Component.translatable("tmm.replay.event.lockpick_attempt", sourceName,
+             * Boolean.parseBoolean(message) ?
+             * Component.translatable("tmm.replay.event.success").withStyle(ChatFormatting.
+             * GREEN) :
+             * Component.translatable("tmm.replay.event.failed").withStyle(ChatFormatting.
+             * RED));
+             * case TASK_COMPLETE ->
+             * Component.translatable("tmm.replay.event.task_complete", sourceName,
+             * itemUsedText);
+             * case STORE_BUY -> {
+             * Component costComponent = message != null ? Component.literal(message) :
+             * Component.literal("?");
+             * yield Component.translatable("tmm.replay.event.store_buy", sourceName,
+             * itemUsedText, costComponent);
+             * }
+             * case MOOD_CHANGE -> Component.translatable("tmm.replay.event.mood_change",
+             * sourceName, Component.literal(message));
+             * case DOOR_LOCK -> Component.translatable("tmm.replay.event.door_lock",
+             * sourceName, Component.literal(message));
+             * case DOOR_UNLOCK -> Component.translatable("tmm.replay.event.door_unlock",
+             * sourceName, Component.literal(message));
+             * case PSYCHO_STATE_CHANGE ->
+             * Component.translatable("tmm.replay.event.psycho_state_change", sourceName,
+             * Component.literal(message));
+             */
             case CUSTOM_EVENT -> {
-                if (event.details() instanceof ReplayEventTypes.CustomEventDetails(
-                        ResourceLocation eventId, String data
-                )) {
+                if (event
+                        .details() instanceof ReplayEventTypes.CustomEventDetails(ResourceLocation eventId, String data)) {
                     // CustomEventDetails 没有 playerUuid，只有 eventId 和 data
-                    yield Component.translatable("tmm.replay.event.custom_event", Component.literal(eventId.toString()), Component.literal(data));
+                    yield Component.translatable("tmm.replay.event.custom_event", Component.literal(eventId.toString()),
+                            Component.literal(data));
                 }
                 yield Component.translatable("tmm.replay.event.custom_event", Component.literal("未知自定义事件"));
             }
-            case TASK_COMPLETE,LOCKPICK_ATTEMPT,DOOR_CLOSE,DOOR_OPEN,DOOR_UNLOCK,DOOR_LOCK,STORE_BUY,MOOD_CHANGE,PSYCHO_STATE_CHANGE -> null;
+            default -> throw new IllegalArgumentException("Unexpected value: " + event.eventType());
         };
     }
-    
-    private ChatFormatting getRoleColor(String roleId) {
+
+    public static ChatFormatting getRoleColor(String roleId) {
         if (roleId == null) {
             return ChatFormatting.WHITE; // 默认颜色
         }
-        final var first = TMMRoles.ROLES.values().stream().filter(role -> role.identifier().toString().equals(roleId)).findFirst();
+        final var first = TMMRoles.ROLES.values().stream().filter(
+                role -> role.identifier().toString().equals(roleId) || role.identifier().getPath().equals(roleId))
+                .findFirst();
         // 根据角色ID分类
-        if (first.isPresent()&& first.get().isInnocent()) {
+        if (first.isPresent() && first.get().isInnocent()) {
             return ChatFormatting.GREEN;
         } else {
 
@@ -333,7 +391,7 @@ public class GameReplayData {
         ITEM_USED,
         PSYCHO_STATE_CHANGE,
         BLACKOUT_START,
-        BLACKOUT_END
+        BLACKOUT_END, CHANGE_ROLE
     }
 
     public static class ReplayEvent {
@@ -343,14 +401,23 @@ public class GameReplayData {
         private final String itemUsed;
         private final String message;
         private final long timestamp;
+        private final String text_a;
+        private final String text_b;
 
         public ReplayEvent(EventType type, UUID sourcePlayer, UUID targetPlayer, String itemUsed, String message) {
+            this(type, sourcePlayer, targetPlayer, itemUsed, message, "", "");
+        }
+
+        public ReplayEvent(EventType type, UUID sourcePlayer, UUID targetPlayer, String itemUsed, String message,
+                String text_a, String text_b) {
             this.type = type;
             this.sourcePlayer = sourcePlayer;
             this.targetPlayer = targetPlayer;
             this.itemUsed = itemUsed;
             this.message = message;
             this.timestamp = System.currentTimeMillis();
+            this.text_a = text_a;
+            this.text_b = text_b;
         }
 
         public EventType getType() {

@@ -4,6 +4,7 @@ import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.cca.PlayerShopComponent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 
 import org.jetbrains.annotations.Nullable;
+import org.ladysnake.cca.api.v3.component.ComponentKey;
 
 /**
  * 角色方法调度器，用于调用角色的各个方法
@@ -95,6 +97,15 @@ public class RoleMethodDispatcher {
         }
     }
 
+    public static void onInit(Role role, MinecraftServer minecraftServer,ServerPlayer player){
+        role.onInit(minecraftServer,player);
+        if (role.isAutoReset()){
+            ComponentKey<? extends RoleComponent> componentKey = role.getComponentKey();
+            if (componentKey != null) {
+                componentKey.get(player).reset();
+            }
+        }
+    }
     /**
      * 调用玩家角色的 clientTick 方法
      */
@@ -158,15 +169,6 @@ public class RoleMethodDispatcher {
         return InteractionResult.PASS;
     }
 
-    /**
-     * 调用玩家角色的 onPressAbilityKey 方法
-     */
-    public static void callOnPressAbilityKey(Minecraft client) {
-        Role role = getCurrentRole(client.player);
-        if (role != null) {
-            role.onPressAbilityKey(client);
-        }
-    }
 
     /**
      * 获取玩家当前的角色

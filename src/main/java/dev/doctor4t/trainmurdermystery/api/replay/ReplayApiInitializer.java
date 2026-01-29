@@ -23,6 +23,8 @@ public class ReplayApiInitializer {
         ReplayEventRegistry.register(EventType.BLACKOUT_START, BlackoutEventDetails.class, new BlackoutEventDetailsSerializer(), new BlackoutEventDetailsSerializer());
         ReplayEventRegistry.register(EventType.BLACKOUT_END, BlackoutEventDetails.class, new BlackoutEventDetailsSerializer(), new BlackoutEventDetailsSerializer());
         ReplayEventRegistry.register(EventType.GRENADE_THROWN, GrenadeThrownDetails.class, new GrenadeThrownDetailsSerializer(), new GrenadeThrownDetailsSerializer());
+        ReplayEventRegistry.register(EventType.CHANGE_ROLE, ChangeRoleDetails.class, new ChangeRoleDetailsSerializer(), new ChangeRoleDetailsSerializer());
+
         // 注册自定义事件的默认序列化器和反序列化器
         // 注意：CUSTOM_EVENT 本身不直接注册，而是通过 registerCustomEvent 注册具体的自定义事件ID
         // ReplayEventRegistry.register(EventType.CUSTOM_EVENT, CustomEventDetails.class, new CustomEventDetailsSerializer(), new CustomEventDetailsSerializer());

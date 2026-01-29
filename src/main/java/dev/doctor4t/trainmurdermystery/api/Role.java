@@ -29,6 +29,7 @@ import org.ladysnake.cca.api.v3.component.ComponentKey;
 
 public abstract class Role {
     private ResourceLocation identifier;
+    private boolean canSeeCoin;
 
     public Role setColor(int color) {
         this.color = color;
@@ -69,7 +70,51 @@ public abstract class Role {
     private boolean isInnocent;
     private boolean canUseKiller;
     private MoodType moodType;
+
+    public boolean isAutoReset() {
+        return autoReset;
+    }
+
+    public Role setAutoReset(boolean autoReset) {
+        this.autoReset = autoReset;
+        return this;
+    }
+
+    private boolean autoReset = true;
     private boolean ableToPickUpRevolver;
+
+    public boolean isVigilanteTeam() {
+        return isVigilanteTeam;
+    }
+
+    public Role setVigilanteTeam(boolean vigilanteTeam) {
+        isVigilanteTeam = vigilanteTeam;
+        return this;
+    }
+
+    public boolean isCanSeeCoin() {
+        return canSeeCoin;
+    }
+
+    public boolean isAbleToPickUpRevolver() {
+        return ableToPickUpRevolver;
+    }
+
+    public Role setAbleToPickUpRevolver(boolean ableToPickUpRevolver) {
+        this.ableToPickUpRevolver = ableToPickUpRevolver;
+        return this;
+    }
+
+    public ComponentKey<? extends RoleComponent> getComponentKey() {
+        return componentKey;
+    }
+
+    public Role setComponentKey(ComponentKey<? extends RoleComponent> componentKey) {
+        this.componentKey = componentKey;
+        return this;
+    }
+
+    private boolean isVigilanteTeam;
 
     public ResourceLocation getIdentifier() {
         return identifier;
@@ -109,6 +154,7 @@ public abstract class Role {
     public void onFinishQuest(Player player, String quest) {
 
     }
+
 
     public Predicate<Item> cantPickupItem(Player player) {
         return a -> false;
@@ -215,12 +261,6 @@ public abstract class Role {
         return InteractionResult.PASS;
     }
 
-    /**
-     * 在按下技能键G时触发（请补充调用callOnPressAbilityKey）
-     */
-    public void onPressAbilityKey(Minecraft client) {
-    }
-
     private ComponentKey<? extends RoleComponent> componentKey;
     private int maxSprintTime;
     private boolean canSeeTime;
@@ -294,12 +334,21 @@ public abstract class Role {
         return this.ableToPickUpRevolver;
     }
 
+    public Role setCanSeeCoin(boolean able) {
+        this.canSeeCoin = able;
+        return this;
+    }
+
+    public boolean canSeeCoin() {
+        return this.canSeeCoin;
+    }
+
     public Role setCanPickUpRevolver(boolean able) {
         this.ableToPickUpRevolver = able;
         return this;
     }
 
     public boolean isGambler() {
-        return false; // 暂时没有赌徒角色
+        return false;
     }
 }

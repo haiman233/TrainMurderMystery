@@ -34,9 +34,6 @@
   "gui.mapselector.select": "选择",
   "gui.mapselector.cancel": "取消",
   "gui.mapselector.confirm": "确认选择",
-
-
-
   "Edit Note": "编辑便条",
   "I should write something first": "我应该先写下一些东西",
   "Purchase Failed": "购买失败",
@@ -455,6 +452,8 @@
   "task.exercise": "去做些锻炼 - 在锻炼室奔跑",
   "task.bathe": "去洗个澡 - 在花洒下或者在水中",
   "death_reason.trainmurdermystery.shot_innocent": "误杀平民而亡",
+  "tmm.replay.event.change_role": "%s 的职业从 %s 切换到 %s",
+  "tmm.replay.event.null": "[事件无法显示]",
   "task.meditate": "冥想 - 必须蹲下且保持静止",
   "task.fake": "你可以假装去",
   "task.feel": "你感觉想去",
@@ -493,6 +492,7 @@
   "tmm.replay.event.hit": "命中",
   "tmm.replay.event.miss": "未命中",
   "tmm.replay.event.grenade_thrown": "%s 投掷了手榴弹",
+  "tmm.replay.event.unknown_player": "未知玩家",
   "tmm.replay.event.skill_used": "%s 使用了 %s",
   "tmm.replay.event.role_assignment": "%s 被分配了角色: %s",
   "tmm.replay.event.door_open": "%s 打开了门",
