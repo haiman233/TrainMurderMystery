@@ -70,6 +70,17 @@ public abstract class Role {
     private boolean isInnocent;
     private boolean canUseKiller;
     private MoodType moodType;
+
+    public boolean isAutoReset() {
+        return autoReset;
+    }
+
+    public Role setAutoReset(boolean autoReset) {
+        this.autoReset = autoReset;
+        return this;
+    }
+
+    private boolean autoReset = true;
     private boolean ableToPickUpRevolver;
 
     public boolean isVigilanteTeam() {
@@ -338,6 +349,6 @@ public abstract class Role {
     }
 
     public boolean isGambler() {
-        return false; // 暂时没有赌徒角色
+        return false;
     }
 }

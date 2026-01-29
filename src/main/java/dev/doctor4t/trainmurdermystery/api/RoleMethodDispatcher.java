@@ -4,6 +4,7 @@ import dev.doctor4t.trainmurdermystery.cca.GameWorldComponent;
 import dev.doctor4t.trainmurdermystery.cca.PlayerShopComponent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -95,6 +96,12 @@ public class RoleMethodDispatcher {
         }
     }
 
+    public static void onInit(Role role, MinecraftServer minecraftServer,ServerPlayer player){
+        if (role.isAutoReset()){
+            role.onInit(minecraftServer,player);
+            role.getComponentKey().get( player).reset();
+        }
+    }
     /**
      * 调用玩家角色的 clientTick 方法
      */
